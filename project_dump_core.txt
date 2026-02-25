@@ -1,0 +1,3045 @@
+PROJECT CORE FILES OVERVIEW
+================================================================================
+- README.md
+- dump_project_full.py
+- index.html
+- package.json
+- public/manifest.json
+- src/main.jsx
+- src/pages/AnalyzerPage.jsx
+- src/pages/ClinicsPage.jsx
+- src/pages/LandingPage.jsx
+- vite.config.js
+
+
+================================================================================
+FILE: README.md
+================================================================================
+
+# BodyComp — Анализ состава тела
+
+PWA-приложение: образовательная страница + калькулятор состава тела + поиск клиник DXA.
+
+## Структура
+
+```
+/               — Образовательная landing page (3D-модели, квиз, статистика)
+/analyzer       — Калькулятор состава тела (Navy Body Fat Formula)
+/clinics        — Поиск клиник + запись на DXA
+```
+
+## Стек
+
+- **React 18** + React Router 6
+- **Three.js** — 3D-модели тела и кости
+- **Vite** — сборка
+- Нулевой бэкенд — всё работает на клиенте
+
+## Деплой на Netlify
+
+### Вариант A: Быстрый (drag & drop)
+
+1. Откройте [app.netlify.com/drop](https://app.netlify.com/drop)
+2. Перетащите папку `dist/` в окно
+3. Готово! Сайт доступен по ссылке
+
+### Вариант B: Через Git (автодеплой)
+
+1. Залейте проект на GitHub/GitLab
+2. В Netlify: **Add new site** → **Import from Git**
+3. Настройки сборки уже в `netlify.toml`:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+4. Каждый push = автодеплой
+
+### Вариант C: Netlify CLI
+
+```bash
+npm install -g netlify-cli
+netlify login
+netlify deploy --prod --dir=dist
+```
+
+## Локальная разработка
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # Сборка в dist/
+npm run preview    # Превью сборки
+```
+
+## Кастомный домен
+
+1. В Netlify: **Domain management** → **Add custom domain**
+2. Укажите домен (например bodycomp.ru)
+3. Настройте DNS: CNAME запись → ваш-сайт.netlify.app
+4. HTTPS включится автоматически (Let's Encrypt)
+
+## Что нужно поменять
+
+- `/src/pages/ClinicsPage.jsx` — реальные данные клиник (адреса, телефоны, цены)
+- `/src/pages/LandingPage.jsx` — CTA кнопка «Записаться на DXA» (ссылка на WhatsApp/телефон)
+- `/public/manifest.json` — URL сайта
+- `/public/robots.txt` — URL sitemap
+
+================================================================================
+FILE: dump_project_full.py
+================================================================================
+
+#!/usr/bin/env python3
+
+
+
+from __future__ import annotations 
+
+import io 
+import os 
+import tokenize 
+from pathlib import Path 
+
+
+
+PROJECT_DIR =Path .cwd ().resolve ()
+
+DUMP_BASENAME_PREFIX ="project_dump_core"
+DUMP_EXTENSION =".txt"
+
+
+
+STRIP_COMMENTS_IN_DUMP =True 
+
+KEEP_PY_DOCSTRINGS =False 
+
+
+def get_next_output_file (project_dir :Path )->Path :
+
+    base_file =project_dir /f"{DUMP_BASENAME_PREFIX}{DUMP_EXTENSION}"
+    if not base_file .exists ():
+        return base_file 
+
+    max_version =1 
+
+    for p in project_dir .glob (f"{DUMP_BASENAME_PREFIX}_*{DUMP_EXTENSION}"):
+        stem =p .stem 
+        parts =stem .split ("_")
+        if not parts :
+            continue 
+        last =parts [-1 ]
+        try :
+            num =int (last )
+        except ValueError :
+            continue 
+        if num >max_version :
+            max_version =num 
+
+    next_version =max_version +1 
+    return project_dir /f"{DUMP_BASENAME_PREFIX}_{next_version}{DUMP_EXTENSION}"
+
+
+
+ALLOWED_ROOT_FILES ={
+"README.md",
+"index.html",
+"package.json",
+"eslint.config.js",
+"vite.config.ts",
+"tsconfig.json",
+"tsconfig.app.json",
+"tsconfig.node.json",
+}
+
+
+ALLOWED_EXT ={
+
+".ts",".tsx",".js",".jsx",".css",".md",".json",".jsonc",".html",
+
+".yml",".yaml",
+
+".sh",
+
+".py",
+
+".tf",".tfvars",
+
+".cfg",".lock",
+}
+
+
+EXCLUDED_DIRS ={
+
+".git",".idea",".vscode",
+
+
+"node_modules","dist","build",".next",".nuxt",
+"coverage",".turbo",".cache",
+
+
+".venv","venv","env",".env",
+"__pycache__",
+"Lib","site-packages","Scripts",
+".pytest_cache",".mypy_cache",
+".tox",".eggs",
+
+
+".terraform",
+}
+
+
+EXCLUDED_FILES :set [str ]={
+"package-lock.json",
+}
+
+
+EXCLUDED_EXT ={
+".map",".svg",".png",".jpg",".jpeg",".gif",".ico",".webp",
+".bmp",".pdf",".mp4",".mp3",".wav",
+".woff",".woff2",".ttf",".eot",
+".pyc",".pyo",".pyd",".whl",
+}
+
+
+UNWANTED_RELATIVE_PATHS ={
+"QMS-Client-main/package-lock.json",
+"QMS-Server-master/package-lock.json",
+"QMS-Client-main/README.md",
+"QMS-Client-main/src/components/Test/Test.tsx",
+}
+
+
+MAX_FILE_SIZE_BYTES =400_000 
+MAX_LINES_PER_FILE =2000 
+
+
+def is_excluded_dir (name :str )->bool :
+    return name in EXCLUDED_DIRS or name .endswith (".egg-info")
+
+
+def should_keep_root_file (p :Path )->bool :
+    return p .name in ALLOWED_ROOT_FILES 
+
+
+def is_dump_file (path :Path )->bool :
+
+    return (
+    path .suffix ==DUMP_EXTENSION 
+    and path .stem .startswith (DUMP_BASENAME_PREFIX )
+    )
+
+
+def should_keep (path :Path )->bool :
+
+    if is_dump_file (path ):
+        return False 
+
+    try :
+        rel =path .relative_to (PROJECT_DIR ).as_posix ()
+    except ValueError :
+        rel =path .as_posix ()
+
+    if rel in UNWANTED_RELATIVE_PATHS :
+        return False 
+
+    if any (part in EXCLUDED_DIRS for part in path .parts ):
+        return False 
+
+    if path .name in EXCLUDED_FILES :
+        return False 
+
+    if path .suffix .lower ()in EXCLUDED_EXT :
+        return False 
+
+    if path .parent ==PROJECT_DIR and should_keep_root_file (path ):
+        return True 
+
+    if path .suffix .lower ()in ALLOWED_EXT :
+        return True 
+
+    return False 
+
+
+def gather_files ()->list [Path ]:
+    files :list [Path ]=[]
+    for root ,dirs ,filenames in os .walk (PROJECT_DIR ):
+        dirs [:]=[d for d in dirs if not is_excluded_dir (d )]
+        for fn in filenames :
+            p =Path (root )/fn 
+            if not p .is_file ():
+                continue 
+            if should_keep (p ):
+                files .append (p )
+    return sorted (files ,key =lambda x :x .relative_to (PROJECT_DIR ).as_posix ())
+
+
+
+
+
+
+def _strip_html_comments (text :str )->str :
+
+    out :list [str ]=[]
+    i =0 
+    n =len (text )
+    while i <n :
+        if text .startswith ("<!--",i ):
+            j =text .find ("-->",i +4 )
+            if j ==-1 :
+                out .extend ("\n"for ch in text [i :]if ch =="\n")
+                break 
+            seg =text [i :j +3 ]
+            out .extend ("\n"for ch in seg if ch =="\n")
+            i =j +3 
+        else :
+            out .append (text [i ])
+            i +=1 
+    return "".join (out )
+
+
+def _strip_hash_line_comments (text :str ,*,keep_shebang :bool =True )->str :
+
+    out_lines :list [str ]=[]
+    lines =text .splitlines (keepends =True )
+
+    for idx ,line in enumerate (lines ):
+        if keep_shebang and idx ==0 and line .startswith ("#!"):
+            out_lines .append (line )
+            continue 
+
+        in_s =False 
+        in_d =False 
+        i =0 
+        while i <len (line ):
+            ch =line [i ]
+            if ch =="'"and not in_d :
+                in_s =not in_s 
+                i +=1 
+                continue 
+            if ch =='"'and not in_s :
+                in_d =not in_d 
+                i +=1 
+                continue 
+            if ch =="#"and not in_s and not in_d :
+
+                if i ==0 or line [i -1 ].isspace ():
+                    nl ="\n"if line .endswith ("\n")else ""
+                    out_lines .append (line [:i ].rstrip ()+nl )
+                    break 
+            i +=1 
+        else :
+            out_lines .append (line )
+
+    return "".join (out_lines )
+
+
+def _strip_c_like_comments (text :str )->str :
+
+    CODE ,SQ ,DQ ,BT ,LINE ,BLOCK =range (6 )
+    state =CODE 
+    out :list [str ]=[]
+    i =0 
+    n =len (text )
+    esc =False 
+
+    while i <n :
+        ch =text [i ]
+        nxt =text [i +1 ]if i +1 <n else ""
+
+        if state ==CODE :
+            if ch =="/"and nxt =="/":
+                state =LINE 
+                i +=2 
+                continue 
+            if ch =="/"and nxt =="*":
+                state =BLOCK 
+                i +=2 
+                continue 
+            if ch =="'":
+                state =SQ 
+                out .append (ch )
+                esc =False 
+                i +=1 
+                continue 
+            if ch =='"':
+                state =DQ 
+                out .append (ch )
+                esc =False 
+                i +=1 
+                continue 
+            if ch =="`":
+                state =BT 
+                out .append (ch )
+                esc =False 
+                i +=1 
+                continue 
+
+            out .append (ch )
+            i +=1 
+            continue 
+
+        if state ==LINE :
+            if ch =="\n":
+                out .append ("\n")
+                state =CODE 
+            i +=1 
+            continue 
+
+        if state ==BLOCK :
+            if ch =="\n":
+                out .append ("\n")
+                i +=1 
+                continue 
+            if ch =="*"and nxt =="/":
+                state =CODE 
+                i +=2 
+                continue 
+            i +=1 
+            continue 
+
+
+        out .append (ch )
+        if esc :
+            esc =False 
+        else :
+            if ch =="\\":
+                esc =True 
+            else :
+                if state ==SQ and ch =="'":
+                    state =CODE 
+                elif state ==DQ and ch =='"':
+                    state =CODE 
+                elif state ==BT and ch =="`":
+                    state =CODE 
+        i +=1 
+
+    return "".join (out )
+
+
+def _strip_python (text :str ,*,keep_docstrings :bool )->str :
+
+    shebang =""
+    rest =text 
+    if text .startswith ("#!"):
+        first ,_ ,remainder =text .partition ("\n")
+        shebang =first +"\n"
+        rest =remainder 
+
+    try :
+        tokgen =tokenize .generate_tokens (io .StringIO (rest ).readline )
+    except Exception :
+        return shebang +_strip_hash_line_comments (rest ,keep_shebang =False )
+
+    out_tokens :list [tuple [int ,str ]]=[]
+    prev_type =tokenize .INDENT 
+    at_block_start =True 
+
+    for tok in tokgen :
+        ttype =tok .type 
+        tstr =tok .string 
+
+        if ttype ==tokenize .COMMENT :
+            continue 
+
+        if (not keep_docstrings )and ttype ==tokenize .STRING and at_block_start and prev_type in (
+        tokenize .INDENT ,tokenize .NEWLINE ,tokenize .NL ,tokenize .DEDENT ,tokenize .ENCODING 
+        ):
+
+            prev_type =ttype 
+            at_block_start =False 
+            continue 
+
+        out_tokens .append ((ttype ,tstr ))
+
+        if ttype ==tokenize .INDENT :
+            at_block_start =True 
+        elif ttype not in (tokenize .NL ,tokenize .NEWLINE ,tokenize .ENDMARKER ,tokenize .ENCODING ):
+            at_block_start =False 
+
+        prev_type =ttype 
+
+    return shebang +tokenize .untokenize (out_tokens )
+
+
+def strip_comments_for_file (path :Path ,content :str )->str :
+    if not STRIP_COMMENTS_IN_DUMP :
+        return content 
+
+    ext =path .suffix .lower ()
+
+    if ext ==".py":
+        return _strip_python (content ,keep_docstrings =KEEP_PY_DOCSTRINGS )
+
+    if ext in {".html",".htm",".md"}:
+        return _strip_html_comments (content )
+
+    if ext in {".yml",".yaml",".sh"}:
+        return _strip_hash_line_comments (content ,keep_shebang =True )
+
+    if ext in {".tf",".tfvars"}:
+        content =_strip_c_like_comments (content )
+        content =_strip_hash_line_comments (content ,keep_shebang =False )
+        return content 
+
+    if ext in {".ts",".tsx",".js",".jsx",".css",".json",".jsonc",".cfg",".lock"}:
+        return _strip_c_like_comments (content )
+
+    return content 
+
+
+def read_file_safely (p :Path )->tuple [str ,bool ]:
+
+    truncated =False 
+    try :
+        size =p .stat ().st_size 
+        if size >MAX_FILE_SIZE_BYTES :
+            return (
+            f"[Пропущено: файл {size} байт больше лимита {MAX_FILE_SIZE_BYTES}]\n",
+            True ,
+            )
+
+        with p .open ("r",encoding ="utf-8",errors ="replace")as f :
+            lines =f .readlines ()
+
+        if len (lines )>MAX_LINES_PER_FILE :
+            truncated =True 
+            lines =lines [:MAX_LINES_PER_FILE ]
+            lines .append (f"\n[... обрезано до {MAX_LINES_PER_FILE} строк ...]\n")
+
+        content ="".join (lines )
+
+
+        content =strip_comments_for_file (p ,content )
+
+        return content ,truncated 
+    except Exception as e :
+        return f"[Ошибка чтения файла: {e}]\n",True 
+
+
+def main ():
+    print (f"Стартую сборку из каталога: {PROJECT_DIR}")
+
+    output_file =get_next_output_file (PROJECT_DIR )
+    print (f"Файл дампа: {output_file.name}")
+
+    files =gather_files ()
+
+    toc_lines =["PROJECT CORE FILES OVERVIEW\n","="*80 +"\n"]
+    for f in files :
+        toc_lines .append (f"- {f.relative_to(PROJECT_DIR).as_posix()}\n")
+    toc_lines .append ("\n\n")
+
+    with output_file .open ("w",encoding ="utf-8")as out :
+        out .writelines (toc_lines )
+
+        for f in files :
+            rel =f .relative_to (PROJECT_DIR ).as_posix ()
+            out .write ("="*80 +"\n")
+            out .write (f"FILE: {rel}\n")
+            out .write ("="*80 +"\n\n")
+
+            content ,_truncated =read_file_safely (f )
+            out .write (content )
+            out .write ("\n")
+
+    print (f"Готово: {output_file}")
+    print (f"Файлов собрано: {len(files)}")
+
+    if STRIP_COMMENTS_IN_DUMP :
+        print ("Комментарии в дампе: УДАЛЕНЫ (исходники проекта не изменены).")
+    else :
+        print ("Комментарии в дампе: НЕ трогал.")
+
+
+if __name__ =="__main__":
+    main ()
+
+================================================================================
+FILE: index.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#020617" />
+  <meta name="color-scheme" content="dark" />
+  <title>Состав тела — узнайте реальные цифры | DXA-анализ</title>
+  <meta name="description" content="Бесплатный расчёт состава тела за 3 минуты. Процент жира, мышечная масса, метаболизм. Запись на точный DXA-анализ." />
+  <meta property="og:title" content="Узнайте реальный состав вашего тела" />
+  <meta property="og:description" content="Ваши весы скрывают правду. Бесплатный расчёт за 3 минуты или точный DXA-анализ." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',system-ui,sans-serif;background:#020617;color:#e2e8f0;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+    input[type=range]{-webkit-appearance:none;background:#1e293b;border-radius:4px;outline:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#22d3ee;cursor:pointer;border:2px solid #0f172a;box-shadow:0 0 8px #22d3ee44}
+    input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#22d3ee;cursor:pointer;border:2px solid #0f172a}
+    select{-webkit-appearance:none}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes pulse2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+    @keyframes spin3d{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.1) rotate(180deg)}}
+    @keyframes blink{50%{opacity:0}}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
+
+================================================================================
+FILE: package.json
+================================================================================
+
+{
+  "name": "bodycomp-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
+  }
+}
+
+================================================================================
+FILE: public/manifest.json
+================================================================================
+
+{
+  "name": "Состав тела — анализ",
+  "short_name": "BodyComp",
+  "description": "Бесплатный расчёт состава тела. Запись на DXA-анализ.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+
+================================================================================
+FILE: src/main.jsx
+================================================================================
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import LandingPage from "./pages/LandingPage.jsx";
+import AnalyzerPage from "./pages/AnalyzerPage.jsx";
+import ClinicsPage from "./pages/ClinicsPage.jsx";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/analyzer" element={<AnalyzerPage />} />
+        <Route path="/clinics" element={<ClinicsPage />} />
+      </Routes>
+    </BrowserRouter>
+  </React.StrictMode>
+);
+
+================================================================================
+FILE: src/pages/AnalyzerPage.jsx
+================================================================================
+
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+
+
+const Ic = ({ children, size = 32, color = "#22d3ee", glow = false }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    style={glow ? { filter: `drop-shadow(0 0 6px ${color}55)` } : {}}>
+    {children}
+  </svg>
+);
+
+const Icons = {
+  timer: (sz = 32, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="13" r="8" stroke={c} strokeWidth="1.6" opacity="0.2"/>
+    <circle cx="12" cy="13" r="8" stroke={c} strokeWidth="1.8" strokeDasharray="14 50" strokeLinecap="round"/>
+    <path d="M12 9.5v3.5l2.5 2" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M10 2.5h4" stroke={c} strokeWidth="1.8" strokeLinecap="round"/>
+    <path d="M12 2.5V4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+  </Ic>,
+  hexagon: (sz = 32, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <path d="M12 2L20 7v10l-8 5-8-5V7l8-5z" stroke={c} strokeWidth="1.4" fill={c+"0c"}/>
+    <circle cx="12" cy="9.5" r="1.2" fill={c}/>
+    <circle cx="8.5" cy="13" r="1" fill={c} opacity="0.65"/>
+    <circle cx="15.5" cy="13" r="1" fill={c} opacity="0.65"/>
+    <path d="M12 9.5l-3.5 3.5M12 9.5l3.5 3.5" stroke={c} strokeWidth="0.7" opacity="0.4"/>
+    <text x="12" y="18.5" textAnchor="middle" fill={c} fontSize="5.5" fontWeight="800" fontFamily="monospace" opacity="0.7">6</text>
+  </Ic>,
+  shield: (sz = 32, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <path d="M12 2.5L3.5 6.5v5c0 5.25 3.63 10.15 8.5 11.5 4.87-1.35 8.5-6.25 8.5-11.5v-5L12 2.5z" stroke={c} strokeWidth="1.5" fill={c+"08"}/>
+    <path d="M9 12.5l2 2 4-4.5" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Ic>,
+  report: (sz = 32, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <rect x="4.5" y="2.5" width="15" height="19" rx="2.5" stroke={c} strokeWidth="1.5" fill={c+"08"}/>
+    <path d="M8 7h8M8 10.5h4.5" stroke={c} strokeWidth="1.2" strokeLinecap="round" opacity="0.4"/>
+    <rect x="8" y="13.5" width="2.5" height="4.5" rx="0.6" fill={c} opacity="0.55"/>
+    <rect x="12" y="11.5" width="2.5" height="6.5" rx="0.6" fill={c} opacity="0.75"/>
+  </Ic>,
+  male: (sz = 40, c = "#22d3ee") => <Ic size={sz} color={c}>
+    <circle cx="10" cy="8.5" r="3.8" stroke={c} strokeWidth="1.6" fill={c+"10"}/>
+    <path d="M15.5 4h4v4" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M19.5 4L14 9.5" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+    <path d="M10 13v4.5M7 21l3-3.5 3 3.5" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 15h8" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+  </Ic>,
+  female: (sz = 40, c = "#22d3ee") => <Ic size={sz} color={c}>
+    <circle cx="12" cy="8" r="4.5" stroke={c} strokeWidth="1.6" fill={c+"10"}/>
+    <path d="M12 13v5.5" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+    <path d="M9 16h6" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+  </Ic>,
+  bodyScan: (sz = 48, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="5.5" r="2.5" stroke={c} strokeWidth="1.3" fill={c+"12"}/>
+    <path d="M12 8.5v4.5M9 20l3-7 3 7" stroke={c} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 12h10" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+    <rect x="2.5" y="2.5" width="19" height="19" rx="2" stroke={c} strokeWidth="1" strokeDasharray="2 2.5" opacity="0.25"/>
+    <path d="M2.5 5V2.5H5M19 2.5h2.5V5M2.5 19v2.5H5M19 21.5h2.5V19" stroke={c} strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
+  </Ic>,
+  athletic: (sz = 48, c = "#10b981") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="5" r="2.5" stroke={c} strokeWidth="1.4" fill={c+"15"}/>
+    <path d="M12 8v4M9 20l3-8 3 8" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 10.5l3.5 1.5h2M19 10.5l-3.5 1.5h-2" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 9l1 1.5M20 9l-1 1.5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+  </Ic>,
+  fit: (sz = 48, c = "#22d3ee") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="5" r="2.5" stroke={c} strokeWidth="1.4" fill={c+"15"}/>
+    <path d="M12 8v5M9 20l3-7 3 7" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 11h10" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+    <circle cx="12" cy="12" r="7.5" stroke={c} strokeWidth="0.7" strokeDasharray="2 2.5" opacity="0.2"/>
+    <path d="M8.5 2l3.5 1 3.5-1" stroke={c} strokeWidth="0.8" strokeLinecap="round" opacity="0.4"/>
+  </Ic>,
+  average: (sz = 48, c = "#f59e0b") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="5" r="2.5" stroke={c} strokeWidth="1.4" fill={c+"15"}/>
+    <path d="M12 8v5M9.5 20l2.5-7 2.5 7" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 11h10" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M17 3h3v3M4 3h3" stroke={c} strokeWidth="1" strokeLinecap="round" opacity="0.35"/>
+  </Ic>,
+  warnTriangle: (sz = 48, c = "#ef4444") => <Ic size={sz} color={c} glow>
+    <path d="M12 3L2.5 20.5h19L12 3z" stroke={c} strokeWidth="1.5" fill={c+"10"} strokeLinejoin="round"/>
+    <path d="M12 9.5v4.5" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="12" cy="17" r="1.1" fill={c}/>
+  </Ic>,
+  excess: (sz = 48, c = "#ef4444") => <Ic size={sz} color={c} glow>
+    <circle cx="12" cy="5" r="2.5" stroke={c} strokeWidth="1.4" fill={c+"15"}/>
+    <ellipse cx="12" cy="13" rx="5" ry="3.5" stroke={c} strokeWidth="1.4" fill={c+"0c"}/>
+    <path d="M9.5 19.5l2.5-3 2.5 3" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M7 10.5h10" stroke={c} strokeWidth="1.2" strokeLinecap="round"/>
+  </Ic>,
+  calendar: (sz = 18, c = "#10b981") => <Ic size={sz} color={c}>
+    <rect x="3" y="4" width="18" height="17" rx="2.5" stroke={c} strokeWidth="1.5" fill={c+"0c"}/>
+    <path d="M3 9h18" stroke={c} strokeWidth="1.3"/>
+    <path d="M8 2v3.5M16 2v3.5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="14" r="1.5" fill={c}/>
+  </Ic>,
+  check: (s = 20, c = "#10b981") => <Ic size={s} color={c}>
+    <circle cx="12" cy="12" r="9" stroke={c} strokeWidth="1.5" fill={c+"10"}/>
+    <path d="M8 12.5l2.5 2.5L15 10" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Ic>,
+  alert: (s = 20, c = "#f59e0b") => <Ic size={s} color={c}>
+    <circle cx="12" cy="12" r="9" stroke={c} strokeWidth="1.5" fill={c+"10"}/>
+    <path d="M12 8v4" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="12" cy="15.5" r="1" fill={c}/>
+  </Ic>,
+  danger: (s = 20, c = "#ef4444") => <Ic size={s} color={c}>
+    <circle cx="12" cy="12" r="9" stroke={c} strokeWidth="1.5" fill={c+"10"}/>
+    <path d="M14.5 9.5l-5 5M9.5 9.5l5 5" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+  </Ic>,
+};
+
+
+function getBodyTypeIcon(type) {
+  if (type === "Атлетическое") return Icons.athletic;
+  if (type === "Подтянутое") return Icons.fit;
+  if (type === "Среднее") return Icons.average;
+  if (type === "Экстремально низкий жир") return Icons.warnTriangle;
+  return Icons.excess;
+}
+
+
+
+
+const calc = {
+  
+  bodyFatNavy(gender, waist, neck, hip, height) {
+    if (gender === "male") {
+      return 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450;
+    }
+    return 495 / (1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.22100 * Math.log10(height)) - 450;
+  },
+
+  
+  bmi(weight, heightCm) {
+    const h = heightCm / 100;
+    return weight / (h * h);
+  },
+
+  
+  bmr(gender, weight, heightCm, age) {
+    const base = 10 * weight + 6.25 * heightCm - 5 * age;
+    return gender === "male" ? base + 5 : base - 161;
+  },
+
+  
+  whr(waist, hip) {
+    return waist / hip;
+  },
+
+  
+  ffmi(weight, heightCm, bodyFatPct) {
+    const h = heightCm / 100;
+    const ffm = weight * (1 - bodyFatPct / 100);
+    return ffm / (h * h);
+  },
+
+  
+  leanMass(weight, bodyFatPct) {
+    return weight * (1 - bodyFatPct / 100);
+  },
+
+  
+  fatMass(weight, bodyFatPct) {
+    return weight * (bodyFatPct / 100);
+  },
+
+  
+  bodyType(gender, bodyFatPct) {
+    if (gender === "male") {
+      if (bodyFatPct < 6) return { type: "Экстремально низкий жир", emoji: "⚠️", risk: "high" };
+      if (bodyFatPct < 14) return { type: "Атлетическое", emoji: "💪", risk: "low" };
+      if (bodyFatPct < 18) return { type: "Подтянутое", emoji: "✅", risk: "low" };
+      if (bodyFatPct < 25) return { type: "Среднее", emoji: "📊", risk: "medium" };
+      return { type: "Избыточный жир", emoji: "⚡", risk: "high" };
+    }
+    if (bodyFatPct < 14) return { type: "Экстремально низкий жир", emoji: "⚠️", risk: "high" };
+    if (bodyFatPct < 21) return { type: "Атлетическое", emoji: "💪", risk: "low" };
+    if (bodyFatPct < 25) return { type: "Подтянутое", emoji: "✅", risk: "low" };
+    if (bodyFatPct < 32) return { type: "Среднее", emoji: "📊", risk: "medium" };
+    return { type: "Избыточный жир", emoji: "⚡", risk: "high" };
+  },
+
+  
+  visceralRisk(gender, whr) {
+    if (gender === "male") {
+      if (whr < 0.90) return { level: "Низкий", color: "#10b981" };
+      if (whr < 0.99) return { level: "Повышенный", color: "#f59e0b" };
+      return { level: "Высокий", color: "#ef4444" };
+    }
+    if (whr < 0.80) return { level: "Низкий", color: "#10b981" };
+    if (whr < 0.84) return { level: "Повышенный", color: "#f59e0b" };
+    return { level: "Высокий", color: "#ef4444" };
+  },
+
+  
+  fatRanges(gender) {
+    if (gender === "male") {
+      return [
+        { label: "Мин.", from: 2, to: 6, color: "#f59e0b" },
+        { label: "Атлет", from: 6, to: 14, color: "#10b981" },
+        { label: "Норма", from: 14, to: 18, color: "#22d3ee" },
+        { label: "Средне", from: 18, to: 25, color: "#f59e0b" },
+        { label: "Выше", from: 25, to: 40, color: "#ef4444" },
+      ];
+    }
+    return [
+      { label: "Мин.", from: 10, to: 14, color: "#f59e0b" },
+      { label: "Атлет", from: 14, to: 21, color: "#10b981" },
+      { label: "Норма", from: 21, to: 25, color: "#22d3ee" },
+      { label: "Средне", from: 25, to: 32, color: "#f59e0b" },
+      { label: "Выше", from: 32, to: 45, color: "#ef4444" },
+    ];
+  },
+};
+
+
+
+
+function Gauge({ value, min, max, ranges, label, unit }) {
+  const [anim, setAnim] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setAnim(value), 100);
+    return () => clearTimeout(t);
+  }, [value]);
+
+  const pct = Math.max(0, Math.min(100, ((anim - min) / (max - min)) * 100));
+  const currentRange = ranges.find(r => value >= r.from && value < r.to) || ranges[ranges.length - 1];
+
+  return (
+    <div style={{ padding: "20px 0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 13, color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{label}</span>
+        <span style={{ fontSize: 22, fontWeight: 700, color: currentRange.color, fontFamily: "'JetBrains Mono', monospace" }}>
+          {value.toFixed(1)}{unit}
+        </span>
+      </div>
+      <div style={{ position: "relative", height: 10, borderRadius: 5, overflow: "hidden", background: "#1e293b" }}>
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0,
+          width: `${pct}%`,
+          background: `linear-gradient(90deg, ${currentRange.color}88, ${currentRange.color})`,
+          borderRadius: 5,
+          transition: "width 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+        {ranges.map((r, i) => (
+          <span key={i} style={{ fontSize: 10, color: r.color, opacity: 0.7, fontFamily: "'JetBrains Mono', monospace" }}>{r.label}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+function BodyRing({ fatPct, musclePct }) {
+  const [anim, setAnim] = useState(false);
+  useEffect(() => { setTimeout(() => setAnim(true), 200); }, []);
+
+  const r = 70, cx = 90, cy = 90, stroke = 16;
+  const circ = 2 * Math.PI * r;
+  const fatLen = (fatPct / 100) * circ;
+  const muscleLen = (musclePct / 100) * circ;
+  const otherLen = circ - fatLen - muscleLen;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 24, justifyContent: "center", padding: "12px 0" }}>
+      <svg width={180} height={180} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1e293b" strokeWidth={stroke} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#ef4444" strokeWidth={stroke}
+          strokeDasharray={`${anim ? fatLen : 0} ${circ}`}
+          strokeDashoffset={0}
+          strokeLinecap="round"
+          style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+        />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#10b981" strokeWidth={stroke}
+          strokeDasharray={`${anim ? muscleLen : 0} ${circ}`}
+          strokeDashoffset={`${-fatLen}`}
+          strokeLinecap="round"
+          style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s" }}
+        />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#3b82f6" strokeWidth={stroke}
+          strokeDasharray={`${anim ? otherLen : 0} ${circ}`}
+          strokeDashoffset={`${-fatLen - muscleLen}`}
+          strokeLinecap="round"
+          style={{ transition: "stroke-dasharray 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.6s" }}
+        />
+      </svg>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {[
+          { color: "#ef4444", label: "Жир", value: fatPct },
+          { color: "#10b981", label: "Мышцы", value: musclePct },
+          { color: "#3b82f6", label: "Другое", value: 100 - fatPct - musclePct },
+        ].map((item, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: item.color }} />
+            <span style={{ fontSize: 13, color: "#cbd5e1", fontFamily: "'JetBrains Mono', monospace" }}>
+              {item.label}: <b style={{ color: "#fff" }}>{item.value.toFixed(1)}%</b>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+function StatCard({ label, value, unit, sub, color = "#22d3ee", delay = 0 }) {
+  const [vis, setVis] = useState(false);
+  useEffect(() => { setTimeout(() => setVis(true), delay); }, []);
+  return (
+    <div style={{
+      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+      borderRadius: 16, padding: "18px 16px",
+      border: "1px solid #334155",
+      opacity: vis ? 1 : 0, transform: vis ? "translateY(0)" : "translateY(16px)",
+      transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+    }}>
+      <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 700, color, fontFamily: "'JetBrains Mono', monospace" }}>
+        {value}<span style={{ fontSize: 14, fontWeight: 400, color: "#94a3b8", marginLeft: 3 }}>{unit}</span>
+      </div>
+      {sub && <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>{sub}</div>}
+    </div>
+  );
+}
+
+
+
+
+function InputField({ label, value, onChange, unit, placeholder, min, max, hint }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <label style={{ fontSize: 13, color: "#94a3b8", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+        {label}
+      </label>
+      <div style={{ position: "relative" }}>
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          style={{
+            width: "100%", boxSizing: "border-box", padding: "14px 50px 14px 16px",
+            background: "#0f172a", border: "1.5px solid #334155", borderRadius: 12,
+            color: "#fff", fontSize: 18, fontWeight: 600,
+            fontFamily: "'JetBrains Mono', monospace",
+            outline: "none", transition: "border-color 0.2s",
+          }}
+          onFocus={e => e.target.style.borderColor = "#22d3ee"}
+          onBlur={e => e.target.style.borderColor = "#334155"}
+        />
+        <span style={{
+          position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
+          fontSize: 14, color: "#64748b", fontFamily: "'JetBrains Mono', monospace",
+        }}>{unit}</span>
+      </div>
+      {hint && <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>{hint}</div>}
+    </div>
+  );
+}
+
+
+
+
+export default function AnalyzerPage() {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0); 
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [waist, setWaist] = useState("");
+  const [hip, setHip] = useState("");
+  const [neck, setNeck] = useState("");
+  const [activity, setActivity] = useState("moderate");
+  const [results, setResults] = useState(null);
+  const [showDxa, setShowDxa] = useState(false);
+  const topRef = useRef(null);
+
+  useEffect(() => {
+    if (topRef.current) topRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [step]);
+
+  const canProceed2 = age && height && weight;
+  const canProceed3 = waist && neck && (gender === "male" || hip);
+
+  function calculate() {
+    const g = gender;
+    const a = parseFloat(age);
+    const h = parseFloat(height);
+    const w = parseFloat(weight);
+    const wa = parseFloat(waist);
+    const hi = parseFloat(hip) || 0;
+    const ne = parseFloat(neck);
+
+    const bf = Math.max(3, Math.min(55, calc.bodyFatNavy(g, wa, ne, hi, h)));
+    const bmi = calc.bmi(w, h);
+    const bmr = calc.bmr(g, w, h, a);
+    const whr = g === "female" && hi > 0 ? calc.whr(wa, hi) : calc.whr(wa, hi || wa * 0.85);
+    const ffmi = calc.ffmi(w, h, bf);
+    const lm = calc.leanMass(w, bf);
+    const fm = calc.fatMass(w, bf);
+    const bt = calc.bodyType(g, bf);
+    const vr = calc.visceralRisk(g, whr);
+
+    
+    const musclePct = (lm / w) * 100 * 0.55;
+
+    
+    const actMult = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, extreme: 1.9 };
+    const tdee = bmr * (actMult[activity] || 1.55);
+
+    setResults({ bf, bmi, bmr, whr, ffmi, lm, fm, bt, vr, musclePct, tdee, weight: w, gender: g });
+    setStep(4);
+  }
+
+  const activityLabels = {
+    sedentary: "Сидячий образ жизни",
+    light: "Лёгкая активность (1-2 р/нед)",
+    moderate: "Умеренная (3-4 р/нед)",
+    active: "Высокая (5-6 р/нед)",
+    extreme: "Экстремальная (ежедневно)",
+  };
+
+  
+  const pageStyle = {
+    minHeight: "100dvh",
+    background: "linear-gradient(180deg, #020617 0%, #0f172a 50%, #020617 100%)",
+    color: "#e2e8f0",
+    fontFamily: "'Outfit', 'Manrope', sans-serif",
+    padding: "0 0 40px 0",
+  };
+
+  const containerStyle = {
+    maxWidth: 440, margin: "0 auto", padding: "0 20px",
+  };
+
+  const btnPrimary = {
+    width: "100%", padding: "16px", border: "none", borderRadius: 14,
+    background: "linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)",
+    color: "#020617", fontSize: 16, fontWeight: 700, cursor: "pointer",
+    fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: "0.02em",
+    boxShadow: "0 0 30px #22d3ee33",
+    transition: "transform 0.2s, box-shadow 0.2s",
+  };
+
+  const btnSecondary = {
+    ...btnPrimary,
+    background: "linear-gradient(135deg, #10b981 0%, #34d399 100%)",
+    boxShadow: "0 0 30px #10b98133",
+  };
+
+  const cardStyle = {
+    background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+    borderRadius: 20, padding: 24, marginBottom: 16,
+    border: "1px solid #334155",
+  };
+
+  
+  if (step === 0) {
+    return (
+      <div style={pageStyle}>
+        <div ref={topRef} />
+        <div style={containerStyle}>
+          {}
+          <div style={{ textAlign: "center", paddingTop: 60, paddingBottom: 40 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: 20, margin: "0 auto 24px",
+              background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 0 60px #22d3ee44",
+            }}>
+              {Icons.bodyScan(44, "#020617")}
+            </div>
+            <h1 style={{
+              fontSize: 32, fontWeight: 800, lineHeight: 1.15, margin: "0 0 12px",
+              background: "linear-gradient(135deg, #e2e8f0, #22d3ee)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              fontFamily: "'Outfit', sans-serif",
+            }}>
+              Узнайте реальный<br />состав вашего тела
+            </h1>
+            <p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 32px", maxWidth: 340, marginLeft: "auto", marginRight: "auto" }}>
+              Процент жира, мышечная масса, метаболизм и риски — за 3 минуты. Бесплатно.
+            </p>
+            <button
+              style={btnPrimary}
+              onClick={() => setStep(1)}
+              onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 0 40px #22d3ee55"; }}
+              onMouseOut={e => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = "0 0 30px #22d3ee33"; }}
+            >
+              Начать анализ →
+            </button>
+          </div>
+
+          {}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32 }}>
+            {[
+              { icon: Icons.timer(30, "#22d3ee"), title: "3 минуты", sub: "Быстрый анализ" },
+              { icon: Icons.hexagon(30, "#22d3ee"), title: "6 метрик", sub: "Полная картина" },
+              { icon: Icons.shield(30, "#22d3ee"), title: "Без регистрации", sub: "Данные не хранятся" },
+              { icon: Icons.report(30, "#22d3ee"), title: "Отчёт", sub: "Можно поделиться" },
+            ].map((f, i) => (
+              <div key={i} style={{
+                ...cardStyle, padding: "20px 16px", textAlign: "center", marginBottom: 0,
+              }}>
+                <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>{f.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{f.title}</div>
+                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{f.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {}
+          <div style={{ textAlign: "center", padding: "16px 0" }}>
+            <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.6 }}>
+              Расчёт по формуле US Navy Body Fat Formula<br />
+              используемой Министерством обороны США
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  
+  if (step === 1) {
+    return (
+      <div style={pageStyle}>
+        <div ref={topRef} />
+        <div style={containerStyle}>
+          <div style={{ paddingTop: 40, marginBottom: 32 }}>
+            <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 1 / 3</div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Ваш пол</h2>
+            <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Формулы расчёта отличаются для мужчин и женщин</p>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 32 }}>
+            {[
+              { id: "male", icon: Icons.male(36, "#22d3ee"), label: "Мужской" },
+              { id: "female", icon: Icons.female(36, "#22d3ee"), label: "Женский" },
+            ].map(g => (
+              <button
+                key={g.id}
+                onClick={() => { setGender(g.id); setStep(2); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16,
+                  padding: "20px 24px", borderRadius: 16,
+                  background: gender === g.id ? "#0891b215" : "#0f172a",
+                  border: `2px solid ${gender === g.id ? "#22d3ee" : "#334155"}`,
+                  color: "#e2e8f0", fontSize: 18, fontWeight: 600, cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                <span style={{ width: 48, display: "flex", justifyContent: "center" }}>{g.icon}</span>
+                {g.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  
+  if (step === 2) {
+    return (
+      <div style={pageStyle}>
+        <div ref={topRef} />
+        <div style={containerStyle}>
+          <div style={{ paddingTop: 40, marginBottom: 32 }}>
+            <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 2 / 3</div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Базовые параметры</h2>
+          </div>
+
+          <InputField label="Возраст" value={age} onChange={setAge} unit="лет" placeholder="30" min={14} max={99} />
+          <InputField label="Рост" value={height} onChange={setHeight} unit="см" placeholder="175" min={120} max={230} />
+          <InputField label="Вес" value={weight} onChange={setWeight} unit="кг" placeholder="75" min={30} max={250} />
+
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ fontSize: 13, color: "#94a3b8", display: "block", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>
+              Уровень активности
+            </label>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {Object.entries(activityLabels).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setActivity(key)}
+                  style={{
+                    padding: "12px 16px", borderRadius: 10, textAlign: "left",
+                    background: activity === key ? "#0891b215" : "#0f172a",
+                    border: `1.5px solid ${activity === key ? "#22d3ee" : "#1e293b"}`,
+                    color: activity === key ? "#22d3ee" : "#94a3b8",
+                    fontSize: 13, cursor: "pointer", transition: "all 0.2s",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setStep(1)} style={{ ...btnPrimary, width: "auto", flex: "0 0 auto", padding: "16px 20px", background: "#1e293b", color: "#94a3b8", boxShadow: "none" }}>←</button>
+            <button
+              onClick={() => canProceed2 && setStep(3)}
+              style={{ ...btnPrimary, opacity: canProceed2 ? 1 : 0.4 }}
+              disabled={!canProceed2}
+            >
+              Далее →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  
+  if (step === 3) {
+    return (
+      <div style={pageStyle}>
+        <div ref={topRef} />
+        <div style={containerStyle}>
+          <div style={{ paddingTop: 40, marginBottom: 24 }}>
+            <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 3 / 3</div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Обхваты тела</h2>
+            <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Измерьте сантиметровой лентой</p>
+          </div>
+
+          {}
+          <div style={{ ...cardStyle, padding: 16, marginBottom: 24 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#22d3ee", marginBottom: 8 }}>📏 Как измерить</div>
+            <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>
+              <b style={{ color: "#e2e8f0" }}>Шея</b> — по основанию, под кадыком<br />
+              <b style={{ color: "#e2e8f0" }}>Талия</b> — на уровне пупка, расслабив живот<br />
+              {gender === "female" && <><b style={{ color: "#e2e8f0" }}>Бёдра</b> — по самой широкой точке ягодиц<br /></>}
+            </div>
+          </div>
+
+          <InputField label="Обхват шеи" value={neck} onChange={setNeck} unit="см" placeholder="38" min={20} max={60} hint="У основания шеи, под кадыком" />
+          <InputField label="Обхват талии" value={waist} onChange={setWaist} unit="см" placeholder="82" min={40} max={180} hint="На уровне пупка" />
+          {gender === "female" && (
+            <InputField label="Обхват бёдер" value={hip} onChange={setHip} unit="см" placeholder="96" min={50} max={180} hint="По самой широкой точке" />
+          )}
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setStep(2)} style={{ ...btnPrimary, width: "auto", flex: "0 0 auto", padding: "16px 20px", background: "#1e293b", color: "#94a3b8", boxShadow: "none" }}>←</button>
+            <button
+              onClick={() => canProceed3 && calculate()}
+              style={{ ...btnPrimary, opacity: canProceed3 ? 1 : 0.4 }}
+              disabled={!canProceed3}
+            >
+              Рассчитать →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  
+  if (step === 4 && results) {
+    const r = results;
+    const fatRanges = calc.fatRanges(r.gender);
+
+    return (
+      <div style={pageStyle}>
+        <div ref={topRef} />
+        <div style={containerStyle}>
+          {}
+          <div style={{ paddingTop: 40, textAlign: "center", marginBottom: 32 }}>
+            <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>{getBodyTypeIcon(r.bt.type)}</div>
+            <h2 style={{
+              fontSize: 28, fontWeight: 800, margin: "0 0 6px",
+              background: "linear-gradient(135deg, #e2e8f0, #22d3ee)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>
+              {r.bt.type}
+            </h2>
+            <p style={{ fontSize: 14, color: "#64748b", margin: 0 }}>Ваш тип телосложения</p>
+          </div>
+
+          {}
+          <div style={cardStyle}>
+            <Gauge value={r.bf} min={2} max={r.gender === "male" ? 40 : 45} ranges={fatRanges} label="Процент жира" unit="%" />
+          </div>
+
+          {}
+          <div style={cardStyle}>
+            <div style={{ fontSize: 13, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+              Состав тела
+            </div>
+            <BodyRing fatPct={r.bf} musclePct={r.musclePct} />
+            <div style={{ display: "flex", justifyContent: "space-around", marginTop: 12, textAlign: "center" }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#ef4444", fontFamily: "'JetBrains Mono', monospace" }}>{r.fm.toFixed(1)}</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>кг жира</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#10b981", fontFamily: "'JetBrains Mono', monospace" }}>{r.lm.toFixed(1)}</div>
+                <div style={{ fontSize: 11, color: "#64748b" }}>кг без жира</div>
+              </div>
+            </div>
+          </div>
+
+          {}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <StatCard label="ИМТ" value={r.bmi.toFixed(1)} unit="" sub={r.bmi < 18.5 ? "Дефицит" : r.bmi < 25 ? "Норма" : r.bmi < 30 ? "Избыток" : "Ожирение"} color="#f59e0b" delay={100} />
+            <StatCard label="FFMI" value={r.ffmi.toFixed(1)} unit="" sub={r.ffmi < 18 ? "Ниже среднего" : r.ffmi < 20 ? "Среднее" : r.ffmi < 22 ? "Выше среднего" : "Продвинутое"} color="#8b5cf6" delay={200} />
+            <StatCard label="Метаболизм" value={Math.round(r.bmr).toString()} unit="ккал" sub="Базовый обмен" color="#22d3ee" delay={300} />
+            <StatCard label="TDEE" value={Math.round(r.tdee).toString()} unit="ккал" sub="Расход за день" color="#10b981" delay={400} />
+          </div>
+
+          {}
+          <div style={{ ...cardStyle, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace", marginBottom: 4 }}>Висцеральный жир</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: r.vr.color }}>Риск: {r.vr.level}</div>
+              <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>WHR: {r.whr.toFixed(2)}</div>
+            </div>
+            <div style={{
+              width: 48, height: 48, borderRadius: "50%",
+              border: `3px solid ${r.vr.color}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {r.vr.level === "Низкий" ? Icons.check(24, r.vr.color) : r.vr.level === "Повышенный" ? Icons.alert(24, r.vr.color) : Icons.danger(24, r.vr.color)}
+            </div>
+          </div>
+
+          {}
+          <div style={{
+            background: "linear-gradient(135deg, #0c4a6e22, #164e6333)",
+            borderRadius: 20, padding: 24, marginBottom: 16,
+            border: "1px solid #0891b244",
+          }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#22d3ee", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+              {Icons.alert(18, "#22d3ee")} Точность: ±8-12%
+            </div>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
+              Формулы дают приблизительную оценку. Домашние весы-анализаторы ошибаются ещё больше — до ±15%.
+            </p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0", margin: "0 0 16px" }}>
+              Хотите узнать <span style={{ color: "#22d3ee" }}>точные цифры</span>? DXA-сканирование — золотой стандарт анализа состава тела, точность ±1-2%.
+            </p>
+            <button
+              onClick={() => setShowDxa(!showDxa)}
+              style={btnSecondary}
+              onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; }}
+              onMouseOut={e => { e.target.style.transform = "translateY(0)"; }}
+            >
+              {showDxa ? "Скрыть" : "Узнать про DXA →"}
+            </button>
+          </div>
+
+          {}
+          {showDxa && (
+            <div style={{
+              background: "linear-gradient(135deg, #064e3b22, #10b98122)",
+              borderRadius: 20, padding: 24, marginBottom: 16,
+              border: "1px solid #10b98144",
+              animation: "fadeIn 0.5s ease",
+            }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#10b981", margin: "0 0 12px" }}>
+                DXA-сканирование тела
+              </h3>
+              <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.8, marginBottom: 16 }}>
+                DXA (двухэнергетическая рентгеновская абсорбциометрия) за 5 минут определяет:<br /><br />
+                <span style={{ color: "#10b981" }}>▸</span> Точный % жира по каждой зоне тела<br />
+                <span style={{ color: "#10b981" }}>▸</span> Мышечную массу и её распределение<br />
+                <span style={{ color: "#10b981" }}>▸</span> Плотность костей (риск остеопороза)<br />
+                <span style={{ color: "#10b981" }}>▸</span> Висцеральный жир (невидимый враг)<br />
+                <span style={{ color: "#10b981" }}>▸</span> Асимметрию мышц лево/право<br /><br />
+                Доза облучения минимальна — в 10 раз меньше рентгена грудной клетки.
+              </div>
+
+              <div style={{
+                background: "#0f172a", borderRadius: 14, padding: 16, marginBottom: 16,
+                border: "1px solid #334155",
+              }}>
+                <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>Партнёр</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>Санаторий-партнёр ASVOMED</div>
+                <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 12 }}>DXA-денситометр Stratos dR (Франция)</div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#10b98122", color: "#10b981", fontSize: 12 }}>Body Composition</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#22d3ee22", color: "#22d3ee", fontSize: 12 }}>Денситометрия</span>
+                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#8b5cf622", color: "#8b5cf6", fontSize: 12 }}>3D-DXA</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => navigate("/clinics")}
+                style={btnSecondary}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{Icons.calendar(18, "#020617")} Записаться на DXA</span>
+              </button>
+              <p style={{ fontSize: 11, color: "#64748b", textAlign: "center", marginTop: 8 }}>
+                Или позвоните: +7 (XXX) XXX-XX-XX
+              </p>
+            </div>
+          )}
+
+          {}
+          <div style={{ textAlign: "center", marginBottom: 16 }}>
+            <button
+              onClick={() => {
+                const text = `Мой анализ состава тела:\n` +
+                  `▸ ${r.bt.type}\n` +
+                  `Жир: ${r.bf.toFixed(1)}% (${r.fm.toFixed(1)} кг)\n` +
+                  `Мышцы+кости: ${r.lm.toFixed(1)} кг\n` +
+                  `Метаболизм: ${Math.round(r.tdee)} ккал/день\n\n` +
+                  `Узнай свои цифры → ${window.location.href}`;
+                if (navigator.share) {
+                  navigator.share({ text });
+                } else {
+                  navigator.clipboard.writeText(text);
+                  alert("Скопировано!");
+                }
+              }}
+              style={{ ...btnPrimary, background: "#1e293b", color: "#94a3b8", boxShadow: "none", fontSize: 14 }}
+            >
+              📤 Поделиться результатом
+            </button>
+          </div>
+
+          {}
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={() => { setStep(0); setGender(""); setResults(null); }}
+              style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", padding: 8, textDecoration: "underline" }}
+            >
+              Пройти заново
+            </button>
+          </div>
+
+          {}
+          <div style={{ textAlign: "center", padding: "24px 0 0", borderTop: "1px solid #1e293b", marginTop: 24 }}>
+            <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>
+              Результаты носят информационный характер и не являются медицинским диагнозом.
+              Для точной оценки обратитесь к специалисту. Имеются противопоказания, необходима консультация специалиста.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+================================================================================
+FILE: src/pages/ClinicsPage.jsx
+================================================================================
+
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+
+
+const CLINICS = [
+  { id: 1, name: "Санаторий «Сириус»", city: "Сочи", address: "ул. Морская, 12", lat: 43.4025, lng: 39.9549, phone: "+7 (862) 123-45-67", rating: 4.8, reviews: 124, services: ["Body Composition", "Денситометрия", "3D-DXA"], device: "Stratos dR 3.0 «Про»", price: 5500, priceOld: 8000, hours: "Пн-Сб 8:00-20:00", img: "🏥", partner: true, slots: ["09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"] },
+  { id: 2, name: "Клиника «МедЛайн»", city: "Москва", address: "ул. Тверская, 24, стр. 2", lat: 55.7649, lng: 37.6043, phone: "+7 (495) 987-65-43", rating: 4.6, reviews: 89, services: ["Body Composition", "Денситометрия"], device: "Stratos dR 2.5 «Оптимум»", price: 7500, priceOld: 12000, hours: "Пн-Пт 9:00-21:00", img: "🏢", partner: true, slots: ["09:30","10:30","11:30","14:00","15:00","16:30"] },
+  { id: 3, name: "Центр здоровья «Вита»", city: "Санкт-Петербург", address: "Невский пр., 100", lat: 59.9311, lng: 30.3609, phone: "+7 (812) 555-44-33", rating: 4.7, reviews: 67, services: ["Body Composition", "Денситометрия", "Саркопения"], device: "Stratos dR 2.5 «Оптимум»", price: 6800, priceOld: 10000, hours: "Пн-Сб 8:00-19:00", img: "🏥", partner: true, slots: ["08:00","09:00","10:00","11:00","13:00","14:00"] },
+  { id: 4, name: "Фитнес-клиника «Олимп»", city: "Екатеринбург", address: "ул. Ленина, 50", lat: 56.8389, lng: 60.5977, phone: "+7 (343) 222-11-00", rating: 4.5, reviews: 45, services: ["Body Composition", "Денситометрия"], device: "Stratos dR 2.4 «Стандарт»", price: 5000, priceOld: 7500, hours: "Пн-Пт 9:00-20:00", img: "💪", partner: true, slots: ["09:00","10:00","11:00","14:00","15:00","16:00","17:00","18:00"] },
+  { id: 5, name: "Диагностический центр «Нова»", city: "Новосибирск", address: "Красный пр., 75", lat: 55.0303, lng: 82.9206, phone: "+7 (383) 333-22-11", rating: 4.4, reviews: 38, services: ["Денситометрия", "Body Composition"], device: "Stratos dR 2.4 «Стандарт»", price: 4500, priceOld: 7000, hours: "Пн-Сб 8:00-18:00", img: "🔬", partner: true, slots: ["08:30","09:30","10:30","11:30","13:00","14:00","15:00"] },
+  { id: 6, name: "Санаторий «Кедр»", city: "Краснодар", address: "ул. Красная, 180", lat: 45.0355, lng: 38.9753, phone: "+7 (861) 444-33-22", rating: 4.9, reviews: 156, services: ["Body Composition", "Денситометрия", "3D-DXA", "Саркопения"], device: "Stratos dR 3.0 «Про»", price: 5000, priceOld: 8500, hours: "Ежедневно 7:00-21:00", img: "🌿", partner: true, slots: ["07:00","08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00"] },
+];
+
+const CITIES = ["Все города", "Москва", "Санкт-Петербург", "Сочи", "Екатеринбург", "Новосибирск", "Краснодар"];
+
+
+
+
+function Reveal({ children, from = "bottom", delay = 0 }) {
+  const [vis, setVis] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(() => setVis(true), delay); obs.disconnect(); } }, { threshold: 0.06 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [delay]);
+  const map = { bottom: "translateY(50px)", left: "translateX(-60px)", right: "translateX(60px)", scale: "scale(0.9)" };
+  return <div ref={ref} style={{ opacity: vis ? 1 : 0, transform: vis ? "none" : map[from], transition: `all 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}ms` }}>{children}</div>;
+}
+
+
+
+
+function MapView({ clinics, selectedId, onSelect }) {
+  const [loaded, setLoaded] = useState(false);
+
+  
+  const center = clinics.length > 0
+    ? { lat: clinics.reduce((s, c) => s + c.lat, 0) / clinics.length, lng: clinics.reduce((s, c) => s + c.lng, 0) / clinics.length }
+    : { lat: 55.75, lng: 37.62 };
+
+  const zoom = clinics.length === 1 ? 13 : clinics.length <= 3 ? 6 : 4;
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - (zoom > 10 ? 0.05 : 40)},${center.lat - (zoom > 10 ? 0.03 : 15)},${center.lng + (zoom > 10 ? 0.05 : 40)},${center.lat + (zoom > 10 ? 0.03 : 15)}&layer=mapnik`;
+
+  return (
+    <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", marginBottom: 16, border: "1px solid #334155" }}>
+      <iframe
+        src={mapUrl}
+        style={{ width: "100%", height: 240, border: "none", filter: "saturate(0.3) brightness(0.4) hue-rotate(180deg)" }}
+        onLoad={() => setLoaded(true)}
+        title="map"
+      />
+
+      {}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        {clinics.map((c, i) => {
+          
+          const xPct = 20 + (i / Math.max(clinics.length - 1, 1)) * 60;
+          const yPct = 25 + (i % 3) * 20;
+          const isSelected = selectedId === c.id;
+          return (
+            <div key={c.id} style={{
+              position: "absolute",
+              left: `${xPct}%`, top: `${yPct}%`,
+              transform: "translate(-50%,-100%)",
+              pointerEvents: "auto", cursor: "pointer",
+              transition: "all 0.3s",
+              zIndex: isSelected ? 10 : 1,
+            }} onClick={() => onSelect(c.id)}>
+              <div style={{
+                background: isSelected ? "#22d3ee" : "#10b981",
+                color: "#020617",
+                padding: "4px 8px",
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                fontFamily: "'JetBrains Mono',monospace",
+                whiteSpace: "nowrap",
+                boxShadow: isSelected ? "0 0 20px #22d3ee66" : "0 2px 8px #0008",
+                transform: isSelected ? "scale(1.15)" : "scale(1)",
+                transition: "all 0.3s",
+              }}>
+                ₽{c.price.toLocaleString()}
+              </div>
+              <div style={{
+                width: 0, height: 0,
+                borderLeft: "6px solid transparent",
+                borderRight: "6px solid transparent",
+                borderTop: `6px solid ${isSelected ? "#22d3ee" : "#10b981"}`,
+                margin: "0 auto",
+              }} />
+            </div>
+          );
+        })}
+      </div>
+
+      {!loaded && (
+        <div style={{ position: "absolute", inset: 0, background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 14, color: "#475569", fontFamily: "mono" }}>Загрузка карты...</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+function Stars({ rating }) {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  return (
+    <span style={{ color: "#f59e0b", fontSize: 14, letterSpacing: 1 }}>
+      {"★".repeat(full)}{half ? "½" : ""}{"☆".repeat(5 - full - (half ? 1 : 0))}
+    </span>
+  );
+}
+
+
+
+
+function ClinicCard({ clinic, isSelected, onSelect, onBook }) {
+  const c = clinic;
+  const discount = Math.round((1 - c.price / c.priceOld) * 100);
+
+  return (
+    <div
+      onClick={() => onSelect(c.id)}
+      style={{
+        background: isSelected
+          ? "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
+          : "linear-gradient(135deg, #0f172a 0%, #151f30 100%)",
+        borderRadius: 18, padding: isSelected ? 20 : 16,
+        border: `1.5px solid ${isSelected ? "#22d3ee55" : "#1e293b"}`,
+        boxShadow: isSelected ? "0 0 30px #22d3ee12" : "none",
+        cursor: "pointer",
+        transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)",
+        marginBottom: 12,
+      }}
+    >
+      {}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 14,
+          background: "#020617", border: "1px solid #1e293b",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 24, flexShrink: 0,
+        }}>{c.img}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+          <div style={{ fontSize: 12, color: "#64748b" }}>{c.address}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+            <Stars rating={c.rating} />
+            <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600 }}>{c.rating}</span>
+            <span style={{ fontSize: 11, color: "#475569" }}>({c.reviews})</span>
+          </div>
+        </div>
+      </div>
+
+      {}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: "#020617" }}>
+        <div>
+          <span style={{ fontSize: 24, fontWeight: 800, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace" }}>₽{c.price.toLocaleString()}</span>
+          <span style={{ fontSize: 14, color: "#475569", textDecoration: "line-through", marginLeft: 8, fontFamily: "'JetBrains Mono',monospace" }}>₽{c.priceOld.toLocaleString()}</span>
+        </div>
+        <div style={{ marginLeft: "auto", padding: "4px 10px", borderRadius: 8, background: "#10b98122", color: "#10b981", fontSize: 13, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>
+          −{discount}%
+        </div>
+      </div>
+
+      {}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+        {c.services.map((s, i) => (
+          <span key={i} style={{
+            padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+            background: s === "3D-DXA" ? "#8b5cf622" : s === "Саркопения" ? "#f59e0b22" : "#22d3ee15",
+            color: s === "3D-DXA" ? "#a78bfa" : s === "Саркопения" ? "#fbbf24" : "#67e8f9",
+          }}>{s}</span>
+        ))}
+      </div>
+
+      {}
+      {isSelected && (
+        <div style={{ animation: "fadeSlide 0.5s ease" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+            <div style={{ padding: "8px 12px", borderRadius: 10, background: "#020617" }}>
+              <div style={{ fontSize: 10, color: "#475569", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "mono" }}>Аппарат</div>
+              <div style={{ fontSize: 12, color: "#cbd5e1", fontWeight: 600, marginTop: 2 }}>{c.device}</div>
+            </div>
+            <div style={{ padding: "8px 12px", borderRadius: 10, background: "#020617" }}>
+              <div style={{ fontSize: 10, color: "#475569", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "mono" }}>Часы работы</div>
+              <div style={{ fontSize: 12, color: "#cbd5e1", fontWeight: 600, marginTop: 2 }}>{c.hours}</div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onBook(c); }}
+              style={{
+                flex: 1, padding: "14px", border: "none", borderRadius: 12,
+                background: "linear-gradient(135deg,#0891b2,#22d3ee)",
+                color: "#020617", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                fontFamily: "'JetBrains Mono',monospace",
+                boxShadow: "0 0 20px #22d3ee22",
+                transition: "transform 0.2s",
+              }}
+              onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
+              onMouseOut={e => e.target.style.transform = "none"}
+            >
+              Записаться →
+            </button>
+            <a
+              href={`tel:${c.phone.replace(/\D/g, "")}`}
+              onClick={e => e.stopPropagation()}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 48, borderRadius: 12, background: "#1e293b",
+                border: "1px solid #334155", textDecoration: "none", fontSize: 20,
+              }}
+            >📞</a>
+          </div>
+        </div>
+      )}
+
+      {}
+      {c.partner && (
+        <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#10b981" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
+          Официальный партнёр · Stratos dR (Франция)
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+function BookingModal({ clinic, onClose, onConfirm }) {
+  const [step, setStep] = useState(1); 
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  
+  const dates = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() + i + 1);
+    return d;
+  });
+
+  const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+  const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+  const formatDate = (d) => `${d.getDate()} ${monthNames[d.getMonth()]}`;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ position: "absolute", inset: 0, background: "#000a", backdropFilter: "blur(8px)" }} />
+      <div
+        style={{
+          position: "relative", width: "100%", maxWidth: 480,
+          maxHeight: "90vh", overflow: "auto",
+          background: "linear-gradient(180deg, #0f172a 0%, #020617 100%)",
+          borderRadius: "24px 24px 0 0", padding: "24px 20px 40px",
+          animation: "slideUp 0.5s cubic-bezier(0.16,1,0.3,1)",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {}
+        <div style={{ width: 40, height: 4, borderRadius: 2, background: "#334155", margin: "0 auto 20px" }} />
+
+        {}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{clinic.img}</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16 }}>{clinic.name}</div>
+            <div style={{ fontSize: 12, color: "#64748b" }}>{clinic.city} · {clinic.device}</div>
+          </div>
+          <button onClick={onClose} style={{ marginLeft: "auto", background: "#1e293b", border: "none", color: "#94a3b8", width: 32, height: 32, borderRadius: 10, cursor: "pointer", fontSize: 16 }}>✕</button>
+        </div>
+
+        {}
+        <div style={{ display: "flex", gap: 4, marginBottom: 24 }}>
+          {[1, 2, 3].map(s => (
+            <div key={s} style={{ flex: 1, height: 3, borderRadius: 2, background: step >= s ? "#22d3ee" : "#1e293b", transition: "background 0.3s" }} />
+          ))}
+        </div>
+
+        {}
+        {step === 1 && (
+          <div style={{ animation: "fadeSlide 0.4s ease" }}>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Выберите дату</div>
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, marginBottom: 20, WebkitOverflowScrolling: "touch" }}>
+              {dates.map((d, i) => {
+                const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                const isSel = selectedDate && d.toDateString() === selectedDate.toDateString();
+                return (
+                  <button key={i} onClick={() => setSelectedDate(d)} style={{
+                    flexShrink: 0, width: 64, padding: "10px 6px", borderRadius: 14, textAlign: "center", cursor: "pointer",
+                    background: isSel ? "#22d3ee" : "#0f172a",
+                    border: `1.5px solid ${isSel ? "#22d3ee" : "#1e293b"}`,
+                    color: isSel ? "#020617" : isWeekend ? "#ef4444" : "#e2e8f0",
+                    transition: "all 0.2s",
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.7 }}>{dayNames[d.getDay()]}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, margin: "2px 0" }}>{d.getDate()}</div>
+                    <div style={{ fontSize: 10 }}>{monthNames[d.getMonth()]}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => selectedDate && setStep(2)}
+              disabled={!selectedDate}
+              style={{
+                width: "100%", padding: 16, border: "none", borderRadius: 14,
+                background: selectedDate ? "linear-gradient(135deg,#0891b2,#22d3ee)" : "#1e293b",
+                color: selectedDate ? "#020617" : "#475569",
+                fontSize: 15, fontWeight: 700, cursor: selectedDate ? "pointer" : "default",
+                fontFamily: "'JetBrains Mono',monospace", transition: "all 0.3s",
+              }}
+            >Далее →</button>
+          </div>
+        )}
+
+        {}
+        {step === 2 && (
+          <div style={{ animation: "fadeSlide 0.4s ease" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <button onClick={() => setStep(1)} style={{ background: "#1e293b", border: "none", color: "#94a3b8", padding: "6px 10px", borderRadius: 8, cursor: "pointer" }}>←</button>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>Выберите время</div>
+                <div style={{ fontSize: 13, color: "#64748b" }}>{formatDate(selectedDate)}, {dayNames[selectedDate.getDay()]}</div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 20 }}>
+              {clinic.slots.map((t, i) => {
+                const isSel = selectedTime === t;
+                return (
+                  <button key={i} onClick={() => setSelectedTime(t)} style={{
+                    padding: "14px 8px", borderRadius: 12, textAlign: "center", cursor: "pointer",
+                    background: isSel ? "#22d3ee" : "#0f172a",
+                    border: `1.5px solid ${isSel ? "#22d3ee" : "#1e293b"}`,
+                    color: isSel ? "#020617" : "#e2e8f0",
+                    fontSize: 16, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace",
+                    transition: "all 0.2s",
+                  }}>{t}</button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => selectedTime && setStep(3)}
+              disabled={!selectedTime}
+              style={{
+                width: "100%", padding: 16, border: "none", borderRadius: 14,
+                background: selectedTime ? "linear-gradient(135deg,#0891b2,#22d3ee)" : "#1e293b",
+                color: selectedTime ? "#020617" : "#475569",
+                fontSize: 15, fontWeight: 700, cursor: selectedTime ? "pointer" : "default",
+                fontFamily: "'JetBrains Mono',monospace", transition: "all 0.3s",
+              }}
+            >Далее →</button>
+          </div>
+        )}
+
+        {}
+        {step === 3 && (
+          <div style={{ animation: "fadeSlide 0.4s ease" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <button onClick={() => setStep(2)} style={{ background: "#1e293b", border: "none", color: "#94a3b8", padding: "6px 10px", borderRadius: 8, cursor: "pointer" }}>←</button>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>Ваши данные</div>
+            </div>
+
+            {}
+            <div style={{ padding: 14, borderRadius: 14, background: "#020617", border: "1px solid #1e293b", marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: "#64748b" }}>Клиника</span>
+                <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600 }}>{clinic.name}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: "#64748b" }}>Дата</span>
+                <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600 }}>{formatDate(selectedDate)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: "#64748b" }}>Время</span>
+                <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600 }}>{selectedTime}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 13, color: "#64748b" }}>Стоимость</span>
+                <div>
+                  <span style={{ fontSize: 15, color: "#22d3ee", fontWeight: 700, fontFamily: "mono" }}>₽{clinic.price.toLocaleString()}</span>
+                  <span style={{ fontSize: 12, color: "#475569", textDecoration: "line-through", marginLeft: 6 }}>₽{clinic.priceOld.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {}
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6, fontFamily: "mono" }}>Имя</label>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="Ваше имя"
+                style={{ width: "100%", boxSizing: "border-box", padding: "14px 16px", background: "#0f172a", border: "1.5px solid #334155", borderRadius: 12, color: "#fff", fontSize: 16, outline: "none", fontFamily: "'Outfit',sans-serif" }}
+                onFocus={e => e.target.style.borderColor = "#22d3ee"} onBlur={e => e.target.style.borderColor = "#334155"} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6, fontFamily: "mono" }}>Телефон</label>
+              <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 (___) ___-__-__" type="tel"
+                style={{ width: "100%", boxSizing: "border-box", padding: "14px 16px", background: "#0f172a", border: "1.5px solid #334155", borderRadius: 12, color: "#fff", fontSize: 16, outline: "none", fontFamily: "'Outfit',sans-serif" }}
+                onFocus={e => e.target.style.borderColor = "#22d3ee"} onBlur={e => e.target.style.borderColor = "#334155"} />
+            </div>
+
+            <button
+              onClick={() => { if (name && phone) { setStep(4); if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone }); } }}
+              disabled={!name || !phone}
+              style={{
+                width: "100%", padding: 16, border: "none", borderRadius: 14,
+                background: name && phone ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
+                color: name && phone ? "#020617" : "#475569",
+                fontSize: 15, fontWeight: 700, cursor: name && phone ? "pointer" : "default",
+                fontFamily: "'JetBrains Mono',monospace",
+                boxShadow: name && phone ? "0 0 30px #10b98122" : "none",
+                transition: "all 0.3s",
+              }}
+            >Подтвердить запись ✓</button>
+
+            <p style={{ fontSize: 11, color: "#334155", textAlign: "center", marginTop: 10 }}>
+              Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
+            </p>
+          </div>
+        )}
+
+        {}
+        {step === 4 && (
+          <div style={{ textAlign: "center", padding: "20px 0", animation: "fadeSlide 0.5s ease" }}>
+            <div style={{ fontSize: 64, marginBottom: 16, animation: "bounceIn 0.6s ease" }}>✅</div>
+            <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, background: "linear-gradient(135deg,#e2e8f0,#10b981)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Запись подтверждена!
+            </div>
+            <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.6, marginBottom: 20 }}>
+              {formatDate(selectedDate)} в {selectedTime}<br />
+              {clinic.name}, {clinic.city}<br />
+              {clinic.address}
+            </div>
+
+            <div style={{ padding: 16, borderRadius: 14, background: "#10b98112", border: "1px solid #10b98133", marginBottom: 16, textAlign: "left" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#10b981", marginBottom: 6 }}>📋 Подготовка к DXA:</div>
+              <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.8 }}>
+                • Наденьте удобную одежду без металла<br />
+                • Не принимайте кальций за 24 часа<br />
+                • Возьмите паспорт<br />
+                • Процедура занимает ~5 минут
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={onClose} style={{
+                flex: 1, padding: 14, border: "none", borderRadius: 12,
+                background: "linear-gradient(135deg,#0891b2,#22d3ee)",
+                color: "#020617", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                fontFamily: "mono",
+              }}>Готово</button>
+              <a href={`tel:${clinic.phone.replace(/\D/g, "")}`} style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 48, borderRadius: 12, background: "#1e293b",
+                border: "1px solid #334155", textDecoration: "none", fontSize: 18,
+              }}>📞</a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+export default function ClinicsPage() {
+  const [city, setCity] = useState("Все города");
+  const [service, setService] = useState("all");
+  const [sort, setSort] = useState("price");
+  const [selectedClinic, setSelectedClinic] = useState(null);
+  const [bookingClinic, setBookingClinic] = useState(null);
+  const [geoStatus, setGeoStatus] = useState(null); 
+
+  const filtered = CLINICS
+    .filter(c => city === "Все города" || c.city === city)
+    .filter(c => service === "all" || c.services.includes(service))
+    .sort((a, b) => sort === "price" ? a.price - b.price : sort === "rating" ? b.rating - a.rating : 0);
+
+  const requestGeo = () => {
+    setGeoStatus("loading");
+    navigator.geolocation?.getCurrentPosition(
+      () => setGeoStatus("granted"),
+      () => setGeoStatus("denied"),
+      { timeout: 5000 }
+    );
+  };
+
+  return (
+    <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif" }}>
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
+
+        {}
+        <Reveal from="bottom">
+          <div style={{ paddingTop: 40, marginBottom: 24 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЗАПИСЬ НА DXA</div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Ближайшие денситометры
+            </h1>
+            <p style={{ fontSize: 14, color: "#64748b", margin: 0 }}>
+              {filtered.length} клиник{filtered.length > 1 && filtered.length < 5 ? "и" : ""} с аппаратами Stratos dR
+            </p>
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="right" delay={100}>
+          <button onClick={requestGeo} style={{
+            width: "100%", padding: "12px 16px", marginBottom: 16, borderRadius: 14,
+            background: geoStatus === "granted" ? "#10b98118" : "#0f172a",
+            border: `1.5px solid ${geoStatus === "granted" ? "#10b98155" : "#1e293b"}`,
+            color: geoStatus === "granted" ? "#10b981" : "#94a3b8",
+            fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.3s",
+            display: "flex", alignItems: "center", gap: 8, justifyContent: "center",
+          }}>
+            {geoStatus === "loading" ? "⏳ Определяем..." : geoStatus === "granted" ? "📍 Геолокация включена" : "📍 Определить моё местоположение"}
+          </button>
+        </Reveal>
+
+        {}
+        <Reveal from="left" delay={150}>
+          <div style={{ marginBottom: 16 }}>
+            {}
+            <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 10, WebkitOverflowScrolling: "touch" }}>
+              {CITIES.map(c => (
+                <button key={c} onClick={() => setCity(c)} style={{
+                  flexShrink: 0, padding: "8px 14px", borderRadius: 10,
+                  background: city === c ? "#22d3ee" : "#0f172a",
+                  border: `1px solid ${city === c ? "#22d3ee" : "#1e293b"}`,
+                  color: city === c ? "#020617" : "#94a3b8",
+                  fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
+                  whiteSpace: "nowrap",
+                }}>{c}</button>
+              ))}
+            </div>
+
+            {}
+            <div style={{ display: "flex", gap: 8 }}>
+              <select value={service} onChange={e => setService(e.target.value)} style={{
+                flex: 1, padding: "10px 12px", borderRadius: 10, background: "#0f172a", border: "1px solid #1e293b",
+                color: "#94a3b8", fontSize: 12, cursor: "pointer", outline: "none",
+              }}>
+                <option value="all">Все услуги</option>
+                <option value="Body Composition">Body Composition</option>
+                <option value="Денситометрия">Денситометрия</option>
+                <option value="3D-DXA">3D-DXA</option>
+                <option value="Саркопения">Саркопения</option>
+              </select>
+              <select value={sort} onChange={e => setSort(e.target.value)} style={{
+                width: "auto", padding: "10px 12px", borderRadius: 10, background: "#0f172a", border: "1px solid #1e293b",
+                color: "#94a3b8", fontSize: 12, cursor: "pointer", outline: "none",
+              }}>
+                <option value="price">По цене ↑</option>
+                <option value="rating">По рейтингу ↓</option>
+              </select>
+            </div>
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="scale" delay={200}>
+          <MapView clinics={filtered} selectedId={selectedClinic} onSelect={setSelectedClinic} />
+        </Reveal>
+
+        {}
+        {filtered.map((c, i) => (
+          <Reveal key={c.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 80}>
+            <ClinicCard
+              clinic={c}
+              isSelected={selectedClinic === c.id}
+              onSelect={setSelectedClinic}
+              onBook={setBookingClinic}
+            />
+          </Reveal>
+        ))}
+
+        {filtered.length === 0 && (
+          <Reveal from="bottom">
+            <div style={{ textAlign: "center", padding: 40 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Клиник не найдено</div>
+              <div style={{ fontSize: 13, color: "#64748b" }}>Попробуйте другой город или услугу</div>
+            </div>
+          </Reveal>
+        )}
+
+        {}
+        <Reveal from="bottom" delay={200}>
+          <div style={{
+            marginTop: 24, padding: 20, borderRadius: 18, textAlign: "center",
+            background: "linear-gradient(135deg,#0891b210,#10b98110)",
+            border: "1px solid #22d3ee22",
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#22d3ee", marginBottom: 6 }}>
+              Не нашли свой город?
+            </div>
+            <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 12 }}>
+              Мы расширяем сеть. Оставьте заявку — сообщим, когда появится клиника рядом.
+            </div>
+            <button style={{
+              padding: "12px 24px", border: "none", borderRadius: 12,
+              background: "#1e293b", color: "#94a3b8", fontSize: 13, fontWeight: 600,
+              cursor: "pointer", transition: "all 0.2s",
+            }}
+              onMouseOver={e => { e.target.style.background = "#334155"; e.target.style.color = "#e2e8f0"; }}
+              onMouseOut={e => { e.target.style.background = "#1e293b"; e.target.style.color = "#94a3b8"; }}
+            >Сообщить мне →</button>
+          </div>
+        </Reveal>
+
+        {}
+        <div style={{ textAlign: "center", padding: "24px 0 0", marginTop: 24, borderTop: "1px solid #1e293b" }}>
+          <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>
+            Имеются противопоказания, необходима консультация специалиста.<br />
+            Все аппараты — Stratos dR (DMS Imaging, Франция).
+          </p>
+        </div>
+      </div>
+
+      {}
+      {bookingClinic && (
+        <BookingModal
+          clinic={bookingClinic}
+          onClose={() => setBookingClinic(null)}
+          onConfirm={(data) => console.log("Booking:", data)}
+        />
+      )}
+    </div>
+  );
+}
+
+================================================================================
+FILE: src/pages/LandingPage.jsx
+================================================================================
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import * as THREE from "three";
+
+
+
+
+function Splash({ onDone }) {
+  const [p, setP] = useState(0);
+  const [fade, setFade] = useState(false);
+  useEffect(() => {
+    let v = 0;
+    const iv = setInterval(() => { v += Math.random() * 18 + 5; if (v >= 100) { v = 100; clearInterval(iv); setTimeout(() => setFade(true), 300); setTimeout(onDone, 900); } setP(Math.min(v, 100)); }, 120);
+    return () => clearInterval(iv);
+  }, [onDone]);
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#020617", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: fade ? 0 : 1, transition: "opacity 0.6s" }}>
+      <div style={{ fontSize: 48, marginBottom: 24, animation: "spin3d 2s ease-in-out infinite" }}>◎</div>
+      <div style={{ width: 180, height: 3, borderRadius: 2, background: "#1e293b", overflow: "hidden", marginBottom: 12 }}>
+        <div style={{ height: "100%", borderRadius: 2, background: "linear-gradient(90deg,#0891b2,#22d3ee)", width: `${p}%`, transition: "width 0.15s", boxShadow: "0 0 12px #22d3ee66" }} />
+      </div>
+      <div style={{ fontSize: 12, color: "#475569", fontFamily: "mono" }}>{Math.round(p)}%</div>
+    </div>
+  );
+}
+
+
+
+
+function Particles() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d");
+    let w = innerWidth, h = innerHeight; c.width = w; c.height = h;
+    const pts = Array.from({ length: 40 }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25, r: Math.random() * 1.5 + 0.5, o: Math.random() * 0.25 + 0.05 }));
+    let raf;
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      pts.forEach(p => { p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(34,211,238,${p.o})`; ctx.fill(); });
+      for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy); if (d < 100) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.strokeStyle = `rgba(34,211,238,${0.04 * (1 - d / 100)})`; ctx.lineWidth = 0.5; ctx.stroke(); } }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    const rs = () => { w = innerWidth; h = innerHeight; c.width = w; c.height = h; };
+    addEventListener("resize", rs);
+    return () => { cancelAnimationFrame(raf); removeEventListener("resize", rs); };
+  }, []);
+  return <canvas ref={ref} style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
+}
+
+
+
+
+function Typewriter({ text, speed = 55, delay = 0, style = {} }) {
+  const [d, setD] = useState("");
+  const [go, setGo] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setGo(true), delay); return () => clearTimeout(t); }, [delay]);
+  useEffect(() => { if (!go) return; let i = 0; const iv = setInterval(() => { i++; setD(text.slice(0, i)); if (i >= text.length) clearInterval(iv); }, speed); return () => clearInterval(iv); }, [go, text, speed]);
+  return <span style={style}>{d}<span style={{ opacity: d.length < text.length ? 1 : 0, animation: "blink .8s step-end infinite" }}>|</span></span>;
+}
+
+
+
+
+function Reveal({ children, from = "bottom", delay = 0, style = {} }) {
+  const [v, setV] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => { const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(() => setV(true), delay); o.disconnect(); } }, { threshold: 0.06 }); if (ref.current) o.observe(ref.current); return () => o.disconnect(); }, [delay]);
+  const m = { bottom: "translateY(60px)", left: "translateX(-80px) rotate(-1.5deg)", right: "translateX(80px) rotate(1.5deg)", scale: "scale(0.85)", blur: "translateY(40px)" };
+  return <div ref={ref} style={{ opacity: v ? 1 : 0, transform: v ? "none" : m[from], transition: `all 0.9s cubic-bezier(.16,1,.3,1) ${delay}ms`, filter: from === "blur" && !v ? "blur(6px)" : "none", ...style }}>{children}</div>;
+}
+
+
+
+
+function CountingStat({ value, suffix, label, duration = 2000 }) {
+  const [cur, setCur] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => { const o = new IntersectionObserver(([e]) => { if (e.isIntersecting && !started) setStarted(true); }, { threshold: 0.4 }); if (ref.current) o.observe(ref.current); return () => o.disconnect(); }, [started]);
+  useEffect(() => {
+    if (!started) return;
+    const num = parseFloat(value); if (isNaN(num)) return;
+    const s = Date.now();
+    const tick = () => { const p = Math.min((Date.now() - s) / duration, 1); const eased = 1 - Math.pow(1 - p, 3); setCur(eased * num); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }, [started, value, duration]);
+
+  
+  const progress = cur / parseFloat(value);
+  const r = Math.round(255);
+  const g = Math.round(255 - progress * 200);
+  const b = Math.round(255 - progress * 240);
+  const color = `rgb(${r},${g},${b})`;
+  const glow = `0 0 ${20 + progress * 30}px rgba(239,68,68,${progress * 0.4})`;
+
+  return (
+    <div ref={ref} style={{ flex: "0 0 auto", textAlign: "center", padding: "16px 20px", minWidth: 120 }}>
+      <div style={{
+        fontSize: 38, fontWeight: 900, fontFamily: "'JetBrains Mono',monospace",
+        color, textShadow: glow,
+        transition: "text-shadow 0.3s",
+        lineHeight: 1.1,
+      }}>
+        {suffix === "%" ? Math.round(cur) : cur.toFixed(cur < 10 ? 1 : 0).replace(/\.0$/, "")}{suffix}
+      </div>
+      <div style={{ fontSize: 11, color: "#64748b", marginTop: 6, lineHeight: 1.3, maxWidth: 110, margin: "6px auto 0" }}>{label}</div>
+    </div>
+  );
+}
+
+
+
+
+function BodyModel3D({ fatPct = 25, height = 340 }) {
+  const mountRef = useRef(null);
+  const sRef = useRef({});
+  const fRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const dRef = useRef({ x: 0, ry: 0 });
+
+  useEffect(() => {
+    const el = mountRef.current; if (!el) return;
+    const w = el.clientWidth || 300;
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(32, w / height, 0.1, 100);
+    cam.position.set(0, 0.3, 7);
+    const ren = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    ren.setSize(w, height); ren.setPixelRatio(Math.min(devicePixelRatio, 2)); ren.setClearColor(0, 0);
+    el.appendChild(ren.domElement);
+
+    
+    scene.add(new THREE.AmbientLight(0x6677aa, 0.6));
+    const key = new THREE.DirectionalLight(0x22d3ee, 1.0); key.position.set(3, 4, 5); scene.add(key);
+    const fill = new THREE.DirectionalLight(0x10b981, 0.5); fill.position.set(-3, 1, 3); scene.add(fill);
+    const back = new THREE.DirectionalLight(0x8b5cf6, 0.3); back.position.set(0, 2, -4); scene.add(back);
+
+    const body = new THREE.Group();
+
+    
+    const fatScale = 1 + Math.max(0, fatPct - 15) * 0.015;
+    const musScale = 1 + Math.max(0, 30 - fatPct) * 0.01;
+
+    const matSkin = new THREE.MeshStandardMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.22, roughness: 0.3, metalness: 0.1, side: THREE.DoubleSide });
+    const matFat = new THREE.MeshStandardMaterial({ color: 0xef4444, transparent: true, opacity: 0.55, roughness: 0.6 });
+    const matMuscle = new THREE.MeshStandardMaterial({ color: 0x10b981, transparent: true, opacity: 0.5, roughness: 0.4, metalness: 0.15 });
+    const matBone = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, transparent: true, opacity: 0.8, roughness: 0.2, metalness: 0.3 });
+    const matVisc = new THREE.MeshStandardMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.45, roughness: 0.7 });
+
+    
+    const torsoGeo = new THREE.SphereGeometry(1, 32, 28);
+    torsoGeo.scale(0.65 * fatScale, 1.05, 0.45 * fatScale);
+    const torso = new THREE.Mesh(torsoGeo, matSkin);
+    torso.position.y = 0.3;
+    body.add(torso);
+
+    
+    const chestGeo = new THREE.SphereGeometry(0.55, 24, 20);
+    chestGeo.scale(0.8 * musScale, 0.6, 0.5);
+    const chest = new THREE.Mesh(chestGeo, matMuscle);
+    chest.position.y = 0.85;
+    body.add(chest);
+
+    
+    const fatGeo = new THREE.SphereGeometry(0.75 * fatScale, 28, 22);
+    fatGeo.scale(0.58, 0.8, 0.4);
+    const fatMesh = new THREE.Mesh(fatGeo, matFat);
+    fatMesh.position.y = 0.2;
+    body.add(fatMesh);
+
+    
+    const muscGeo = new THREE.SphereGeometry(0.45 * musScale, 24, 18);
+    muscGeo.scale(0.55, 0.85, 0.38);
+    const muscMesh = new THREE.Mesh(muscGeo, matMuscle);
+    muscMesh.position.y = 0.3;
+    body.add(muscMesh);
+
+    
+    if (fatPct > 22) {
+      const viscAmount = (fatPct - 22) / 23; 
+      const viscGeo = new THREE.SphereGeometry(0.2 + viscAmount * 0.2, 18, 14);
+      viscGeo.scale(1.3, 0.7, 1.1);
+      const viscMesh = new THREE.Mesh(viscGeo, matVisc);
+      viscMesh.position.y = 0.1;
+      body.add(viscMesh);
+    }
+
+    
+    for (let i = 0; i < 12; i++) {
+      const vertGeo = new THREE.SphereGeometry(0.06, 8, 6);
+      vertGeo.scale(1, 0.6, 0.8);
+      const vert = new THREE.Mesh(vertGeo, matBone);
+      vert.position.y = -0.3 + i * 0.2;
+      body.add(vert);
+    }
+
+    
+    const headGeo = new THREE.SphereGeometry(0.35, 28, 22);
+    headGeo.scale(0.85, 1, 0.85);
+    const head = new THREE.Mesh(headGeo, matSkin);
+    head.position.y = 1.85;
+    body.add(head);
+
+    
+    const neckGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.25, 12);
+    const neck = new THREE.Mesh(neckGeo, matSkin);
+    neck.position.y = 1.55;
+    body.add(neck);
+
+    
+    const pelGeo = new THREE.SphereGeometry(0.28, 14, 10);
+    pelGeo.scale(1.4, 0.5, 0.9);
+    const pelvis = new THREE.Mesh(pelGeo, matBone);
+    pelvis.position.y = -0.4;
+    body.add(pelvis);
+
+    
+    [-1, 1].forEach(side => {
+      
+      const uaGeo = new THREE.CylinderGeometry(0.1 * musScale, 0.09, 0.7, 12);
+      const ua = new THREE.Mesh(uaGeo, matMuscle);
+      ua.position.set(side * 0.72, 0.65, 0);
+      ua.rotation.z = side * 0.12;
+      body.add(ua);
+
+      
+      const faGeo = new THREE.CylinderGeometry(0.07, 0.06, 0.65, 10);
+      const fa = new THREE.Mesh(faGeo, matSkin);
+      fa.position.set(side * 0.78, 0.1, 0);
+      fa.rotation.z = side * 0.05;
+      body.add(fa);
+
+      
+      const shGeo = new THREE.SphereGeometry(0.13 * musScale, 12, 10);
+      const sh = new THREE.Mesh(shGeo, matMuscle);
+      sh.position.set(side * 0.68, 1.05, 0);
+      body.add(sh);
+    });
+
+    
+    [-1, 1].forEach(side => {
+      
+      const thGeo = new THREE.CylinderGeometry(0.17 * fatScale, 0.13, 0.9, 14);
+      const th = new THREE.Mesh(thGeo, fatPct > 25 ? matFat : matMuscle);
+      th.position.set(side * 0.25, -1.0, 0);
+      body.add(th);
+
+      
+      const shGeo = new THREE.CylinderGeometry(0.1, 0.08, 0.85, 12);
+      const sh = new THREE.Mesh(shGeo, matSkin);
+      sh.position.set(side * 0.25, -1.85, 0);
+      body.add(sh);
+
+      
+      const feGeo = new THREE.CylinderGeometry(0.035, 0.03, 0.8, 6);
+      const fe = new THREE.Mesh(feGeo, matBone);
+      fe.position.set(side * 0.25, -1.0, 0);
+      body.add(fe);
+
+      
+      const knGeo = new THREE.SphereGeometry(0.08, 10, 8);
+      const kn = new THREE.Mesh(knGeo, matBone);
+      kn.position.set(side * 0.25, -1.42, 0);
+      body.add(kn);
+    });
+
+    body.position.y = -0.2;
+    scene.add(body);
+
+    
+    const pgeo = new THREE.BufferGeometry();
+    const pp = new Float32Array(60 * 3);
+    for (let i = 0; i < 180; i++) pp[i] = (Math.random() - 0.5) * 8;
+    pgeo.setAttribute("position", new THREE.BufferAttribute(pp, 3));
+    const pts = new THREE.Points(pgeo, new THREE.PointsMaterial({ color: 0x22d3ee, size: 0.02, transparent: true, opacity: 0.3 }));
+    scene.add(pts);
+
+    sRef.current = { scene, cam, ren, body, pts, el };
+    let t = 0;
+    const anim = () => { fRef.current = requestAnimationFrame(anim); t += 0.014; body.rotation.y += 0.003; body.position.y = -0.2 + Math.sin(t * 0.7) * 0.04; pts.rotation.y -= 0.0008; ren.render(scene, cam); };
+    anim();
+    return () => { cancelAnimationFrame(fRef.current); if (el.contains(ren.domElement)) el.removeChild(ren.domElement); ren.dispose(); };
+  }, [fatPct, height]);
+
+  const dn = e => { setDragging(true); dRef.current = { x: e.clientX || e.touches?.[0]?.clientX || 0, ry: sRef.current.body?.rotation.y || 0 }; };
+  const mv = useCallback(e => { if (!dragging || !sRef.current.body) return; const x = e.clientX || e.touches?.[0]?.clientX || 0; sRef.current.body.rotation.y = dRef.current.ry + (x - dRef.current.x) * 0.01; }, [dragging]);
+  const up = () => setDragging(false);
+  useEffect(() => { addEventListener("pointermove", mv); addEventListener("pointerup", up); addEventListener("touchmove", mv); addEventListener("touchend", up); return () => { removeEventListener("pointermove", mv); removeEventListener("pointerup", up); removeEventListener("touchmove", mv); removeEventListener("touchend", up); }; }, [mv]);
+
+  return <div ref={mountRef} onPointerDown={dn} onTouchStart={dn} style={{ width: "100%", height, cursor: dragging ? "grabbing" : "grab", touchAction: "none", position: "relative" }}>
+    <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", fontSize: 11, color: "#334155", fontFamily: "mono", background: "#020617cc", padding: "3px 10px", borderRadius: 8, pointerEvents: "none", border: "1px solid #1e293b" }}>↔ покрутите 3D-модель пальцем</div>
+  </div>;
+}
+
+
+
+function BoneCrossSection({ density = 0.8, height = 280 }) {
+  const mountRef = useRef(null);
+  const dragRef = useRef({ active: false, x: 0, rotY: 0 });
+  const zoomRef = useRef({ dist: 0, scale: 1 });
+
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+    const w = el.clientWidth || 300;
+    const h = height;
+
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(32, w / h, 0.1, 100);
+    cam.position.set(0, 0, 9.5);
+    cam.lookAt(0, 0, 0);
+
+    const ren = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    ren.setSize(w, h);
+    ren.setPixelRatio(Math.min(devicePixelRatio, 2));
+    ren.setClearColor(0, 0);
+    ren.toneMapping = THREE.ACESFilmicToneMapping;
+    ren.toneMappingExposure = 1.1;
+    el.appendChild(ren.domElement);
+
+    scene.add(new THREE.AmbientLight(0xfff8f0, 0.6));
+    const key = new THREE.DirectionalLight(0xfff0dd, 1.4);
+    key.position.set(3, 5, 5); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xb0c4de, 0.5);
+    fill.position.set(-4, 1, 3); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0x22d3ee, 0.25);
+    rim.position.set(0, -4, -4); scene.add(rim);
+
+    const d = density;
+    const femur = new THREE.Group();
+
+    const healthyC = new THREE.Color(0.98, 0.95, 0.88);
+    const sickC = new THREE.Color(0.55, 0.42, 0.32);
+    const boneColor = healthyC.clone().lerp(sickC, 1 - d);
+
+    const boneMat = new THREE.MeshStandardMaterial({
+      color: boneColor, roughness: 0.45, metalness: 0.02,
+      transparent: true, opacity: 0.55 + d * 0.45, side: THREE.DoubleSide,
+    });
+    const solidMat = new THREE.MeshStandardMaterial({
+      color: boneColor, roughness: 0.4, metalness: 0.03,
+    });
+    const cortMat = new THREE.MeshStandardMaterial({
+      color: boneColor.clone().multiplyScalar(0.92),
+      roughness: 0.35, metalness: 0.02,
+      transparent: true, opacity: 0.3 + d * 0.35,
+    });
+
+    
+    const shaftCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -2.3, 0),
+      new THREE.Vector3(-0.04, -1.2, 0.03),
+      new THREE.Vector3(-0.07, 0, 0.05),
+      new THREE.Vector3(-0.04, 1.0, 0.03),
+      new THREE.Vector3(0, 1.7, 0),
+    ]);
+    femur.add(new THREE.Mesh(new THREE.TubeGeometry(shaftCurve, 48, 0.38, 20, false), boneMat));
+    femur.add(new THREE.Mesh(new THREE.TubeGeometry(shaftCurve, 48, 0.42, 20, false), cortMat));
+
+    
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.7, 18), solidMat);
+    neck.position.set(0.35, 1.9, 0); neck.rotation.z = -Math.PI / 3;
+    femur.add(neck);
+
+    
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.46, 28, 22), solidMat);
+    head.position.set(0.75, 2.3, 0);
+    femur.add(head);
+
+    
+    const cartMat = new THREE.MeshStandardMaterial({
+      color: 0xc8e0f0, transparent: true, opacity: 0.12 + d * 0.12, roughness: 0.15, metalness: 0.1,
+    });
+    const cart = new THREE.Mesh(new THREE.SphereGeometry(0.475, 22, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), cartMat);
+    cart.position.set(0.75, 2.3, 0); cart.rotation.x = -0.4;
+    femur.add(cart);
+
+    
+    const troch = new THREE.Mesh(new THREE.SphereGeometry(0.34, 18, 14), solidMat);
+    troch.position.set(-0.2, 1.85, 0); troch.scale.set(1.0, 1.4, 0.85);
+    femur.add(troch);
+
+    
+    const lt = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), solidMat);
+    lt.position.set(0.3, 1.35, 0.15);
+    femur.add(lt);
+
+    
+    const medC = new THREE.Mesh(new THREE.SphereGeometry(0.45, 22, 16), solidMat);
+    medC.position.set(0.22, -2.5, 0); medC.scale.set(0.85, 0.8, 1.1);
+    femur.add(medC);
+    const latC = new THREE.Mesh(new THREE.SphereGeometry(0.42, 22, 16), solidMat);
+    latC.position.set(-0.22, -2.5, 0); latC.scale.set(0.85, 0.8, 1.1);
+    femur.add(latC);
+    const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.5, 10), solidMat);
+    bridge.position.set(0, -2.5, 0); bridge.rotation.z = Math.PI / 2;
+    femur.add(bridge);
+
+    
+    const patel = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 12), cartMat.clone());
+    patel.position.set(0, -2.25, 0.35); patel.scale.set(1.3, 0.85, 0.5);
+    femur.add(patel);
+
+    
+    const lineaCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.04, -1.7, -0.35), new THREE.Vector3(-0.07, -0.5, -0.38),
+      new THREE.Vector3(-0.06, 0.5, -0.37), new THREE.Vector3(-0.02, 1.3, -0.3),
+    ]);
+    femur.add(new THREE.Mesh(new THREE.TubeGeometry(lineaCurve, 24, 0.05, 8, false), solidMat));
+
+    
+    if (d < 0.95) {
+      const trabMat = new THREE.MeshStandardMaterial({
+        color: boneColor.clone().multiplyScalar(0.7),
+        transparent: true, opacity: Math.max(0.05, d * 0.25),
+        roughness: 0.8, wireframe: true,
+      });
+      const trabGeo = new THREE.CylinderGeometry(0.25, 0.25, 3.5, 8, 12);
+      const trab = new THREE.Mesh(trabGeo, trabMat);
+      trab.position.y = -0.3;
+      femur.add(trab);
+    }
+
+    
+    if (d < 0.7) {
+      const severity = (0.7 - d) / 0.55;
+      const cavCount = Math.floor(severity * 30) + 5;
+      const cavMat = new THREE.MeshStandardMaterial({
+        color: 0x0c0c1e, roughness: 0.95, transparent: true, opacity: 0.5 + severity * 0.4,
+      });
+      for (let i = 0; i < cavCount; i++) {
+        const r = 0.03 + Math.random() * 0.08 * (1 + severity);
+        const cav = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), cavMat);
+        const t = 0.1 + Math.random() * 0.8;
+        const pt = shaftCurve.getPoint(t);
+        const ang = Math.random() * Math.PI * 2;
+        const depth = Math.random() * 0.25;
+        cav.position.set(pt.x + Math.cos(ang) * depth, pt.y, pt.z + Math.sin(ang) * depth);
+        femur.add(cav);
+      }
+      if (severity > 0.3) {
+        for (let i = 0; i < Math.floor(severity * 12); i++) {
+          const r2 = 0.02 + Math.random() * 0.06;
+          const nc = new THREE.Mesh(new THREE.SphereGeometry(r2, 6, 6), cavMat);
+          nc.position.set(0.2 + Math.random() * 0.4, 1.6 + Math.random() * 0.5, (Math.random() - 0.5) * 0.25);
+          femur.add(nc);
+        }
+      }
+      if (severity > 0.6) {
+        const crMat = new THREE.MeshStandardMaterial({ color: 0x1a0505, transparent: true, opacity: 0.4 });
+        for (let i = 0; i < 4; i++) {
+          const cr = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.3 + Math.random() * 0.3, 0.5), crMat);
+          cr.position.set(0, -1.5 + Math.random() * 3, 0);
+          cr.rotation.y = Math.random() * Math.PI; cr.rotation.z = (Math.random() - 0.5) * 0.3;
+          femur.add(cr);
+        }
+      }
+    }
+
+    
+    if (d > 0.7) {
+      const gc = d > 0.85 ? 0x10b981 : 0x22d3ee;
+      const gm = new THREE.MeshStandardMaterial({
+        color: gc, emissive: gc, emissiveIntensity: 0.15, transparent: true, opacity: 0.06,
+      });
+      femur.add(new THREE.Mesh(new THREE.TubeGeometry(shaftCurve, 24, 0.48, 16, false), gm));
+    }
+
+    femur.rotation.x = 0.05; femur.position.y = 0;
+    femur.scale.setScalar(0.82);
+    scene.add(femur);
+
+    let raf;
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      const t = Date.now() * 0.001;
+      if (!dragRef.current.active) femur.rotation.y += 0.004;
+      femur.position.y = Math.sin(t * 0.6) * 0.03;
+      const s = 0.82 * zoomRef.current.scale;
+      femur.scale.set(s, s, s);
+      ren.render(scene, cam);
+    };
+    animate();
+
+    const onDown = (e) => { dragRef.current.active = true; dragRef.current.x = (e.clientX || e.touches?.[0]?.clientX || 0); dragRef.current.rotY = femur.rotation.y; };
+    const onMove = (e) => { if (!dragRef.current.active) return; const cx = (e.clientX || e.touches?.[0]?.clientX || 0); femur.rotation.y = dragRef.current.rotY + (cx - dragRef.current.x) * 0.01; };
+    const onUp = () => { dragRef.current.active = false; };
+
+    
+    const getTouchDist = (e) => {
+      if (e.touches.length < 2) return 0;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    const onTouchStart = (e) => {
+      if (e.touches.length === 2) { zoomRef.current.dist = getTouchDist(e); e.preventDefault(); }
+    };
+    const onTouchMove2 = (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const newDist = getTouchDist(e);
+        if (zoomRef.current.dist > 0) {
+          const delta = newDist / zoomRef.current.dist;
+          zoomRef.current.scale = Math.max(0.5, Math.min(2.5, zoomRef.current.scale * delta));
+          zoomRef.current.dist = newDist;
+        }
+      }
+    };
+    
+    const onWheel = (e) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 0.92 : 1.08;
+      zoomRef.current.scale = Math.max(0.5, Math.min(2.5, zoomRef.current.scale * factor));
+    };
+
+    const cv = ren.domElement;
+    cv.addEventListener("pointerdown", onDown); cv.addEventListener("pointermove", onMove);
+    cv.addEventListener("pointerup", onUp); cv.addEventListener("pointerleave", onUp);
+    cv.addEventListener("touchstart", onTouchStart, { passive: false });
+    cv.addEventListener("touchmove", onTouchMove2, { passive: false });
+    cv.addEventListener("wheel", onWheel, { passive: false });
+    cv.style.touchAction = "none";
+
+    return () => {
+      cancelAnimationFrame(raf);
+      cv.removeEventListener("pointerdown", onDown); cv.removeEventListener("pointermove", onMove);
+      cv.removeEventListener("pointerup", onUp); cv.removeEventListener("pointerleave", onUp);
+      cv.removeEventListener("touchstart", onTouchStart);
+      cv.removeEventListener("touchmove", onTouchMove2);
+      cv.removeEventListener("wheel", onWheel);
+      ren.dispose(); el.removeChild(cv);
+    };
+  }, [density, height]);
+
+  return <div ref={mountRef} style={{ width: "100%", height, cursor: "grab" }} />;
+}
+
+
+
+
+
+function BodyCompare() {
+  const [pos, setPos] = useState(50);
+  const ref = useRef(null);
+  const onMove = e => { const r = ref.current?.getBoundingClientRect(); if (!r) return; setPos(Math.max(5, Math.min(95, ((e.clientX || e.touches?.[0]?.clientX || 0) - r.left) / r.width * 100))); };
+  return (
+    <div ref={ref} onPointerMove={onMove} onTouchMove={onMove} style={{ position: "relative", height: 200, borderRadius: 16, overflow: "hidden", cursor: "col-resize", touchAction: "none", userSelect: "none" }}>
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#1a0505,#2d0a0a)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6 }}>
+        <div style={{ fontSize: 40 }}>🔴</div>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "#ef4444", fontFamily: "mono" }}>38% жира</div>
+        <div style={{ fontSize: 12, color: "#fca5a5" }}>ИМТ 22 — «норма»</div>
+        <div style={{ fontSize: 11, color: "#7f1d1d" }}>Риск диабета ×2.4</div>
+      </div>
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#022c22,#064e3b)", clipPath: `inset(0 0 0 ${pos}%)`, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6 }}>
+        <div style={{ fontSize: 40 }}>🟢</div>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981", fontFamily: "mono" }}>18% жира</div>
+        <div style={{ fontSize: 12, color: "#6ee7b7" }}>Здоровый состав тела</div>
+        <div style={{ fontSize: 11, color: "#065f46" }}>Все показатели ОК</div>
+      </div>
+      <div style={{ position: "absolute", top: 0, bottom: 0, left: `${pos}%`, width: 3, background: "#fff", transform: "translateX(-50%)", boxShadow: "0 0 20px #fff8", zIndex: 2 }}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 32, height: 32, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#020617", fontWeight: 800, boxShadow: "0 0 20px #fff6" }}>↔</div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+const PROFILES = [
+  { id: "a", name: "Анна", age: 34, w: 62, h: 168, bmi: 22.0, fat: 36, muscle: 38, verdict: "Skinny Fat", vc: "#ef4444", icon: "👩", scale: "Весы: «62 кг — идеально!»", truth: "36% жира — скрытое ожирение. Мало мышц, висцеральный жир вокруг органов. Риск диабета повышен в 2 раза.", bmiL: "Норма ✓", bmiC: "#10b981", tip: "ИМТ 22 — «здорова». Но внутри — проблема, которую не видно." },
+  { id: "d", name: "Дмитрий", age: 28, w: 92, h: 180, bmi: 28.4, fat: 15, muscle: 72, verdict: "Атлет", vc: "#10b981", icon: "🧔", scale: "Весы: «92 кг — срочно худей!»", truth: "15% жира. 72 кг чистой мышечной массы. Здоровее 90% людей с «нормальным» ИМТ.", bmiL: "Избыток ✗", bmiC: "#ef4444", tip: "ИМТ 28.4 — врач назначил бы диету здоровому атлету." },
+  { id: "e", name: "Елена", age: 52, w: 68, h: 165, bmi: 25.0, fat: 28, muscle: 41, verdict: "Саркопения", vc: "#f59e0b", icon: "👩‍🦰", scale: "Весы: «68 кг — стабильно 10 лет!»", truth: "−4 кг мышц, +4 кг жира за 10 лет. Тот же вес — совершенно другое тело. Риск переломов ×3.", bmiL: "Норма ✓", bmiC: "#10b981", tip: "Стабильный вес — опаснейшая иллюзия здоровья после 40." },
+];
+const MYTHS = [
+  { myth: "«Слежу за весом = контролирую здоровье»", fact: "Вес не различает жир, мышцы, воду, кости. Можно терять мышцы и набирать жир при том же числе на весах.", stat: "40%", sub: "людей с нормальным весом имеют скрытый избыток жира", icon: "⚖️" },
+  { myth: "«Мой ИМТ в норме — я здоров»", fact: "Формуле почти 200 лет. Она создана для статистики населения и не различает 90 кг мышц и 90 кг жира.", stat: "1832", sub: "год создания формулы ИМТ", icon: "📊" },
+  { myth: "«Диета работает — вес уходит»", fact: "На жёстких диетах до половины потерянного веса — это мышцы. Метаболизм замедляется, вес возвращается.", stat: "50%", sub: "потерь на диете может быть мышцами", icon: "🥗" },
+  { myth: "«Умные весы показывают мой % жира»", fact: "Биоимпедансные весы ошибаются на ±8-15%. Результат зависит от выпитой воды, еды и времени суток.", stat: "±15%", sub: "погрешность домашних анализаторов", icon: "🔌" },
+  { myth: "«Остеопороз — это про бабушек»", fact: "Потеря костной массы начинается с 30 лет. К 50 годам каждая 3-я женщина и каждый 5-й мужчина в зоне риска.", stat: "30", sub: "лет — старт потери костной массы", icon: "🦴" },
+];
+const THREATS = [
+  { what: "Висцеральный жир", desc: "Жир вокруг печени, сердца, кишечника. Невидим снаружи. Предиктор №1 диабета и инфаркта.", tag: "Стройные снаружи — жирные внутри", icon: "🫁", c: "#ef4444" },
+  { what: "Саркопения", desc: "Потеря 1% мышц каждый год после 30. К 60 годам — минус 30%. Падения, переломы, инвалидность.", tag: "Вес стоит — мышцы тают незаметно", icon: "💪", c: "#f59e0b" },
+  { what: "Потеря костей", desc: "Падает бессимптомно десятилетиями. Первый и единственный признак — перелом.", tag: "Узнаёте когда уже поздно", icon: "🦴", c: "#8b5cf6" },
+  { what: "Асимметрия тела", desc: "Одна сторона сильнее другой → хронические боли, травмы, проблемы с осанкой.", tag: "Определить можно только измерением", icon: "⚖️", c: "#0891b2" },
+];
+
+
+function fatDesc(v) {
+  if (v < 10) return { label: "Соревновательный атлет", color: "#22d3ee", detail: "Экстремально низкий жир. Видны все мышцы и вены. Не поддерживается долго." };
+  if (v < 15) return { label: "Спортивная форма", color: "#10b981", detail: "Рельефный пресс, чёткие мышцы. Уровень профессиональных спортсменов." };
+  if (v < 20) return { label: "Здоровая норма (муж)", color: "#10b981", detail: "Оптимальный уровень для мужчин. Хорошее здоровье и энергия." };
+  if (v < 25) return { label: "Здоровая норма (жен)", color: "#22d3ee", detail: "Оптимальный уровень для женщин. Нормальный гормональный фон." };
+  if (v < 30) return { label: "Повышенный жир", color: "#f59e0b", detail: "Начало скрытых рисков. Висцеральный жир вокруг органов растёт." };
+  if (v < 35) return { label: "Ожирение I степени", color: "#ef4444", detail: "Высокий риск диабета, гипертонии, сердечно-сосудистых заболеваний." };
+  return { label: "Ожирение II-III ст.", color: "#dc2626", detail: "Серьёзная угроза здоровью. Множественные метаболические нарушения." };
+}
+function boneDesc(v) {
+  if (v < 40) return { label: "Тяжёлый остеопороз", color: "#dc2626", detail: "T-score < −3.5. Множественные переломы. Кость крайне хрупкая." };
+  if (v < 55) return { label: "Остеопороз", color: "#ef4444", detail: "T-score < −2.5. Высокий риск переломов при минимальной нагрузке." };
+  if (v < 75) return { label: "Остеопения", color: "#f59e0b", detail: "T-score от −1 до −2.5. Пред-стадия остеопороза. Обратима!" };
+  return { label: "Норма", color: "#10b981", detail: "T-score > −1. Кость плотная и крепкая. Низкий риск переломов." };
+}
+
+
+
+
+export default function LandingPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [revealed, setRevealed] = useState({});
+  const [myth, setMyth] = useState(null);
+  const [quiz, setQuiz] = useState(null);
+  const [quizDone, setQuizDone] = useState(false);
+  const [fat, setFat] = useState(25);
+  const [bone, setBone] = useState(80);
+
+  const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
+  const fd = fatDesc(fat);
+  const bd = boneDesc(bone);
+
+  if (loading) return <Splash onDone={() => setLoading(false)} />;
+
+  return (
+    <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
+      <Particles />
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
+
+        {}
+        <div style={{ textAlign: "center", paddingTop: 48, paddingBottom: 28 }}>
+          <Reveal from="scale" delay={200}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 50, background: "#ef444412", border: "1px solid #ef444430", marginBottom: 20 }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", animation: "pulse2 1.5s ease infinite" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#f87171", fontFamily: "mono" }}>ВАЖНО ЗНАТЬ</span>
+            </div>
+          </Reveal>
+          <Reveal from="blur" delay={500}>
+            <h1 style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.1, margin: "0 0 16px" }}>
+              <span style={{ color: "#64748b" }}>Ваши весы<br /></span>
+              <Typewriter text="скрывают правду" delay={800} speed={60} style={{ background: "linear-gradient(135deg,#ef4444,#f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }} />
+            </h1>
+          </Reveal>
+          <Reveal from="bottom" delay={1800}><p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.65, maxWidth: 360, margin: "0 auto" }}>Одинаковый вес — совершенно разное здоровье.</p></Reveal>
+          <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "mono", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
+        </div>
+
+        {}
+        <Reveal from="scale" delay={100}>
+          <div style={{ marginBottom: 28, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden" }}>
+            <div style={{ fontSize: 10, color: "#475569", fontFamily: "mono", letterSpacing: "0.12em", padding: "12px 16px 0", textAlign: "center" }}>РОССИЯ — ПРЯМО СЕЙЧАС</div>
+            <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
+              <CountingStat value="14" suffix=" млн" label="больны остеопорозом" duration={2200} />
+              <CountingStat value="20" suffix=" млн" label="остеопения" duration={2500} />
+              <CountingStat value="40" suffix="%" label="скрытый избыток жира" duration={2800} />
+            </div>
+            <div style={{ textAlign: "center", paddingBottom: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "mono" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
+            </div>
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="left" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 6 }}>СРАВНЕНИЕ</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес — два разных тела</h2>
+            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 10px" }}>Проведите пальцем по разделителю</p>
+            <BodyCompare />
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="right" delay={100}>
+          <div style={{ ...card, marginBottom: 28 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+              <div><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 4 }}>ИНТЕРАКТИВНАЯ 3D-МОДЕЛЬ</div><h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Анатомия состава тела</h2></div>
+            </div>
+            <BodyModel3D fatPct={fat} height={340} />
+
+            {}
+            <div style={{ padding: "12px 16px", borderRadius: 14, background: fd.color + "12", border: `1px solid ${fd.color}33`, marginBottom: 12, transition: "all 0.4s" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: fd.color }}>{fd.label}</span>
+                <span style={{ fontSize: 24, fontWeight: 900, color: fd.color, fontFamily: "mono" }}>{fat}%</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{fd.detail}</div>
+            </div>
+
+            {}
+            <div style={{ padding: "0 4px" }}>
+              <input type="range" min={6} max={45} value={fat} onChange={e => setFat(+e.target.value)} style={{ width: "100%", accentColor: fd.color, height: 6, cursor: "pointer" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#334155", fontFamily: "mono", marginTop: 2 }}>
+                <span>6%</span><span>15%</span><span>25%</span><span>35%</span><span>45%</span>
+              </div>
+            </div>
+
+            {}
+            <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+              {[{ c: "#22d3ee", l: "Кожа" }, { c: "#ef4444", l: "Жир" }, { c: "#10b981", l: "Мышцы" }, { c: "#f1f5f9", l: "Кости" }, ...(fat > 22 ? [{ c: "#fbbf24", l: "Висцеральный жир" }] : [])].map((x, i) => <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#64748b" }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: x.c, border: "1px solid #33415566" }} />{x.l}</div>)}
+            </div>
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="left"><div style={{ marginBottom: 18 }}><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 6 }}>ЭКСПЕРИМЕНТ</div><h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Три человека. «Здоровый» ИМТ.</h2></div></Reveal>
+        {PROFILES.map((p, i) => {
+          const rv = revealed[p.id];
+          return (
+            <Reveal key={p.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
+              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                  <div style={{ width: 50, height: 50, borderRadius: 14, background: "#020617", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, border: "1px solid #1e293b" }}>{p.icon}</div>
+                  <div style={{ flex: 1 }}><div style={{ fontWeight: 700, fontSize: 15 }}>{p.name}, {p.age}</div><div style={{ fontSize: 12, color: "#64748b" }}>{p.h} см · {p.w} кг</div></div>
+                  <div style={{ padding: "4px 10px", borderRadius: 8, background: p.bmiC + "22", color: p.bmiC, fontSize: 11, fontWeight: 700, fontFamily: "mono" }}>ИМТ {p.bmi}</div>
+                </div>
+                <div style={{ padding: "8px 14px", borderRadius: 10, background: "#020617", marginBottom: 12, fontSize: 13, color: "#64748b" }}>{p.scale}</div>
+                {!rv ? <div style={{ textAlign: "center", padding: 12, background: "#ef444408", borderRadius: 12, border: "1px dashed #ef444425" }}><span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 600 }}>👆 Нажмите — увидьте правду</span></div> : (
+                  <div style={{ animation: "fadeSlide 0.6s ease" }}>
+                    <div style={{ display: "flex", height: 26, borderRadius: 8, overflow: "hidden", background: "#1e293b", marginBottom: 10 }}>
+                      <div style={{ width: `${p.fat}%`, background: "linear-gradient(90deg,#ef4444,#f87171)", transition: "width 1s ease", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "mono" }}>{p.fat}%</div>
+                      <div style={{ width: `${p.muscle}%`, background: "linear-gradient(90deg,#10b981,#34d399)", transition: "width 1s ease .1s", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "mono" }}>{p.muscle}%</div>
+                      <div style={{ flex: 1, background: "#3b82f6" }} />
+                    </div>
+                    <div style={{ padding: "12px 14px", borderRadius: 12, background: p.vc + "10", border: `1px solid ${p.vc}30` }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: p.vc, marginBottom: 4 }}>Реальность: {p.verdict}</div>
+                      <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{p.truth}</div>
+                    </div>
+                    <div style={{ marginTop: 6, padding: "6px 12px", borderRadius: 8, background: "#0f172a", fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>💡 {p.tip}</div>
+                  </div>
+                )}
+              </div>
+            </Reveal>
+          );
+        })}
+
+        {}
+        <Reveal from="right" delay={100}>
+          <div style={{ ...card, marginTop: 14, marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#8b5cf6", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 4 }}>3D-МОДЕЛЬ БЕДРЕННОЙ КОСТИ</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 2px" }}>Остеопороз изнутри</h2>
+            <p style={{ fontSize: 12, color: "#475569", margin: "0 0 8px" }}>Крутите пальцем · Щипком приближайте</p>
+
+            <BoneCrossSection density={bone / 100} height={280} />
+
+            {}
+            <div style={{ padding: "12px 16px", borderRadius: 14, background: bd.color + "12", border: `1px solid ${bd.color}33`, marginBottom: 12, transition: "all 0.4s" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: bd.color }}>{bd.label}</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: bd.color, fontFamily: "mono" }}>{bone}%</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{bd.detail}</div>
+            </div>
+
+            <input type="range" min={15} max={100} value={bone} onChange={e => setBone(+e.target.value)} style={{ width: "100%", accentColor: bd.color, height: 6, cursor: "pointer" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: "mono", marginTop: 2 }}>
+              <span style={{ color: "#dc2626" }}>Тяжёлый</span><span style={{ color: "#ef4444" }}>Остеопороз</span><span style={{ color: "#f59e0b" }}>Остеопения</span><span style={{ color: "#10b981" }}>Норма</span>
+            </div>
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="left">
+          <div style={{ ...card, background: "linear-gradient(135deg,#1e1b4b12,#4c1d9512)", border: "1px solid #7c3aed30", marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#a78bfa", fontFamily: "mono", marginBottom: 8, letterSpacing: "0.1em" }}>КВИЗ</div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 14px" }}>Два человека по 80 кг. У кого выше риск инфаркта?</h3>
+            {[{ id: "a", t: "У того, кто выглядит полнее", ok: false }, { id: "b", t: "У того, у кого больше висцерального жира — даже если стройнее", ok: true }, { id: "c", t: "Риск одинаков — вес же одинаковый", ok: false }].map(o => {
+              const s = quiz === o.id, g = quizDone && o.ok, b = quizDone && s && !o.ok;
+              return <button key={o.id} onClick={() => { if (!quizDone) { setQuiz(o.id); setTimeout(() => setQuizDone(true), 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b && "✗ "}{o.t}</button>;
+            })}
+            {quizDone && <div style={{ padding: 14, borderRadius: 12, background: "#10b98110", border: "1px solid #10b98130", animation: "fadeSlide 0.6s ease", marginTop: 6, fontSize: 13, color: "#cbd5e1", lineHeight: 1.7 }}><b style={{ color: "#10b981" }}>Висцеральный жир</b> невидим снаружи, но является предиктором №1 болезней сердца и диабета. <b>Единственный способ измерить точно — DXA-сканирование.</b></div>}
+          </div>
+        </Reveal>
+
+        {}
+        <Reveal from="bottom"><div style={{ marginBottom: 14 }}><div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 6 }}>МИФЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>5 опасных заблуждений</h2></div></Reveal>
+        {MYTHS.map((m, i) => {
+          const op = myth === i;
+          return (
+            <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
+              <div onClick={() => setMyth(op ? null : i)} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <span style={{ fontSize: 24, transition: "transform 0.3s", transform: op ? "scale(1.25) rotate(-8deg)" : "none" }}>{m.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#f87171", textDecoration: op ? "line-through" : "none", transition: "all 0.3s" }}>{m.myth}</div>
+                    {op && <div style={{ animation: "fadeSlide 0.5s ease" }}><div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.7, marginTop: 8, marginBottom: 12 }}>{m.fact}</div><div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "#f59e0b0a", border: "1px solid #f59e0b1a" }}><span style={{ fontSize: 26, fontWeight: 800, color: "#f59e0b", fontFamily: "mono" }}>{m.stat}</span><span style={{ fontSize: 11, color: "#94a3b8" }}>{m.sub}</span></div></div>}
+                  </div>
+                  <span style={{ fontSize: 16, color: "#334155", transform: op ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▾</span>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
+
+        {}
+        <Reveal from="bottom" delay={80}><div style={{ marginTop: 18, marginBottom: 14 }}><div style={{ fontSize: 11, color: "#ef4444", fontFamily: "mono", letterSpacing: "0.1em", marginBottom: 6 }}>НЕВИДИМЫЕ УГРОЗЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Чего не покажут весы и зеркало</h2></div></Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 28 }}>
+          {THREATS.map((t, i) => (
+            <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
+              <div style={{ ...card, padding: 14, borderColor: t.c + "1a", transition: "transform 0.3s, box-shadow 0.3s" }} onMouseOver={e => { e.currentTarget.style.transform = "translateY(-4px) scale(1.02)"; e.currentTarget.style.boxShadow = `0 10px 30px ${t.c}15`; }} onMouseOut={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: t.c, marginBottom: 4 }}>{t.what}</div>
+                <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.55, marginBottom: 8 }}>{t.desc}</div>
+                <div style={{ fontSize: 10, color: t.c, padding: "5px 8px", borderRadius: 6, background: t.c + "0a", lineHeight: 1.4 }}>⚡ {t.tag}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {}
+        <Reveal from="bottom">
+          <div style={{ borderRadius: 22, padding: 32, textAlign: "center", background: "linear-gradient(135deg,#0891b210,#10b98110)", border: "1px solid #22d3ee1a", marginBottom: 24 }}>
+            <div style={{ fontSize: 44, marginBottom: 14, animation: "float 3s ease-in-out infinite" }}>◎</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Узнайте свои реальные цифры</h2>
+            <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.55, margin: "0 0 22px" }}>Бесплатный расчёт за 3 минуты — или точный DXA-анализ</p>
+            {[{ label: "Рассчитать состав тела →", bg: "linear-gradient(135deg,#0891b2,#22d3ee)", s: "#22d3ee", href: "/analyzer", ext: false }, { label: "Записаться на DXA", bg: "linear-gradient(135deg,#10b981,#34d399)", s: "#10b981", href: "/clinics", ext: false }].map((b, i) => (
+              <button key={i} onClick={() => b.ext ? window.open(b.href, "_blank") : navigate(b.href)} style={{ display: "block", width: "100%", padding: 15, marginBottom: 8, border: "none", borderRadius: 14, background: b.bg, color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "mono", boxShadow: `0 0 20px ${b.s}20`, transition: "transform 0.2s, box-shadow 0.2s" }} onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = `0 6px 30px ${b.s}30`; }} onMouseOut={e => { e.target.style.transform = "none"; e.target.style.boxShadow = `0 0 20px ${b.s}20`; }}>{b.label}</button>
+            ))}
+            <p style={{ fontSize: 11, color: "#334155", marginTop: 10 }}>DXA — золотой стандарт точности · 5 минут · Минимальное облучение</p>
+          </div>
+        </Reveal>
+
+        <div style={{ textAlign: "center", padding: "14px 0", borderTop: "1px solid #1e293b" }}><p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p></div>
+      </div>
+    </div>
+  );
+}
+
+================================================================================
+FILE: vite.config.js
+================================================================================
+
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ["three"],
+          router: ["react-router-dom"],
+        },
+      },
+    },
+  },
+});
+

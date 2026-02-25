@@ -64,4 +64,3 @@ npm run preview    # Превью сборки
 - `/src/pages/LandingPage.jsx` — CTA кнопка «Записаться на DXA» (ссылка на WhatsApp/телефон)
 - `/public/manifest.json` — URL сайта
 - `/public/robots.txt` — URL sitemap
-# bodycomp-app
