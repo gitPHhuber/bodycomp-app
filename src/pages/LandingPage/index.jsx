@@ -49,6 +49,22 @@ export default function LandingPage() {
             </h1>
           </Reveal>
           <Reveal from="bottom" delay={1800}><p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.65, maxWidth: 360, margin: "0 auto" }}>Одинаковый вес — совершенно разное здоровье.</p></Reveal>
+          <Reveal from="bottom" delay={2200}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
+              <button onClick={() => navigate("/analyzer")}
+                style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20", transition: "transform 0.2s" }}
+                onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
+                onMouseOut={e => e.target.style.transform = "none"}>
+                Рассчитать состав тела →
+              </button>
+              <button onClick={() => navigate("/xray")}
+                style={{ padding: 12, border: "1px solid #334155", borderRadius: 14, background: "transparent", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
+                onMouseOver={e => { e.target.style.borderColor = "#22d3ee"; e.target.style.color = "#22d3ee"; }}
+                onMouseOut={e => { e.target.style.borderColor = "#334155"; e.target.style.color = "#94a3b8"; }}>
+                Как работает DXA-сканер
+              </button>
+            </div>
+          </Reveal>
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
