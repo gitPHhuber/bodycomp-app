@@ -440,7 +440,7 @@ export default function AnalyzerPage() {
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{Icons.calendar(18, "#020617")} Записаться на DXA</span>
               </button>
               <p style={{ fontSize: 11, color: "#64748b", textAlign: "center", marginTop: 8 }}>
-                Или позвоните: +7 (XXX) XXX-XX-XX
+                Или напишите нам в <a href="https://t.me/asvomed" target="_blank" rel="noopener" style={{ color: "#22d3ee", textDecoration: "underline" }}>Telegram</a>
               </p>
             </div>
           )}
