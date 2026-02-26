@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./keyframes";
 import Reveal from "../../components/Reveal";
-import Splash from "./Splash";
 import Particles from "./Particles";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
@@ -13,7 +12,6 @@ import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState({});
   const [myth, setMyth] = useState(null);
   const [quiz, setQuiz] = useState(null);
@@ -25,8 +23,6 @@ export default function LandingPage() {
   const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
   const fd = fatDesc(fat);
   const bd = boneDesc(bone);
-
-  if (loading) return <Splash onDone={() => setLoading(false)} />;
 
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
