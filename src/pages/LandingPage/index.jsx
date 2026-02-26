@@ -1,15 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import "./keyframes";
 import Reveal from "../../components/Reveal";
 import Particles from "./Particles";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
-import BodyModel3D from "./BodyModel3D";
-import BoneCrossSection from "./BoneCrossSection";
-import BodyCompare from "./BodyCompare";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 import { useMeta } from "../../utils/useMeta";
+
+const BodyModel3D = lazy(() => import("./BodyModel3D"));
+const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
+const BodyCompare = lazy(() => import("./BodyCompare"));
 
 export default function LandingPage() {
   useMeta(
@@ -25,6 +26,7 @@ export default function LandingPage() {
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
 
+  const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
   const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
   const fd = fatDesc(fat);
   const bd = boneDesc(bone);
@@ -89,7 +91,7 @@ export default function LandingPage() {
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-СКАНЕР</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес. Два разных тела.</h2>
             <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Выберите человека и запустите сканирование</p>
-            <BodyCompare />
+            <Suspense fallback={loader3d}><BodyCompare /></Suspense>
           </div>
         </Reveal>
 
@@ -102,7 +104,7 @@ export default function LandingPage() {
                 <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Анатомия состава тела</h2>
               </div>
             </div>
-            <BodyModel3D fatPct={fat} height={340} />
+            <Suspense fallback={loader3d}><BodyModel3D fatPct={fat} height={340} /></Suspense>
             <div style={{ padding: "12px 16px", borderRadius: 14, background: fd.color + "12", border: `1px solid ${fd.color}33`, marginBottom: 12, transition: "all 0.4s" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: fd.color }}>{fd.label}</span>
@@ -206,7 +208,7 @@ export default function LandingPage() {
               <div style={{ animation: "fadeSlide 0.5s ease", marginTop: 2 }}>
                 <div style={{ ...card, marginTop: 0, borderTop: "none", borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
                   <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 8px", textAlign: "center" }}>Крутите пальцем · Щипком приближайте · Слайдер меняет плотность</p>
-                  <BoneCrossSection density={bone / 100} height={280} />
+                  <Suspense fallback={loader3d}><BoneCrossSection density={bone / 100} height={280} /></Suspense>
                   <div style={{ padding: "12px 16px", borderRadius: 14, background: bd.color + "12", border: `1px solid ${bd.color}33`, marginBottom: 12, transition: "all 0.4s" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: bd.color }}>{bd.label}</span>
