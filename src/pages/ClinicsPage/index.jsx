@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Reveal from "../../components/Reveal";
+import { useMeta } from "../../utils/useMeta";
 
 const CITIES = ["Москва", "Санкт-Петербург", "Сочи", "Краснодар", "Другой"];
 
@@ -29,6 +30,10 @@ const inputStyle = {
 };
 
 export default function ClinicsPage() {
+  useMeta(
+    "Запись на DXA-сканирование тела — найти клинику",
+    "Запишитесь на точный DXA-анализ состава тела. Stratos dR — золотой стандарт. Процент жира, мышцы, кости за 5 минут."
+  );
   const [form, setForm] = useState({ name: "", phone: "", city: "Москва", comment: "" });
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error

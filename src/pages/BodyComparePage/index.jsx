@@ -3,8 +3,13 @@ import { XRAY_DATA, BODY_PATHS, SKELETON, MUSCLES, VISCERAL_BLOBS, ANNOTATIONS, 
 import { CSS_KEYFRAMES } from "./keyframes";
 import { useCountUp } from "./useCountUp";
 import { statColor, isDanger, annotColor } from "./colorHelpers";
+import { useMeta } from "../../utils/useMeta";
 
 export default function BodyComparePage() {
+  useMeta(
+    "Рентген состава тела — сравните двух людей с одинаковым весом",
+    "Интерактивный DXA-сканер: посмотрите, как одинаковый вес скрывает совершенно разное здоровье. Skinny fat vs атлет."
+  );
   /* ─── State ─── */
   const [personIdx, setPersonIdx] = useState(0);
   const [scanning, setScanning] = useState(false);
