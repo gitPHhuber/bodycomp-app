@@ -7,8 +7,13 @@ import Gauge from "./Gauge";
 import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
+import { useMeta } from "../../utils/useMeta";
 
 export default function AnalyzerPage() {
+  useMeta(
+    "Калькулятор состава тела онлайн — процент жира, мышцы, метаболизм",
+    "Бесплатный расчёт состава тела за 3 минуты. Процент жира по формуле Navy, ИМТ, FFMI, базовый метаболизм, висцеральный риск."
+  );
   const navigate = useNavigate();
   const [step, setStep] = useState(0); // 0=intro, 1=gender, 2=basics, 3=measurements, 4=results
   const [gender, setGender] = useState("");

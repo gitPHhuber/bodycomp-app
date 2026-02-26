@@ -9,8 +9,13 @@ import BodyModel3D from "./BodyModel3D";
 import BoneCrossSection from "./BoneCrossSection";
 import BodyCompare from "./BodyCompare";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
+import { useMeta } from "../../utils/useMeta";
 
 export default function LandingPage() {
+  useMeta(
+    "Состав тела — узнайте, что скрывают ваши весы | DXA-анализ",
+    "Ваш вес не показывает правду. Узнайте реальный процент жира, мышечную массу и риски. Бесплатный расчёт или точный DXA-анализ."
+  );
   const navigate = useNavigate();
   const [revealed, setRevealed] = useState({});
   const [myth, setMyth] = useState(null);
