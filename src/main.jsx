@@ -3,10 +3,10 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import LandingPage from "./pages/LandingPage.jsx";
-import AnalyzerPage from "./pages/AnalyzerPage.jsx";
-import ClinicsPage from "./pages/ClinicsPage.jsx";
-import BodyComparePage from "./pages/BodyComparePage.jsx";
+import LandingPage from "./pages/LandingPage";
+import AnalyzerPage from "./pages/AnalyzerPage";
+import ClinicsPage from "./pages/ClinicsPage";
+import BodyComparePage from "./pages/BodyComparePage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
