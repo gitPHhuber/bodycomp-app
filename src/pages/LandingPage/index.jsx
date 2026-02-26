@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import "./keyframes";
 import Reveal from "../../components/Reveal";
-import Particles from "./Particles";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 import { useMeta } from "../../utils/useMeta";
 
+const Particles = lazy(() => import("./Particles"));
 const BodyModel3D = lazy(() => import("./BodyModel3D"));
 const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
 const BodyCompare = lazy(() => import("./BodyCompare"));
@@ -33,7 +33,7 @@ export default function LandingPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
-      <Particles />
+      <Suspense fallback={null}><Particles /></Suspense>
       <div style={{ position: "relative", zIndex: 1, maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
 
         {}
