@@ -25,8 +25,14 @@ export default function LandingPage() {
   const [fat, setFat] = useState(25);
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
+  const [openFact, setOpenFact] = useState(null);
+  const [openAge, setOpenAge] = useState(null);
 
-  const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
+  const handleKeyActivate = (callback) => (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); callback(e); }
+  };
+
+  const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#64748b", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
   const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
   const fd = fatDesc(fat);
   const bd = boneDesc(bone);
@@ -67,7 +73,7 @@ export default function LandingPage() {
               </button>
             </div>
           </Reveal>
-          <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
+          <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#64748b", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#64748b" }}>↓</div></div></Reveal>
         </div>
 
         {}
@@ -114,7 +120,7 @@ export default function LandingPage() {
             </div>
             <div style={{ padding: "0 4px" }}>
               <input type="range" min={6} max={45} value={fat} onChange={e => setFat(+e.target.value)} style={{ width: "100%", accentColor: fd.color, height: 6, cursor: "pointer" }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>
                 <span>6%</span><span>15%</span><span>25%</span><span>35%</span><span>45%</span>
               </div>
             </div>
@@ -134,7 +140,7 @@ export default function LandingPage() {
           const rv = revealed[p.id];
           return (
             <Reveal key={p.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
-              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))}>
+              <div role="button" tabIndex={0} aria-label={`${p.name}, ${p.age}. ${rv ? "Данные раскрыты" : "Нажмите чтобы увидеть правду"}`} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))} onKeyDown={handleKeyActivate(() => setRevealed(r => ({ ...r, [p.id]: true })))} style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
                   <div style={{ width: 50, height: 50, borderRadius: 14, background: "#020617", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, border: "1px solid #1e293b" }}>{p.icon}</div>
                   <div style={{ flex: 1 }}><div style={{ fontWeight: 700, fontSize: 15 }}>{p.name}, {p.age}</div><div style={{ fontSize: 12, color: "#64748b" }}>{p.h} см · {p.w} кг</div></div>
@@ -165,7 +171,7 @@ export default function LandingPage() {
         {}
         <Reveal from="right" delay={100}>
           <div style={{ marginTop: 14, marginBottom: 28 }}>
-            <div onClick={() => setBoneOpen(o => !o)} style={{ ...card, cursor: "pointer", borderColor: boneOpen ? "#8b5cf655" : "#ef444440", background: boneOpen ? "linear-gradient(135deg,#0f172a,#1e293b)" : "linear-gradient(135deg,#1a0a0a,#1e293b)", boxShadow: boneOpen ? "0 0 40px #8b5cf610" : "0 0 30px #ef444408", transition: "all 0.5s ease", position: "relative", overflow: "hidden" }}>
+            <div role="button" tabIndex={0} aria-expanded={boneOpen} aria-label={boneOpen ? "Скрыть 3D-модель кости" : "Показать 3D-модель кости"} onClick={() => setBoneOpen(o => !o)} onKeyDown={handleKeyActivate(() => setBoneOpen(o => !o))} style={{ ...card, cursor: "pointer", borderColor: boneOpen ? "#8b5cf655" : "#ef444440", background: boneOpen ? "linear-gradient(135deg,#0f172a,#1e293b)" : "linear-gradient(135deg,#1a0a0a,#1e293b)", boxShadow: boneOpen ? "0 0 40px #8b5cf610" : "0 0 30px #ef444408", transition: "all 0.5s ease", position: "relative", overflow: "hidden" }}>
               {!boneOpen && <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, #ef444415, transparent 70%)", animation: "pulse2 3s ease-in-out infinite" }} />}
               <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: boneOpen ? "#8b5cf610" : "#ef444412", border: `1px solid ${boneOpen ? "#8b5cf633" : "#ef444425"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.4s" }}>
@@ -227,7 +233,7 @@ export default function LandingPage() {
                     { title: "Перелом без причины", text: "При остеопорозе кость ломается от чиха, наклона, ступеньки.", extra: "2 из 3 переломов позвонков остаются незамеченными. Смертность после перелома бедра — до 20% в первый год.", bar: 66, color: "#ef4444", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L12 8L9 11L15 13L12 16L12 22" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="10" stroke="#ef4444" strokeWidth="1" opacity="0.2" strokeDasharray="3 3"/></svg> },
                     { title: "DXA видит невидимое", text: "Обычный рентген покажет проблему, когда потеряно 30%+ массы.", extra: "DXA ловит потерю от 1–2%. Разница в раннем обнаружении — 10 лет. 5 минут сканирования, доза облучения меньше чем от смартфона за день.", bar: 98, color: "#10b981", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#10b981" strokeWidth="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/><circle cx="11" cy="11" r="3" stroke="#10b981" strokeWidth="1" opacity="0.4"/><circle cx="11" cy="11" r="1" fill="#10b981" opacity="0.6"/></svg> },
                   ].map((f, i) => (
-                    <div key={i} onClick={(e) => { e.stopPropagation(); const det = e.currentTarget.querySelector(".fact-extra"); if (det) det.style.display = det.style.display === "none" ? "block" : "none"; }}
+                    <div key={i} role="button" tabIndex={0} aria-expanded={openFact === i} aria-label={f.title} onClick={(e) => { e.stopPropagation(); setOpenFact(openFact === i ? null : i); }} onKeyDown={handleKeyActivate((e) => { e.stopPropagation(); setOpenFact(openFact === i ? null : i); })}
                       style={{ padding: 14, borderRadius: 14, background: f.color + "06", border: `1px solid ${f.color}15`, marginBottom: 10, cursor: "pointer", animation: `fadeSlide 0.5s ease ${i * 0.15}s both`, transition: "all 0.3s" }}
                       onMouseOver={e => { e.currentTarget.style.borderColor = f.color + "44"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                       onMouseOut={e => { e.currentTarget.style.borderColor = f.color + "15"; e.currentTarget.style.transform = "none"; }}>
@@ -237,9 +243,9 @@ export default function LandingPage() {
                           <span style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{f.title}</span>
                           <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5, marginTop: 2 }}>{f.text}</div>
                         </div>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0, opacity: 0.4 }}><path d="M3 4.5L6 7.5L9 4.5" stroke={f.color} strokeWidth="1.5" strokeLinecap="round"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0, opacity: 0.4, transition: "transform 0.3s", transform: openFact === i ? "rotate(180deg)" : "none" }}><path d="M3 4.5L6 7.5L9 4.5" stroke={f.color} strokeWidth="1.5" strokeLinecap="round"/></svg>
                       </div>
-                      <div className="fact-extra" style={{ display: "none", animation: "fadeSlide 0.3s ease", marginTop: 8, padding: "10px 12px", borderRadius: 10, background: f.color + "08", border: `1px solid ${f.color}12`, fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{f.extra}</div>
+                      {openFact === i && <div style={{ animation: "fadeSlide 0.3s ease", marginTop: 8, padding: "10px 12px", borderRadius: 10, background: f.color + "08", border: `1px solid ${f.color}12`, fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{f.extra}</div>}
                       <div style={{ height: 4, borderRadius: 2, background: "#1e293b", overflow: "hidden", marginTop: 8 }}>
                         <div style={{ width: `${f.bar}%`, height: "100%", borderRadius: 2, background: `linear-gradient(90deg, ${f.color}88, ${f.color})`, transition: "width 1.5s ease" }} />
                       </div>
@@ -252,13 +258,13 @@ export default function LandingPage() {
                     <div style={{ fontSize: 11, color: "#64748b", marginBottom: 12 }}>Нажмите свой возраст</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {[{ age: "20–30", risk: "Низкий", desc: "Пик массы. Время инвестировать в кости.", c: "#10b981" }, { age: "30–45", risk: "Начало потерь", desc: "Потеря 0.5–1% в год уже идёт. Пора проверить.", c: "#22d3ee" }, { age: "45–55", risk: "Повышенный", desc: "Менопауза ускоряет потерю до 3% в год.", c: "#f59e0b" }, { age: "55+", risk: "Высокий", desc: "Каждые 5 мин — перелом бедра в России.", c: "#ef4444" }].map((a, i) => (
-                        <div key={i} onClick={(e) => { e.stopPropagation(); const detail = e.currentTarget.querySelector(".age-detail"); if (detail) detail.style.display = detail.style.display === "none" ? "block" : "none"; }}
+                        <div key={i} role="button" tabIndex={0} aria-expanded={openAge === i} aria-label={`Возраст ${a.age}: ${a.risk}`} onClick={(e) => { e.stopPropagation(); setOpenAge(openAge === i ? null : i); }} onKeyDown={handleKeyActivate((e) => { e.stopPropagation(); setOpenAge(openAge === i ? null : i); })}
                           style={{ flex: "1 1 calc(50% - 6px)", minWidth: 130, padding: "10px 12px", borderRadius: 12, cursor: "pointer", background: a.c + "0a", border: `1px solid ${a.c}22`, transition: "all 0.3s" }}
                           onMouseOver={e => { e.currentTarget.style.borderColor = a.c + "55"; e.currentTarget.style.transform = "translateY(-2px)"; }}
                           onMouseOut={e => { e.currentTarget.style.borderColor = a.c + "22"; e.currentTarget.style.transform = "none"; }}>
                           <div style={{ fontSize: 15, fontWeight: 800, color: a.c, fontFamily: "'JetBrains Mono',monospace" }}>{a.age}</div>
                           <div style={{ fontSize: 11, fontWeight: 600, color: "#cbd5e1", marginTop: 2 }}>{a.risk}</div>
-                          <div className="age-detail" style={{ display: "none", fontSize: 11, color: "#94a3b8", marginTop: 6, lineHeight: 1.5, borderTop: `1px solid ${a.c}15`, paddingTop: 6, animation: "fadeSlide 0.3s ease" }}>{a.desc}</div>
+                          {openAge === i && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6, lineHeight: 1.5, borderTop: `1px solid ${a.c}15`, paddingTop: 6, animation: "fadeSlide 0.3s ease" }}>{a.desc}</div>}
                         </div>
                       ))}
                     </div>
@@ -298,14 +304,14 @@ export default function LandingPage() {
           const op = myth === i;
           return (
             <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
-              <div onClick={() => setMyth(op ? null : i)} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
+              <div role="button" tabIndex={0} aria-expanded={op} aria-label={m.myth} onClick={() => setMyth(op ? null : i)} onKeyDown={handleKeyActivate(() => setMyth(op ? null : i))} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                   <span style={{ fontSize: 24, transition: "transform 0.3s", transform: op ? "scale(1.25) rotate(-8deg)" : "none" }}>{m.icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#f87171", textDecoration: op ? "line-through" : "none", transition: "all 0.3s" }}>{m.myth}</div>
                     {op && <div style={{ animation: "fadeSlide 0.5s ease" }}><div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.7, marginTop: 8, marginBottom: 12 }}>{m.fact}</div><div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "#f59e0b0a", border: "1px solid #f59e0b1a" }}><span style={{ fontSize: 26, fontWeight: 800, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace" }}>{m.stat}</span><span style={{ fontSize: 11, color: "#94a3b8" }}>{m.sub}</span></div></div>}
                   </div>
-                  <span style={{ fontSize: 16, color: "#334155", transform: op ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▾</span>
+                  <span style={{ fontSize: 16, color: "#64748b", transform: op ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▾</span>
                 </div>
               </div>
             </Reveal>
@@ -343,12 +349,12 @@ export default function LandingPage() {
                 {b.label}
               </button>
             ))}
-            <p style={{ fontSize: 11, color: "#334155", marginTop: 10 }}>DXA — золотой стандарт точности · 5 минут · Минимальное облучение</p>
+            <p style={{ fontSize: 11, color: "#64748b", marginTop: 10 }}>DXA — золотой стандарт точности · 5 минут · Минимальное облучение</p>
           </div>
         </Reveal>
 
         <div style={{ textAlign: "center", padding: "14px 0", borderTop: "1px solid #1e293b" }}>
-          <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p>
+          <p style={{ fontSize: 10, color: "#64748b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { useMeta } from "../../utils/useMeta";
 
 const CITIES = ["Москва", "Санкт-Петербург", "Сочи", "Краснодар", "Другой"];
 
-const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORMSPREE_ID";
+const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "";
 
 const labelStyle = {
   display: "block",
@@ -44,7 +44,7 @@ export default function ClinicsPage() {
 
   const update = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const canSubmit = form.name.trim() && form.phone.trim() && agreed && status !== "sending";
+  const canSubmit = form.name.trim() && form.phone.trim() && agreed && status !== "sending" && !!FORMSPREE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,8 +156,9 @@ export default function ClinicsPage() {
 
             {/* Name */}
             <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Имя *</label>
+              <label htmlFor="clinic-name" style={labelStyle}>Имя *</label>
               <input
+                id="clinic-name"
                 type="text"
                 required
                 value={form.name}
@@ -171,8 +172,9 @@ export default function ClinicsPage() {
 
             {/* Phone */}
             <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Телефон *</label>
+              <label htmlFor="clinic-phone" style={labelStyle}>Телефон *</label>
               <input
+                id="clinic-phone"
                 type="tel"
                 required
                 value={form.phone}
@@ -186,8 +188,9 @@ export default function ClinicsPage() {
 
             {/* City */}
             <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Город</label>
+              <label htmlFor="clinic-city" style={labelStyle}>Город</label>
               <select
+                id="clinic-city"
                 value={form.city}
                 onChange={update("city")}
                 onFocus={() => setFocusedField("city")}
@@ -210,8 +213,9 @@ export default function ClinicsPage() {
 
             {/* Comment */}
             <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle}>Комментарий</label>
+              <label htmlFor="clinic-comment" style={labelStyle}>Комментарий</label>
               <textarea
+                id="clinic-comment"
                 value={form.comment}
                 onChange={update("comment")}
                 onFocus={() => setFocusedField("comment")}
@@ -228,7 +232,7 @@ export default function ClinicsPage() {
             </div>
 
             {/* Consent */}
-            <div style={{ marginBottom: 22, display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <label style={{ marginBottom: 22, display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
               <input
                 type="checkbox"
                 checked={agreed}
@@ -238,13 +242,13 @@ export default function ClinicsPage() {
                   accentColor: "#22d3ee", flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
+              <span style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>
                 Согласен на обработку{" "}
                 <a href="/privacy" style={{ color: "#22d3ee", textDecoration: "underline" }}>
                   персональных данных
                 </a>
               </span>
-            </div>
+            </label>
 
             {/* Submit */}
             <button
@@ -272,6 +276,12 @@ export default function ClinicsPage() {
             {status === "error" && (
               <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", marginTop: 12, marginBottom: 0 }}>
                 Ошибка отправки. Попробуйте ещё раз или напишите в Telegram.
+              </p>
+            )}
+
+            {!FORMSPREE_URL && (
+              <p style={{ fontSize: 13, color: "#f59e0b", textAlign: "center", marginTop: 12, marginBottom: 0 }}>
+                Форма временно недоступна. Напишите нам в Telegram.
               </p>
             )}
           </form>
@@ -315,7 +325,7 @@ export default function ClinicsPage() {
 
         {/* Footer */}
         <div style={{ textAlign: "center", padding: "24px 0 0", marginTop: 24, borderTop: "1px solid #1e293b" }}>
-          <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 10, color: "#64748b", lineHeight: 1.6 }}>
             Имеются противопоказания, необходима консультация специалиста.<br />
             Все аппараты — Stratos dR (DMS Imaging, Франция).
           </p>

@@ -193,7 +193,7 @@ export default function BodyModel3D({ fatPct = 25, height = 340 }) {
   return (
     <div ref={mountRef} onPointerDown={dn} onTouchStart={dn}
       style={{ width: "100%", height, cursor: dragging ? "grabbing" : "grab", touchAction: "none", position: "relative" }}>
-      <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", fontSize: 11, color: "#334155", fontFamily: "'JetBrains Mono',monospace", background: "#020617cc", padding: "3px 10px", borderRadius: 8, pointerEvents: "none", border: "1px solid #1e293b" }}>
+      <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", fontSize: 11, color: "#64748b", fontFamily: "'JetBrains Mono',monospace", background: "#020617cc", padding: "3px 10px", borderRadius: 8, pointerEvents: "none", border: "1px solid #1e293b" }}>
         ↔ покрутите 3D-модель пальцем
       </div>
     </div>

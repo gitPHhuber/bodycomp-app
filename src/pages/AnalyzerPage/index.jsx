@@ -497,7 +497,7 @@ export default function AnalyzerPage() {
 
           {/* Disclaimer */}
           <div style={{ textAlign: "center", padding: "24px 0 0", borderTop: "1px solid #1e293b", marginTop: 24 }}>
-            <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 10, color: "#64748b", lineHeight: 1.6 }}>
               Результаты носят информационный характер и не являются медицинским диагнозом.
               Для точной оценки обратитесь к специалисту. Имеются противопоказания, необходима консультация специалиста.
             </p>

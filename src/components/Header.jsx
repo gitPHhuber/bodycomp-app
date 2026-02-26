@@ -104,7 +104,8 @@ export default function Header() {
                 padding: 4,
                 lineHeight: 1,
               }}
-              aria-label="Меню"
+              aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={menuOpen}
             >
               {menuOpen ? "✕" : "☰"}
             </button>

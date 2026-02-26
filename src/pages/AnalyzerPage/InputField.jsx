@@ -1,11 +1,13 @@
-export default function InputField({ label, value, onChange, unit, placeholder, min, max, hint }) {
+export default function InputField({ label, value, onChange, unit, placeholder, min, max, hint, id }) {
+  const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}`;
   return (
     <div style={{ marginBottom: 20 }}>
-      <label style={{ fontSize: 13, color: "#94a3b8", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+      <label htmlFor={inputId} style={{ fontSize: 13, color: "#94a3b8", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
         {label}
       </label>
       <div style={{ position: "relative" }}>
         <input
+          id={inputId}
           type="number"
           inputMode="decimal"
           value={value}

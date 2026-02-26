@@ -240,7 +240,7 @@ export default function BodyCompare() {
             const isOpen = expanded === i;
             const isVisible = showMetrics[i];
             return (
-              <div key={m.label + who} onClick={() => isVisible && setExpanded(isOpen ? -1 : i)} style={{
+              <div key={m.label + who} role={isVisible ? "button" : undefined} tabIndex={isVisible ? 0 : -1} aria-expanded={isVisible ? isOpen : undefined} aria-label={isVisible ? `${m.label}: подробнее` : undefined} onClick={() => isVisible && setExpanded(isOpen ? -1 : i)} onKeyDown={(e) => { if (isVisible && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setExpanded(isOpen ? -1 : i); } }} style={{
                 background: isVisible
                   ? isOpen ? "linear-gradient(135deg, #111827 0%, " + scanStatusColor(m.status) + "08 100%)" : "linear-gradient(135deg, #111827, #0F172A)"
                   : "#0A0F1C",
