@@ -13,7 +13,7 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 399px)");
+    const mq = window.matchMedia("(max-width: 479px)");
     const handler = (e) => setIsMobile(e.matches);
     setIsMobile(mq.matches);
     mq.addEventListener("change", handler);
@@ -45,7 +45,7 @@ export default function Header() {
       >
         <div
           style={{
-            maxWidth: 480,
+            maxWidth: 640,
             margin: "0 auto",
             height: "100%",
             padding: "0 20px",

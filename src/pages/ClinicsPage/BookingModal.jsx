@@ -23,7 +23,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
       <div style={{ position: "absolute", inset: 0, background: "#000a", backdropFilter: "blur(8px)" }} />
       <div
         style={{
-          position: "relative", width: "100%", maxWidth: 480,
+          position: "relative", width: "100%", maxWidth: 640,
           maxHeight: "90vh", overflow: "auto",
           background: "linear-gradient(180deg, #0f172a 0%, #020617 100%)",
           borderRadius: "24px 24px 0 0", padding: "24px 20px 40px",
