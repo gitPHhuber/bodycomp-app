@@ -1,31 +1,113 @@
 import { useState } from "react";
 import Reveal from "../../components/Reveal";
-import { CLINICS, CITIES } from "./data";
-import MapView from "./MapView";
-import ClinicCard from "./ClinicCard";
-import BookingModal from "./BookingModal";
+
+const CITIES = ["Москва", "Санкт-Петербург", "Сочи", "Краснодар", "Другой"];
+
+const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORMSPREE_ID";
+
+const labelStyle = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#94a3b8",
+  marginBottom: 6,
+  fontFamily: "'JetBrains Mono',monospace",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px 14px",
+  borderRadius: 12,
+  background: "#0f172a",
+  border: "1.5px solid #334155",
+  color: "#e2e8f0",
+  fontSize: 14,
+  fontFamily: "'Outfit',sans-serif",
+  outline: "none",
+  transition: "border-color 0.2s",
+  boxSizing: "border-box",
+};
 
 export default function ClinicsPage() {
-  const [city, setCity] = useState("Все города");
-  const [service, setService] = useState("all");
-  const [sort, setSort] = useState("price");
-  const [selectedClinic, setSelectedClinic] = useState(null);
-  const [bookingClinic, setBookingClinic] = useState(null);
-  const [geoStatus, setGeoStatus] = useState(null); // null | 'loading' | 'granted' | 'denied'
+  const [form, setForm] = useState({ name: "", phone: "", city: "Москва", comment: "" });
+  const [agreed, setAgreed] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+  const [focusedField, setFocusedField] = useState(null);
 
-  const filtered = CLINICS
-    .filter(c => city === "Все города" || c.city === city)
-    .filter(c => service === "all" || c.services.includes(service))
-    .sort((a, b) => sort === "price" ? a.price - b.price : sort === "rating" ? b.rating - a.rating : 0);
+  const update = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const requestGeo = () => {
-    setGeoStatus("loading");
-    navigator.geolocation?.getCurrentPosition(
-      () => setGeoStatus("granted"),
-      () => setGeoStatus("denied"),
-      { timeout: 5000 }
-    );
+  const canSubmit = form.name.trim() && form.phone.trim() && agreed && status !== "sending";
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setStatus("sending");
+    try {
+      const res = await fetch(FORMSPREE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          city: form.city,
+          comment: form.comment,
+        }),
+      });
+      if (res.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
   };
+
+  const getFocusStyle = (field) =>
+    focusedField === field ? { borderColor: "#22d3ee" } : {};
+
+  if (status === "sent") {
+    return (
+      <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 60px", textAlign: "center" }}>
+          <Reveal from="scale">
+            <div style={{ paddingTop: 100 }}>
+              <div style={{ fontSize: 64, marginBottom: 20 }}>&#10003;</div>
+              <h1 style={{
+                fontSize: 26, fontWeight: 800, margin: "0 0 12px",
+                background: "linear-gradient(135deg,#e2e8f0,#22d3ee)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>
+                Спасибо!
+              </h1>
+              <p style={{ fontSize: 15, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 32px" }}>
+                Мы свяжемся с вами в течение 24 часов
+              </p>
+              <a
+                href="https://t.me/asvomed"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  background: "#0f172a",
+                  border: "1.5px solid #334155",
+                  color: "#22d3ee",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "border-color 0.2s",
+                }}
+              >
+                Написать в Telegram
+              </a>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif" }}>
@@ -33,99 +115,166 @@ export default function ClinicsPage() {
 
         {/* Header */}
         <Reveal from="bottom">
+
           <div style={{ paddingTop: 96, marginBottom: 24 }}>
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЗАПИСЬ НА DXA</div>
             <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Ближайшие денситометры
+
+          <div style={{ paddingTop: 40, marginBottom: 28 }}>
+            <div style={{
+              fontSize: 11, color: "#22d3ee",
+              fontFamily: "'JetBrains Mono',monospace",
+              letterSpacing: "0.1em", marginBottom: 6,
+            }}>
+              ЗАПИСЬ НА DXA
+            </div>
+            <h1 style={{
+              fontSize: 26, fontWeight: 800, margin: "0 0 10px",
+              background: "linear-gradient(135deg,#e2e8f0,#22d3ee)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>
+              Запись на DXA-сканирование
+
             </h1>
-            <p style={{ fontSize: 14, color: "#64748b", margin: 0 }}>
-              {filtered.length} клиник{filtered.length > 1 && filtered.length < 5 ? "и" : ""} с аппаратами Stratos dR
+            <p style={{ fontSize: 14, color: "#94a3b8", margin: 0, lineHeight: 1.5 }}>
+              Оставьте заявку — мы подберём ближайшую клинику с аппаратом Stratos&nbsp;dR и свяжемся с вами
             </p>
           </div>
         </Reveal>
 
-        {/* Geo button */}
-        <Reveal from="right" delay={100}>
-          <button onClick={requestGeo} style={{
-            width: "100%", padding: "12px 16px", marginBottom: 16, borderRadius: 14,
-            background: geoStatus === "granted" ? "#10b98118" : "#0f172a",
-            border: `1.5px solid ${geoStatus === "granted" ? "#10b98155" : "#1e293b"}`,
-            color: geoStatus === "granted" ? "#10b981" : "#94a3b8",
-            fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.3s",
-            display: "flex", alignItems: "center", gap: 8, justifyContent: "center",
+        {/* Form */}
+        <Reveal from="bottom" delay={100}>
+          <form onSubmit={handleSubmit} style={{
+            padding: 24, borderRadius: 18,
+            background: "#0f172a",
+            border: "1px solid #1e293b",
           }}>
-            {geoStatus === "loading" ? "⏳ Определяем..." : geoStatus === "granted" ? "📍 Геолокация включена" : "📍 Определить моё местоположение"}
-          </button>
-        </Reveal>
 
-        {/* Filters */}
-        <Reveal from="left" delay={150}>
-          <div style={{ marginBottom: 16 }}>
+            {/* Name */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>Имя *</label>
+              <input
+                type="text"
+                required
+                value={form.name}
+                onChange={update("name")}
+                onFocus={() => setFocusedField("name")}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Ваше имя"
+                style={{ ...inputStyle, ...getFocusStyle("name") }}
+              />
+            </div>
+
+            {/* Phone */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>Телефон *</label>
+              <input
+                type="tel"
+                required
+                value={form.phone}
+                onChange={update("phone")}
+                onFocus={() => setFocusedField("phone")}
+                onBlur={() => setFocusedField(null)}
+                placeholder="+7 (___) ___-__-__"
+                style={{ ...inputStyle, ...getFocusStyle("phone") }}
+              />
+            </div>
+
             {/* City */}
-            <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 8, marginBottom: 10, WebkitOverflowScrolling: "touch" }}>
-              {CITIES.map(c => (
-                <button key={c} onClick={() => setCity(c)} style={{
-                  flexShrink: 0, padding: "8px 14px", borderRadius: 10,
-                  background: city === c ? "#22d3ee" : "#0f172a",
-                  border: `1px solid ${city === c ? "#22d3ee" : "#1e293b"}`,
-                  color: city === c ? "#020617" : "#94a3b8",
-                  fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
-                  whiteSpace: "nowrap",
-                }}>{c}</button>
-              ))}
-            </div>
-
-            {/* Service & Sort */}
-            <div style={{ display: "flex", gap: 8 }}>
-              <select value={service} onChange={e => setService(e.target.value)} style={{
-                flex: 1, padding: "10px 12px", borderRadius: 10, background: "#0f172a", border: "1px solid #1e293b",
-                color: "#94a3b8", fontSize: 12, cursor: "pointer", outline: "none",
-              }}>
-                <option value="all">Все услуги</option>
-                <option value="Body Composition">Body Composition</option>
-                <option value="Денситометрия">Денситометрия</option>
-                <option value="3D-DXA">3D-DXA</option>
-                <option value="Саркопения">Саркопения</option>
-              </select>
-              <select value={sort} onChange={e => setSort(e.target.value)} style={{
-                width: "auto", padding: "10px 12px", borderRadius: 10, background: "#0f172a", border: "1px solid #1e293b",
-                color: "#94a3b8", fontSize: 12, cursor: "pointer", outline: "none",
-              }}>
-                <option value="price">По цене ↑</option>
-                <option value="rating">По рейтингу ↓</option>
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>Город</label>
+              <select
+                value={form.city}
+                onChange={update("city")}
+                onFocus={() => setFocusedField("city")}
+                onBlur={() => setFocusedField(null)}
+                style={{
+                  ...inputStyle,
+                  ...getFocusStyle("city"),
+                  cursor: "pointer",
+                  appearance: "none",
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2394a3b8' fill='none' stroke-width='1.5'/%3E%3C/svg%3E\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 14px center",
+                }}
+              >
+                {CITIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </select>
             </div>
-          </div>
-        </Reveal>
 
-        {/* Map */}
-        <Reveal from="scale" delay={200}>
-          <MapView clinics={filtered} selectedId={selectedClinic} onSelect={setSelectedClinic} />
-        </Reveal>
-
-        {/* Clinic list */}
-        {filtered.map((c, i) => (
-          <Reveal key={c.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 80}>
-            <ClinicCard
-              clinic={c}
-              isSelected={selectedClinic === c.id}
-              onSelect={setSelectedClinic}
-              onBook={setBookingClinic}
-            />
-          </Reveal>
-        ))}
-
-        {filtered.length === 0 && (
-          <Reveal from="bottom">
-            <div style={{ textAlign: "center", padding: 40 }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Клиник не найдено</div>
-              <div style={{ fontSize: 13, color: "#64748b" }}>Попробуйте другой город или услугу</div>
+            {/* Comment */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Комментарий</label>
+              <textarea
+                value={form.comment}
+                onChange={update("comment")}
+                onFocus={() => setFocusedField("comment")}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Удобное время, пожелания..."
+                rows={3}
+                style={{
+                  ...inputStyle,
+                  ...getFocusStyle("comment"),
+                  resize: "vertical",
+                  minHeight: 70,
+                }}
+              />
             </div>
-          </Reveal>
-        )}
 
-        {/* Bottom CTA */}
+            {/* Consent */}
+            <div style={{ marginBottom: 22, display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                style={{
+                  marginTop: 2, width: 18, height: 18, cursor: "pointer",
+                  accentColor: "#22d3ee", flexShrink: 0,
+                }}
+              />
+              <span style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
+                Согласен на обработку{" "}
+                <a href="/privacy" style={{ color: "#22d3ee", textDecoration: "underline" }}>
+                  персональных данных
+                </a>
+              </span>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              style={{
+                width: "100%",
+                padding: "14px 0",
+                border: "none",
+                borderRadius: 12,
+                background: canSubmit
+                  ? "linear-gradient(135deg,#0891b2,#22d3ee)"
+                  : "#1e293b",
+                color: canSubmit ? "#020617" : "#475569",
+                fontSize: 15,
+                fontWeight: 700,
+                cursor: canSubmit ? "pointer" : "not-allowed",
+                transition: "all 0.3s",
+                fontFamily: "'Outfit',sans-serif",
+              }}
+            >
+              {status === "sending" ? "Отправляем..." : "Отправить заявку"}
+            </button>
+
+            {status === "error" && (
+              <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", marginTop: 12, marginBottom: 0 }}>
+                Ошибка отправки. Попробуйте ещё раз или напишите в Telegram.
+              </p>
+            )}
+          </form>
+        </Reveal>
+
+        {/* Telegram CTA */}
         <Reveal from="bottom" delay={200}>
           <div style={{
             marginTop: 24, padding: 20, borderRadius: 18, textAlign: "center",
@@ -133,19 +282,31 @@ export default function ClinicsPage() {
             border: "1px solid #22d3ee22",
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#22d3ee", marginBottom: 6 }}>
-              Не нашли свой город?
+              Или напишите нам в Telegram
             </div>
-            <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 12 }}>
-              Мы расширяем сеть. Оставьте заявку — сообщим, когда появится клиника рядом.
+            <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 14 }}>
+              Ответим на вопросы и поможем записаться
             </div>
-            <button style={{
-              padding: "12px 24px", border: "none", borderRadius: 12,
-              background: "#1e293b", color: "#94a3b8", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", transition: "all 0.2s",
-            }}
-              onMouseOver={e => { e.target.style.background = "#334155"; e.target.style.color = "#e2e8f0"; }}
-              onMouseOut={e => { e.target.style.background = "#1e293b"; e.target.style.color = "#94a3b8"; }}
-            >Сообщить мне →</button>
+            <a
+              href="https://t.me/asvomed"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-block",
+                padding: "12px 24px",
+                border: "none",
+                borderRadius: 12,
+                background: "#1e293b",
+                color: "#94a3b8",
+                fontSize: 13,
+                fontWeight: 600,
+                textDecoration: "none",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              @asvomed →
+            </a>
           </div>
         </Reveal>
 
@@ -157,15 +318,6 @@ export default function ClinicsPage() {
           </p>
         </div>
       </div>
-
-      {/* Booking Modal */}
-      {bookingClinic && (
-        <BookingModal
-          clinic={bookingClinic}
-          onClose={() => setBookingClinic(null)}
-          onConfirm={(data) => console.log("Booking:", data)}
-        />
-      )}
     </div>
   );
 }
