@@ -183,6 +183,9 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           <div style={{ paddingTop: 96, marginBottom: 32 }}>
+            <button onClick={() => setStep(0)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
+              ← Назад
+            </button>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 1 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Ваш пол</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Формулы расчёта отличаются для мужчин и женщин</p>
@@ -222,6 +225,9 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           <div style={{ paddingTop: 96, marginBottom: 32 }}>
+            <button onClick={() => setStep(1)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
+              ← Назад
+            </button>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 2 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Базовые параметры</h2>
           </div>
@@ -275,6 +281,9 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           <div style={{ paddingTop: 96, marginBottom: 24 }}>
+            <button onClick={() => setStep(2)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
+              ← Назад
+            </button>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 3 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Обхваты тела</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Измерьте сантиметровой лентой</p>
