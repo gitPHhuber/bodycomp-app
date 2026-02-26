@@ -6,11 +6,25 @@ import Particles from "./Particles";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
+import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
 
 const BodyModel3D = lazy(() => import("./BodyModel3D"));
 const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
 const BodyCompare = lazy(() => import("./BodyCompare"));
+
+const PROFILE_ICONS = {
+  female: (sz, c) => Icons.fit(sz, c),
+  male: (sz, c) => Icons.athletic(sz, c),
+  female2: (sz, c) => Icons.average(sz, c),
+};
+
+const DXA_FEATURES = [
+  { title: "Точный % жира по зонам", color: "#22d3ee", svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.5" stroke="#22d3ee" strokeWidth="1.3" fill="#22d3ee12"/><path d="M12 8v5M9.5 20l2.5-7 2.5 7" stroke="#22d3ee" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 11.5h10" stroke="#22d3ee" strokeWidth="1.3" strokeLinecap="round"/><path d="M4 8h2M18 8h2M4 14h2M18 14h2" stroke="#22d3ee" strokeWidth="0.8" strokeLinecap="round" opacity="0.4"/></svg> },
+  { title: "Мышечная масса и баланс", color: "#10b981", svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 10.5l3.5 1.5h2M19 10.5l-3.5 1.5h-2" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M4 9l1 1.5M20 9l-1 1.5" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="5" r="2.5" stroke="#10b981" strokeWidth="1.3" fill="#10b98115"/><path d="M12 8v4M9 20l3-8 3 8" stroke="#10b981" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+  { title: "Плотность костей", color: "#a78bfa", svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="3.5" stroke="#a78bfa" strokeWidth="1.3" fill="none" opacity="0.8"/><line x1="12" y1="10" x2="12" y2="18" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round"/><line x1="8" y1="13" x2="16" y2="13" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round"/><line x1="12" y1="18" x2="9" y2="22" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round"/><line x1="12" y1="18" x2="15" y2="22" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round"/><circle cx="12" cy="14" r="6" stroke="#a78bfa" strokeWidth="0.7" strokeDasharray="2 2.5" opacity="0.25"/></svg> },
+  { title: "Висцеральный жир", color: "#f59e0b", svg: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.5" stroke="#f59e0b" strokeWidth="1.3" fill="#f59e0b15"/><ellipse cx="12" cy="13" rx="4.5" ry="3" stroke="#f59e0b" strokeWidth="1.3" fill="#f59e0b0c"/><path d="M10 19.5l2-3 2 3" stroke="#f59e0b" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M7.5 10.5h9" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round"/></svg> },
+];
 
 export default function LandingPage() {
   useMeta(
@@ -36,12 +50,12 @@ export default function LandingPage() {
       <Particles />
       <div style={{ position: "relative", zIndex: 1, maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
 
-        {}
+        {/* ═══ Block 1: Hero ═══ */}
         <div style={{ textAlign: "center", paddingTop: 104, paddingBottom: 28 }}>
           <Reveal from="scale" delay={200}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 50, background: "#ef444412", border: "1px solid #ef444430", marginBottom: 20 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", animation: "pulse2 1.5s ease infinite" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#f87171", fontFamily: "'JetBrains Mono',monospace" }}>ВАЖНО ЗНАТЬ</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 50, background: "#22d3ee12", border: "1px solid #22d3ee30", marginBottom: 20 }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22d3ee", animation: "pulse2 1.5s ease infinite" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace" }}>БЕСПЛАТНЫЙ РАСЧЁТ</span>
             </div>
           </Reveal>
           <Reveal from="blur" delay={500}>
@@ -68,32 +82,90 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
-        {}
-        <Reveal from="scale" delay={100}>
-          <div style={{ marginBottom: 28, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden" }}>
-            <div style={{ fontSize: 10, color: "#475569", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.12em", padding: "12px 16px 0", textAlign: "center" }}>РОССИЯ — ПРЯМО СЕЙЧАС</div>
-            <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-              <CountingStat value="14" suffix=" млн" label="больны остеопорозом" duration={3200} />
-              <CountingStat value="20" suffix=" млн" label="остеопения" duration={3800} />
-              <CountingStat value="40" suffix="%" label="скрытый избыток жира" duration={4500} />
-            </div>
-            <div style={{ textAlign: "center", paddingBottom: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
-            </div>
-          </div>
-        </Reveal>
-
-        {}
+        {/* ═══ Block 2: BodyCompare ═══ */}
         <Reveal from="left" delay={100}>
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-СКАНЕР</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес. Два разных тела.</h2>
-            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Выберите человека и запустите сканирование</p>
+            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Угадаете, кто из них здоров?</p>
             <Suspense fallback={loader3d}><BodyCompare /></Suspense>
           </div>
         </Reveal>
 
-        {}
+        {/* ═══ Block 3: DXA Features (NEW) ═══ */}
+        <Reveal from="scale" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 14px" }}>Что покажет DXA за 5 минут</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+              {DXA_FEATURES.map((f, i) => (
+                <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 80}>
+                  <div style={{ ...card, padding: 16, borderColor: f.color + "1a" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: f.color + "10", border: `1px solid ${f.color}25`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+                      {f.svg}
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0", lineHeight: 1.35 }}>{f.title}</div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+            <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "#0f172a", border: "1px solid #1e293b" }}>
+              <span style={{ fontSize: 12, color: "#64748b", fontFamily: "'JetBrains Mono',monospace" }}>от ₽5 000 · 5 минут · минимальное облучение</span>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 4: Profiles ═══ */}
+        <Reveal from="left"><div style={{ marginBottom: 18 }}><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЭКСПЕРИМЕНТ</div><h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Три человека. «Здоровый» ИМТ.</h2></div></Reveal>
+        {PROFILES.map((p, i) => {
+          const rv = revealed[p.id];
+          const renderIcon = PROFILE_ICONS[p.icon];
+          return (
+            <Reveal key={p.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
+              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                  <div style={{ width: 50, height: 50, borderRadius: 14, background: "#020617", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #1e293b" }}>
+                    {renderIcon ? renderIcon(26, p.vc) : p.icon}
+                  </div>
+                  <div style={{ flex: 1 }}><div style={{ fontWeight: 700, fontSize: 15 }}>{p.name}, {p.age}</div><div style={{ fontSize: 12, color: "#64748b" }}>{p.h} см · {p.w} кг</div></div>
+                  <div style={{ padding: "4px 10px", borderRadius: 8, background: p.bmiC + "22", color: p.bmiC, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>ИМТ {p.bmi}</div>
+                </div>
+                <div style={{ padding: "8px 14px", borderRadius: 10, background: "#020617", marginBottom: 12, fontSize: 13, color: "#64748b" }}>{p.scale}</div>
+                {!rv ? (
+                  <div style={{ textAlign: "center", padding: 12, background: "#ef444408", borderRadius: 12, border: "1px dashed #ef444425" }}><span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 600 }}>👆 Нажмите — увидьте правду</span></div>
+                ) : (
+                  <div style={{ animation: "fadeSlide 0.6s ease" }}>
+                    <div style={{ display: "flex", height: 26, borderRadius: 8, overflow: "hidden", background: "#1e293b", marginBottom: 10 }}>
+                      <div style={{ width: `${p.fat}%`, background: "linear-gradient(90deg,#ef4444,#f87171)", transition: "width 1s ease", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{p.fat}%</div>
+                      <div style={{ width: `${p.muscle}%`, background: "linear-gradient(90deg,#10b981,#34d399)", transition: "width 1s ease .1s", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{p.muscle}%</div>
+                      <div style={{ flex: 1, background: "#3b82f6" }} />
+                    </div>
+                    <div style={{ padding: "12px 14px", borderRadius: 12, background: p.vc + "10", border: `1px solid ${p.vc}30` }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: p.vc, marginBottom: 4 }}>Реальность: {p.verdict}</div>
+                      <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{p.truth}</div>
+                    </div>
+                    <div style={{ marginTop: 6, padding: "6px 12px", borderRadius: 8, background: "#0f172a", fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>💡 {p.tip}</div>
+                  </div>
+                )}
+              </div>
+            </Reveal>
+          );
+        })}
+
+        {/* ═══ Block 5: Quiz ═══ */}
+        <Reveal from="left">
+          <div style={{ ...card, background: "linear-gradient(135deg,#1e1b4b12,#4c1d9512)", border: "1px solid #7c3aed30", marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#a78bfa", fontFamily: "'JetBrains Mono',monospace", marginBottom: 8, letterSpacing: "0.1em" }}>ПРОВЕРЬТЕ СЕБЯ</div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 14px" }}>Два человека по 80 кг. У кого выше риск инфаркта?</h3>
+            {[{ id: "a", t: "У того, кто выглядит полнее", ok: false }, { id: "b", t: "У того, у кого больше висцерального жира — даже если стройнее", ok: true }, { id: "c", t: "Риск одинаков — вес же одинаковый", ok: false }].map(o => {
+              const s = quiz === o.id, g = quizDone && o.ok, b2 = quizDone && s && !o.ok;
+              return <button key={o.id} onClick={() => { if (!quizDone) { setQuiz(o.id); setTimeout(() => setQuizDone(true), 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b2 ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b2 ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b2 && "✗ "}{o.t}</button>;
+            })}
+            {quizDone && <div style={{ padding: 14, borderRadius: 12, background: "#10b98110", border: "1px solid #10b98130", animation: "fadeSlide 0.6s ease", marginTop: 6, fontSize: 13, color: "#cbd5e1", lineHeight: 1.7 }}><b style={{ color: "#10b981" }}>Висцеральный жир</b> невидим снаружи, но является предиктором №1 болезней сердца и диабета. <b>Единственный способ измерить точно — DXA-сканирование.</b></div>}
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 6: 3D Body Model ═══ */}
         <Reveal from="right" delay={100}>
           <div style={{ ...card, marginBottom: 28 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
@@ -126,43 +198,60 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
-        {}
-        <Reveal from="left"><div style={{ marginBottom: 18 }}><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЭКСПЕРИМЕНТ</div><h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Три человека. «Здоровый» ИМТ.</h2></div></Reveal>
-        {PROFILES.map((p, i) => {
-          const rv = revealed[p.id];
+        {/* ═══ Block 7: Myths ═══ */}
+        <Reveal from="bottom"><div style={{ marginBottom: 14 }}><div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>МИФЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>5 опасных заблуждений</h2></div></Reveal>
+        {MYTHS.map((m, i) => {
+          const op = myth === i;
           return (
-            <Reveal key={p.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
-              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-                  <div style={{ width: 50, height: 50, borderRadius: 14, background: "#020617", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, border: "1px solid #1e293b" }}>{p.icon}</div>
-                  <div style={{ flex: 1 }}><div style={{ fontWeight: 700, fontSize: 15 }}>{p.name}, {p.age}</div><div style={{ fontSize: 12, color: "#64748b" }}>{p.h} см · {p.w} кг</div></div>
-                  <div style={{ padding: "4px 10px", borderRadius: 8, background: p.bmiC + "22", color: p.bmiC, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>ИМТ {p.bmi}</div>
-                </div>
-                <div style={{ padding: "8px 14px", borderRadius: 10, background: "#020617", marginBottom: 12, fontSize: 13, color: "#64748b" }}>{p.scale}</div>
-                {!rv ? (
-                  <div style={{ textAlign: "center", padding: 12, background: "#ef444408", borderRadius: 12, border: "1px dashed #ef444425" }}><span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 600 }}>👆 Нажмите — увидьте правду</span></div>
-                ) : (
-                  <div style={{ animation: "fadeSlide 0.6s ease" }}>
-                    <div style={{ display: "flex", height: 26, borderRadius: 8, overflow: "hidden", background: "#1e293b", marginBottom: 10 }}>
-                      <div style={{ width: `${p.fat}%`, background: "linear-gradient(90deg,#ef4444,#f87171)", transition: "width 1s ease", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{p.fat}%</div>
-                      <div style={{ width: `${p.muscle}%`, background: "linear-gradient(90deg,#10b981,#34d399)", transition: "width 1s ease .1s", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>{p.muscle}%</div>
-                      <div style={{ flex: 1, background: "#3b82f6" }} />
-                    </div>
-                    <div style={{ padding: "12px 14px", borderRadius: 12, background: p.vc + "10", border: `1px solid ${p.vc}30` }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: p.vc, marginBottom: 4 }}>Реальность: {p.verdict}</div>
-                      <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{p.truth}</div>
-                    </div>
-                    <div style={{ marginTop: 6, padding: "6px 12px", borderRadius: 8, background: "#0f172a", fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>💡 {p.tip}</div>
+            <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
+              <div onClick={() => setMyth(op ? null : i)} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <span style={{ fontSize: 24, transition: "transform 0.3s", transform: op ? "scale(1.25) rotate(-8deg)" : "none" }}>{m.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: op ? "#10b981" : "#f87171", textDecoration: op ? "line-through" : "none", transition: "all 0.3s" }}>{m.myth}</div>
+                    {op && <div style={{ animation: "fadeSlide 0.5s ease" }}><div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.7, marginTop: 8, marginBottom: 12 }}>{m.fact}</div><div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "#f59e0b0a", border: "1px solid #f59e0b1a" }}><span style={{ fontSize: 26, fontWeight: 800, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace" }}>{m.stat}</span><span style={{ fontSize: 11, color: "#94a3b8" }}>{m.sub}</span></div></div>}
                   </div>
-                )}
+                  <span style={{ fontSize: 16, color: "#334155", transform: op ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▾</span>
+                </div>
               </div>
             </Reveal>
           );
         })}
 
-        {}
+        {/* ═══ Block 8: Statistics + Threats (combined) ═══ */}
+        <Reveal from="scale" delay={100}>
+          <div style={{ marginTop: 18, marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#ef4444", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЦИФРЫ ПО РОССИИ</div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 14px" }}>Почему это важно</h2>
+            <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
+                <CountingStat value="14" suffix=" млн" label="больны остеопорозом" duration={3200} />
+                <CountingStat value="20" suffix=" млн" label="остеопения" duration={3800} />
+                <CountingStat value="40" suffix="%" label="скрытый избыток жира" duration={4500} />
+              </div>
+              <div style={{ textAlign: "center", paddingBottom: 14 }}>
+                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {THREATS.map((t, i) => (
+                <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
+                  <div className="card-threat"
+                    style={{ ...card, '--hover-shadow': `0 10px 30px ${t.c}15`, padding: 14, borderColor: t.c + "1a" }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: t.c, marginBottom: 4 }}>{t.what}</div>
+                    <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.55, marginBottom: 8 }}>{t.desc}</div>
+                    <div style={{ fontSize: 10, color: t.c, padding: "5px 8px", borderRadius: 6, background: t.c + "0a", lineHeight: 1.4 }}>⚡ {t.tag}</div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 9: Bones (simplified) ═══ */}
         <Reveal from="right" delay={100}>
-          <div style={{ marginTop: 14, marginBottom: 28 }}>
+          <div style={{ marginBottom: 28 }}>
             <div onClick={() => setBoneOpen(o => !o)} style={{ ...card, cursor: "pointer", borderColor: boneOpen ? "#8b5cf655" : "#ef444440", background: boneOpen ? "linear-gradient(135deg,#0f172a,#1e293b)" : "linear-gradient(135deg,#1a0a0a,#1e293b)", boxShadow: boneOpen ? "0 0 40px #8b5cf610" : "0 0 30px #ef444408", transition: "all 0.5s ease", position: "relative", overflow: "hidden" }}>
               {!boneOpen && <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, #ef444415, transparent 70%)", animation: "pulse2 3s ease-in-out infinite" }} />}
               <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
@@ -186,19 +275,9 @@ export default function LandingPage() {
                 </div>
               </div>
               {!boneOpen && (
-                <>
-                  <div style={{ display: "flex", gap: 8, marginTop: 14, animation: "fadeSlide 0.6s ease" }}>
-                    {[{ v: "14 млн", l: "с остеопорозом в РФ", c: "#ef4444" }, { v: "каждые 5 мин", l: "перелом бедра", c: "#f59e0b" }, { v: "0 симптомов", l: "до первого перелома", c: "#8b5cf6" }].map((s, i) => (
-                      <div key={i} style={{ flex: 1, padding: "10px 8px", borderRadius: 12, background: s.c + "08", border: `1px solid ${s.c}18`, textAlign: "center" }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: s.c, fontFamily: "'JetBrains Mono',monospace" }}>{s.v}</div>
-                        <div style={{ fontSize: 9, color: "#64748b", marginTop: 2, lineHeight: 1.3 }}>{s.l}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#64748b", animation: "float 2.5s ease-in-out infinite" }}>
-                    <span style={{ padding: "5px 14px", borderRadius: 20, background: "#ef44440a", border: "1px solid #ef444418" }}>👆 Нажмите — загляните внутрь своих костей</span>
-                  </div>
-                </>
+                <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "#64748b", animation: "float 2.5s ease-in-out infinite" }}>
+                  <span style={{ padding: "5px 14px", borderRadius: 20, background: "#ef44440a", border: "1px solid #ef444418" }}>👆 Нажмите — загляните внутрь своих костей</span>
+                </div>
               )}
             </div>
 
@@ -218,55 +297,8 @@ export default function LandingPage() {
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", marginTop: 2, marginBottom: 18 }}>
                     <span style={{ color: "#dc2626" }}>Тяжёлый</span><span style={{ color: "#ef4444" }}>Остеопороз</span><span style={{ color: "#f59e0b" }}>Остеопения</span><span style={{ color: "#10b981" }}>Норма</span>
                   </div>
-
-                  <div style={{ fontSize: 11, color: "#8b5cf6", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 10 }}>НАЖМИТЕ — УЗНАЙТЕ ПОДРОБНОСТИ</div>
-                  {[
-                    { title: "Пик в 25–30 лет", text: "Костная масса достигает максимума к 30, потом только падает.", extra: "Каждый год — минус 0.5–1%. После менопаузы — до 3% в год. К 70 годам женщина может потерять до 40% костной массы.", bar: 30, color: "#f59e0b", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 17L8 12L12 15L17 8L21 4" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 4H21V8" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/><line x1="3" y1="21" x2="21" y2="21" stroke="#f59e0b" strokeWidth="1" opacity="0.3"/></svg> },
-                    { title: "Перелом без причины", text: "При остеопорозе кость ломается от чиха, наклона, ступеньки.", extra: "2 из 3 переломов позвонков остаются незамеченными. Смертность после перелома бедра — до 20% в первый год.", bar: 66, color: "#ef4444", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L12 8L9 11L15 13L12 16L12 22" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="10" stroke="#ef4444" strokeWidth="1" opacity="0.2" strokeDasharray="3 3"/></svg> },
-                    { title: "DXA видит невидимое", text: "Обычный рентген покажет проблему, когда потеряно 30%+ массы.", extra: "DXA ловит потерю от 1–2%. Разница в раннем обнаружении — 10 лет. 5 минут сканирования, доза облучения меньше чем от смартфона за день.", bar: 98, color: "#10b981", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#10b981" strokeWidth="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/><circle cx="11" cy="11" r="3" stroke="#10b981" strokeWidth="1" opacity="0.4"/><circle cx="11" cy="11" r="1" fill="#10b981" opacity="0.6"/></svg> },
-                  ].map((f, i) => (
-                    <div key={i} onClick={(e) => { e.stopPropagation(); const det = e.currentTarget.querySelector(".fact-extra"); if (det) det.style.display = det.style.display === "none" ? "block" : "none"; }}
-                      className="item-fact"
-                      style={{ '--hover-border': f.color + '44', padding: 14, borderRadius: 14, background: f.color + "06", border: `1px solid ${f.color}15`, marginBottom: 10, cursor: "pointer", animation: `fadeSlide 0.5s ease ${i * 0.15}s both` }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 10, background: f.color + "12", border: `1px solid ${f.color}25`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{f.svg}</div>
-                        <div style={{ flex: 1 }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{f.title}</span>
-                          <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5, marginTop: 2 }}>{f.text}</div>
-                        </div>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0, opacity: 0.4 }}><path d="M3 4.5L6 7.5L9 4.5" stroke={f.color} strokeWidth="1.5" strokeLinecap="round"/></svg>
-                      </div>
-                      <div className="fact-extra" style={{ display: "none", animation: "fadeSlide 0.3s ease", marginTop: 8, padding: "10px 12px", borderRadius: 10, background: f.color + "08", border: `1px solid ${f.color}12`, fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{f.extra}</div>
-                      <div style={{ height: 4, borderRadius: 2, background: "#1e293b", overflow: "hidden", marginTop: 8 }}>
-                        <div style={{ width: `${f.bar}%`, height: "100%", borderRadius: 2, background: `linear-gradient(90deg, ${f.color}88, ${f.color})`, transition: "width 1.5s ease" }} />
-                      </div>
-                    </div>
-                  ))}
-
-                  {}
-                  <div style={{ padding: 18, borderRadius: 16, background: "linear-gradient(135deg,#1e1b4b15,#4c1d9508)", border: "1px solid #7c3aed20", marginTop: 6 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>В какой вы группе риска?</div>
-                    <div style={{ fontSize: 11, color: "#64748b", marginBottom: 12 }}>Нажмите свой возраст</div>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {[{ age: "20–30", risk: "Низкий", desc: "Пик массы. Время инвестировать в кости.", c: "#10b981" }, { age: "30–45", risk: "Начало потерь", desc: "Потеря 0.5–1% в год уже идёт. Пора проверить.", c: "#22d3ee" }, { age: "45–55", risk: "Повышенный", desc: "Менопауза ускоряет потерю до 3% в год.", c: "#f59e0b" }, { age: "55+", risk: "Высокий", desc: "Каждые 5 мин — перелом бедра в России.", c: "#ef4444" }].map((a, i) => (
-                        <div key={i} onClick={(e) => { e.stopPropagation(); const detail = e.currentTarget.querySelector(".age-detail"); if (detail) detail.style.display = detail.style.display === "none" ? "block" : "none"; }}
-                          className="item-age-risk"
-                          style={{ '--hover-border': a.c + '55', flex: "1 1 calc(50% - 6px)", minWidth: 130, padding: "10px 12px", borderRadius: 12, cursor: "pointer", background: a.c + "0a", border: `1px solid ${a.c}22` }}>
-                          <div style={{ fontSize: 15, fontWeight: 800, color: a.c, fontFamily: "'JetBrains Mono',monospace" }}>{a.age}</div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "#cbd5e1", marginTop: 2 }}>{a.risk}</div>
-                          <div className="age-detail" style={{ display: "none", fontSize: 11, color: "#94a3b8", marginTop: 6, lineHeight: 1.5, borderTop: `1px solid ${a.c}15`, paddingTop: 6, animation: "fadeSlide 0.3s ease" }}>{a.desc}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: "center", marginTop: 16, padding: "14px 0" }}>
-                    <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>Узнать свою плотность костей точно</div>
-                    <button onClick={() => navigate("/clinics")}
-                      className="btn-lift-purple"
-                      style={{ padding: "12px 28px", border: "none", borderRadius: 12, background: "linear-gradient(135deg,#8b5cf6,#a78bfa)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", boxShadow: "0 0 20px #8b5cf620" }}>
-                      Записаться на DXA →
-                    </button>
+                  <div onClick={() => navigate("/clinics")} style={{ textAlign: "center", padding: "14px 0", cursor: "pointer" }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "#a78bfa", transition: "color 0.3s" }}>Хотите узнать свою плотность? →</span>
                   </div>
                 </div>
               </div>
@@ -274,59 +306,10 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
-        {}
-        <Reveal from="left">
-          <div style={{ ...card, background: "linear-gradient(135deg,#1e1b4b12,#4c1d9512)", border: "1px solid #7c3aed30", marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#a78bfa", fontFamily: "'JetBrains Mono',monospace", marginBottom: 8, letterSpacing: "0.1em" }}>КВИЗ</div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 14px" }}>Два человека по 80 кг. У кого выше риск инфаркта?</h3>
-            {[{ id: "a", t: "У того, кто выглядит полнее", ok: false }, { id: "b", t: "У того, у кого больше висцерального жира — даже если стройнее", ok: true }, { id: "c", t: "Риск одинаков — вес же одинаковый", ok: false }].map(o => {
-              const s = quiz === o.id, g = quizDone && o.ok, b2 = quizDone && s && !o.ok;
-              return <button key={o.id} onClick={() => { if (!quizDone) { setQuiz(o.id); setTimeout(() => setQuizDone(true), 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b2 ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b2 ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b2 && "✗ "}{o.t}</button>;
-            })}
-            {quizDone && <div style={{ padding: 14, borderRadius: 12, background: "#10b98110", border: "1px solid #10b98130", animation: "fadeSlide 0.6s ease", marginTop: 6, fontSize: 13, color: "#cbd5e1", lineHeight: 1.7 }}><b style={{ color: "#10b981" }}>Висцеральный жир</b> невидим снаружи, но является предиктором №1 болезней сердца и диабета. <b>Единственный способ измерить точно — DXA-сканирование.</b></div>}
-          </div>
-        </Reveal>
-
-        {}
-        <Reveal from="bottom"><div style={{ marginBottom: 14 }}><div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>МИФЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>5 опасных заблуждений</h2></div></Reveal>
-        {MYTHS.map((m, i) => {
-          const op = myth === i;
-          return (
-            <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
-              <div onClick={() => setMyth(op ? null : i)} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <span style={{ fontSize: 24, transition: "transform 0.3s", transform: op ? "scale(1.25) rotate(-8deg)" : "none" }}>{m.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#f87171", textDecoration: op ? "line-through" : "none", transition: "all 0.3s" }}>{m.myth}</div>
-                    {op && <div style={{ animation: "fadeSlide 0.5s ease" }}><div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.7, marginTop: 8, marginBottom: 12 }}>{m.fact}</div><div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "#f59e0b0a", border: "1px solid #f59e0b1a" }}><span style={{ fontSize: 26, fontWeight: 800, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace" }}>{m.stat}</span><span style={{ fontSize: 11, color: "#94a3b8" }}>{m.sub}</span></div></div>}
-                  </div>
-                  <span style={{ fontSize: 16, color: "#334155", transform: op ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>▾</span>
-                </div>
-              </div>
-            </Reveal>
-          );
-        })}
-
-        {}
-        <Reveal from="bottom" delay={80}><div style={{ marginTop: 18, marginBottom: 14 }}><div style={{ fontSize: 11, color: "#ef4444", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>НЕВИДИМЫЕ УГРОЗЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Чего не покажут весы и зеркало</h2></div></Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 28 }}>
-          {THREATS.map((t, i) => (
-            <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
-              <div className="card-threat"
-                style={{ ...card, '--hover-shadow': `0 10px 30px ${t.c}15`, padding: 14, borderColor: t.c + "1a" }}>
-                <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: t.c, marginBottom: 4 }}>{t.what}</div>
-                <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.55, marginBottom: 8 }}>{t.desc}</div>
-                <div style={{ fontSize: 10, color: t.c, padding: "5px 8px", borderRadius: 6, background: t.c + "0a", lineHeight: 1.4 }}>⚡ {t.tag}</div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        {}
+        {/* ═══ Block 10: Final CTA ═══ */}
         <Reveal from="bottom">
           <div style={{ borderRadius: 22, padding: 32, textAlign: "center", background: "linear-gradient(135deg,#0891b210,#10b98110)", border: "1px solid #22d3ee1a", marginBottom: 24 }}>
-            <div style={{ fontSize: 44, marginBottom: 14, animation: "float 3s ease-in-out infinite" }}>◎</div>
+            <div style={{ marginBottom: 14, animation: "float 3s ease-in-out infinite", display: "inline-block" }}>{Icons.bodyScan(44, "#22d3ee")}</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Узнайте свои реальные цифры</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.55, margin: "0 0 22px" }}>Бесплатный расчёт за 3 минуты — или точный DXA-анализ</p>
             {[{ label: "Рассчитать состав тела →", bg: "linear-gradient(135deg,#0891b2,#22d3ee)", s: "#22d3ee", href: "/analyzer" }, { label: "Записаться на DXA", bg: "linear-gradient(135deg,#10b981,#34d399)", s: "#10b981", href: "/clinics" }].map((b, i) => (
