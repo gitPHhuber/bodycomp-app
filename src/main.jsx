@@ -8,6 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import AnalyzerPage from "./pages/AnalyzerPage";
 import ClinicsPage from "./pages/ClinicsPage";
 import BodyComparePage from "./pages/BodyComparePage";
+import PrivacyPage from "./pages/PrivacyPage";
 import Header from "./components/Header";
 
 function ScrollToTop() {
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/analyzer" element={<AnalyzerPage />} />
         <Route path="/clinics" element={<ClinicsPage />} />
         <Route path="/xray" element={<BodyComparePage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
