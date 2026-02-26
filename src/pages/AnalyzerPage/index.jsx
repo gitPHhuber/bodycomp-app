@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { trackGoal } from "../../utils/analytics";
 import { Icons, getBodyTypeIcon } from "./Icons";
 import { calc } from "./calculations";
 import Gauge from "./Gauge";
@@ -56,6 +57,7 @@ export default function AnalyzerPage() {
     const tdee = bmr * (actMult[activity] || 1.55);
 
     setResults({ bf, bmi, bmr, whr, ffmi, lm, fm, bt, vr, musclePct, tdee, weight: w, gender: g });
+    trackGoal('calculator_complete');
     setStep(4);
   }
 
@@ -131,7 +133,7 @@ export default function AnalyzerPage() {
             </p>
             <button
               style={btnPrimary}
-              onClick={() => setStep(1)}
+              onClick={() => { trackGoal('calculator_start'); setStep(1); }}
               onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 0 40px #22d3ee55"; }}
               onMouseOut={e => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = "0 0 30px #22d3ee33"; }}
             >
@@ -389,7 +391,7 @@ export default function AnalyzerPage() {
               Хотите узнать <span style={{ color: "#22d3ee" }}>точные цифры</span>? DXA-сканирование — золотой стандарт анализа состава тела, точность ±1-2%.
             </p>
             <button
-              onClick={() => setShowDxa(!showDxa)}
+              onClick={() => { if (!showDxa) trackGoal('dxa_info_click'); setShowDxa(!showDxa); }}
               style={btnSecondary}
               onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; }}
               onMouseOut={e => { e.target.style.transform = "translateY(0)"; }}
@@ -449,6 +451,7 @@ export default function AnalyzerPage() {
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <button
               onClick={() => {
+                trackGoal('share_result');
                 const text = `Мой анализ состава тела:\n` +
                   `▸ ${r.bt.type}\n` +
                   `Жир: ${r.bf.toFixed(1)}% (${r.fm.toFixed(1)} кг)\n` +
