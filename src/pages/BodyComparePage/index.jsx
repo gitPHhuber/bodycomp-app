@@ -606,6 +606,27 @@ export default function BodyComparePage() {
           </span>
         </p>
       </div>
+
+      {/* ───── CTA after scan ───── */}
+      {scanComplete && (
+        <div style={{ padding: "16px", textAlign: "center", borderTop: "1px solid #1e293b", marginTop: 12 }}>
+          <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 12px", lineHeight: 1.5 }}>
+            {person.id === "anna"
+              ? "Анна не подозревала о скрытом ожирении. А вы знаете свои цифры?"
+              : "Дмитрий точно знает свой состав тела. А вы?"}
+          </p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            <button onClick={() => window.location.href = "/analyzer"}
+              style={{ padding: "10px 16px", border: "none", borderRadius: 10, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>
+              Рассчитать →
+            </button>
+            <button onClick={() => window.location.href = "/clinics"}
+              style={{ padding: "10px 16px", border: "1px solid #334155", borderRadius: 10, background: "transparent", color: "#94a3b8", fontSize: 13, cursor: "pointer" }}>
+              Записаться на DXA
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
