@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SCANNER_IMAGES = {
   male: {
@@ -74,6 +75,7 @@ function ScanCountUp({ target, decimals = 1, duration = 800, active, prefix = ""
 }
 
 export default function BodyCompare() {
+  const navigate = useNavigate();
   const [who, setWho] = useState(0);
   const [scanning, setScanning] = useState(false);
   const [scanPct, setScanPct] = useState(0);
@@ -344,6 +346,27 @@ export default function BodyCompare() {
           <span style={{ color: "#e2e8f0", fontWeight: 700 }}>Весы не покажут. DXA — покажет.</span>
         </div>
       </div>
+
+      {/* ───── CTA after scan ───── */}
+      {done && (
+        <div style={{ padding: "16px", textAlign: "center", borderTop: "1px solid #1e293b", marginTop: 12 }}>
+          <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 12px", lineHeight: 1.5 }}>
+            {p.id === "anna"
+              ? "Анна не подозревала о скрытом ожирении. А вы знаете свои цифры?"
+              : "Дмитрий точно знает свой состав тела. А вы?"}
+          </p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            <button onClick={() => navigate("/analyzer")}
+              style={{ padding: "10px 16px", border: "none", borderRadius: 10, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>
+              Рассчитать →
+            </button>
+            <button onClick={() => navigate("/clinics")}
+              style={{ padding: "10px 16px", border: "1px solid #334155", borderRadius: 10, background: "transparent", color: "#94a3b8", fontSize: 13, cursor: "pointer" }}>
+              Записаться на DXA
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
