@@ -1,0 +1,112 @@
+/* ==========================================================
+   interactive.css — Hover, focus, and transition effects
+   Replaces onMouseOver/onMouseOut JS handlers with CSS :hover
+   ========================================================== */
+
+/* -- 1. Simple button lift --------------------------------- */
+.btn-lift {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-lift:hover {
+  transform: translateY(-2px);
+}
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+/* -- 2. Button lift + cyan glow ---------------------------- */
+.btn-lift-cyan {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-lift-cyan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px #22d3ee55;
+}
+.btn-lift-cyan:active {
+  transform: translateY(0);
+}
+
+/* -- 3. Button lift + purple glow -------------------------- */
+.btn-lift-purple {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-lift-purple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px #8b5cf630;
+}
+.btn-lift-purple:active {
+  transform: translateY(0);
+}
+
+/* -- 4. Button lift + dynamic glow (via --hover-shadow) ---- */
+.btn-lift-glow {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-lift-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow);
+}
+.btn-lift-glow:active {
+  transform: translateY(0);
+}
+
+/* -- 5. Secondary button lift ------------------------------ */
+.btn-lift-secondary {
+  transition: transform 0.2s;
+}
+.btn-lift-secondary:hover {
+  transform: translateY(-2px);
+}
+.btn-lift-secondary:active {
+  transform: translateY(0);
+}
+
+/* -- 6. Ghost button — border/color change to cyan --------- */
+.btn-ghost-cyan {
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost-cyan:hover {
+  border-color: #22d3ee !important;
+  color: #22d3ee !important;
+}
+
+/* -- 7. Threat card — lift + scale + shadow ---------------- */
+.card-threat {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.card-threat:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--hover-shadow);
+}
+
+/* -- 8. Fact card — slight lift + border highlight --------- */
+.item-fact {
+  transition: transform 0.3s, border-color 0.3s;
+}
+.item-fact:hover {
+  transform: translateY(-1px);
+  border-color: var(--hover-border) !important;
+}
+
+/* -- 9. Age risk card — lift + border highlight ------------ */
+.item-age-risk {
+  transition: transform 0.3s, border-color 0.3s;
+}
+.item-age-risk:hover {
+  transform: translateY(-2px);
+  border-color: var(--hover-border) !important;
+}
+
+/* -- Focus-visible for keyboard navigation ----------------- */
+.btn-lift:focus-visible,
+.btn-lift-cyan:focus-visible,
+.btn-lift-purple:focus-visible,
+.btn-lift-glow:focus-visible,
+.btn-lift-secondary:focus-visible,
+.btn-ghost-cyan:focus-visible,
+.card-threat:focus-visible,
+.item-fact:focus-visible,
+.item-age-risk:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}

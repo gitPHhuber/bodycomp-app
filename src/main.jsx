@@ -10,6 +10,7 @@ import ClinicsPage from "./pages/ClinicsPage";
 import BodyComparePage from "./pages/BodyComparePage";
 import PrivacyPage from "./pages/PrivacyPage";
 import Header from "./components/Header";
+import "./styles/interactive.css";
 
 function ScrollToTop() {
   const { pathname } = useLocation();

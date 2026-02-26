@@ -76,6 +76,7 @@ export default function ClinicCard({ clinic, isSelected, onSelect, onBook }) {
 
           <div style={{ display: "flex", gap: 8 }}>
             <button
+              className="btn-lift"
               onClick={(e) => { e.stopPropagation(); onBook(c); }}
               style={{
                 flex: 1, padding: "14px", border: "none", borderRadius: 12,
@@ -83,10 +84,7 @@ export default function ClinicCard({ clinic, isSelected, onSelect, onBook }) {
                 color: "#020617", fontSize: 14, fontWeight: 700, cursor: "pointer",
                 fontFamily: "'JetBrains Mono',monospace",
                 boxShadow: "0 0 20px #22d3ee22",
-                transition: "transform 0.2s",
               }}
-              onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
-              onMouseOut={e => e.target.style.transform = "none"}
             >
               Записаться →
             </button>
