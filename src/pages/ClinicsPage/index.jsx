@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { trackGoal } from "../../utils/analytics";
 import Reveal from "../../components/Reveal";
 
 const CITIES = ["Москва", "Санкт-Петербург", "Сочи", "Краснодар", "Другой"];
@@ -34,6 +35,8 @@ export default function ClinicsPage() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [focusedField, setFocusedField] = useState(null);
 
+  useEffect(() => { trackGoal('clinics_page_visit'); }, []);
+
   const update = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const canSubmit = form.name.trim() && form.phone.trim() && agreed && status !== "sending";
@@ -54,6 +57,7 @@ export default function ClinicsPage() {
         }),
       });
       if (res.ok) {
+        trackGoal('booking_submit');
         setStatus("sent");
       } else {
         setStatus("error");
