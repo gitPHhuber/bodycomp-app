@@ -34,7 +34,7 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
       <Particles />
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px" }}>
 
         {}
         <div style={{ textAlign: "center", paddingTop: 104, paddingBottom: 28 }}>

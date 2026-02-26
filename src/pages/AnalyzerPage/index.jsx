@@ -84,7 +84,7 @@ export default function AnalyzerPage() {
   };
 
   const containerStyle = {
-    maxWidth: 440, margin: "0 auto", padding: "0 20px",
+    maxWidth: 640, margin: "0 auto", padding: "0 20px",
   };
 
   const btnPrimary = {

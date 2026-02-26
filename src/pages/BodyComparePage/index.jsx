@@ -87,7 +87,7 @@ export default function BodyComparePage() {
       minHeight: "100vh", background: "#080e1b",
       display: "flex", flexDirection: "column", alignItems: "center",
       padding: "80px 16px 48px", fontFamily: "'Outfit',system-ui,sans-serif",
-      overflow: "hidden",
+      overflow: "hidden", maxWidth: 640, margin: "0 auto",
     }}>
       <style>{CSS_KEYFRAMES}</style>
 
