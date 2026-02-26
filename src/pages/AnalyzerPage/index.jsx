@@ -94,7 +94,6 @@ export default function AnalyzerPage() {
     fontFamily: "'JetBrains Mono', monospace",
     letterSpacing: "0.02em",
     boxShadow: "0 0 30px #22d3ee33",
-    transition: "transform 0.2s, box-shadow 0.2s",
   };
 
   const btnSecondary = {
@@ -137,10 +136,9 @@ export default function AnalyzerPage() {
               Процент жира, мышечная масса, метаболизм и риски — за 3 минуты. Бесплатно.
             </p>
             <button
+              className="btn-lift-cyan"
               style={btnPrimary}
               onClick={() => { trackGoal('calculator_start'); setStep(1); }}
-              onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 0 40px #22d3ee55"; }}
-              onMouseOut={e => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = "0 0 30px #22d3ee33"; }}
             >
               Начать анализ →
             </button>
@@ -405,10 +403,9 @@ export default function AnalyzerPage() {
               Хотите узнать <span style={{ color: "#22d3ee" }}>точные цифры</span>? DXA-сканирование — золотой стандарт анализа состава тела, точность ±1-2%.
             </p>
             <button
+              className="btn-lift-secondary"
               onClick={() => { if (!showDxa) trackGoal('dxa_info_click'); setShowDxa(!showDxa); }}
               style={btnSecondary}
-              onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; }}
-              onMouseOut={e => { e.target.style.transform = "translateY(0)"; }}
             >
               {showDxa ? "Скрыть" : "Узнать про DXA →"}
             </button>

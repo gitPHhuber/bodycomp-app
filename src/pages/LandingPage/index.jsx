@@ -54,15 +54,13 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2200}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
               <button onClick={() => navigate("/analyzer")}
-                style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20", transition: "transform 0.2s" }}
-                onMouseOver={e => e.target.style.transform = "translateY(-2px)"}
-                onMouseOut={e => e.target.style.transform = "none"}>
+                className="btn-lift"
+                style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
                 Рассчитать состав тела →
               </button>
               <button onClick={() => navigate("/xray")}
-                style={{ padding: 12, border: "1px solid #334155", borderRadius: 14, background: "transparent", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
-                onMouseOver={e => { e.target.style.borderColor = "#22d3ee"; e.target.style.color = "#22d3ee"; }}
-                onMouseOut={e => { e.target.style.borderColor = "#334155"; e.target.style.color = "#94a3b8"; }}>
+                className="btn-ghost-cyan"
+                style={{ padding: 12, border: "1px solid #334155", borderRadius: 14, background: "transparent", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                 Как работает DXA-сканер
               </button>
             </div>
@@ -228,9 +226,8 @@ export default function LandingPage() {
                     { title: "DXA видит невидимое", text: "Обычный рентген покажет проблему, когда потеряно 30%+ массы.", extra: "DXA ловит потерю от 1–2%. Разница в раннем обнаружении — 10 лет. 5 минут сканирования, доза облучения меньше чем от смартфона за день.", bar: 98, color: "#10b981", svg: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#10b981" strokeWidth="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/><circle cx="11" cy="11" r="3" stroke="#10b981" strokeWidth="1" opacity="0.4"/><circle cx="11" cy="11" r="1" fill="#10b981" opacity="0.6"/></svg> },
                   ].map((f, i) => (
                     <div key={i} onClick={(e) => { e.stopPropagation(); const det = e.currentTarget.querySelector(".fact-extra"); if (det) det.style.display = det.style.display === "none" ? "block" : "none"; }}
-                      style={{ padding: 14, borderRadius: 14, background: f.color + "06", border: `1px solid ${f.color}15`, marginBottom: 10, cursor: "pointer", animation: `fadeSlide 0.5s ease ${i * 0.15}s both`, transition: "all 0.3s" }}
-                      onMouseOver={e => { e.currentTarget.style.borderColor = f.color + "44"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                      onMouseOut={e => { e.currentTarget.style.borderColor = f.color + "15"; e.currentTarget.style.transform = "none"; }}>
+                      className="item-fact"
+                      style={{ '--hover-border': f.color + '44', padding: 14, borderRadius: 14, background: f.color + "06", border: `1px solid ${f.color}15`, marginBottom: 10, cursor: "pointer", animation: `fadeSlide 0.5s ease ${i * 0.15}s both` }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                         <div style={{ width: 36, height: 36, borderRadius: 10, background: f.color + "12", border: `1px solid ${f.color}25`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{f.svg}</div>
                         <div style={{ flex: 1 }}>
@@ -253,9 +250,8 @@ export default function LandingPage() {
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {[{ age: "20–30", risk: "Низкий", desc: "Пик массы. Время инвестировать в кости.", c: "#10b981" }, { age: "30–45", risk: "Начало потерь", desc: "Потеря 0.5–1% в год уже идёт. Пора проверить.", c: "#22d3ee" }, { age: "45–55", risk: "Повышенный", desc: "Менопауза ускоряет потерю до 3% в год.", c: "#f59e0b" }, { age: "55+", risk: "Высокий", desc: "Каждые 5 мин — перелом бедра в России.", c: "#ef4444" }].map((a, i) => (
                         <div key={i} onClick={(e) => { e.stopPropagation(); const detail = e.currentTarget.querySelector(".age-detail"); if (detail) detail.style.display = detail.style.display === "none" ? "block" : "none"; }}
-                          style={{ flex: "1 1 calc(50% - 6px)", minWidth: 130, padding: "10px 12px", borderRadius: 12, cursor: "pointer", background: a.c + "0a", border: `1px solid ${a.c}22`, transition: "all 0.3s" }}
-                          onMouseOver={e => { e.currentTarget.style.borderColor = a.c + "55"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                          onMouseOut={e => { e.currentTarget.style.borderColor = a.c + "22"; e.currentTarget.style.transform = "none"; }}>
+                          className="item-age-risk"
+                          style={{ '--hover-border': a.c + '55', flex: "1 1 calc(50% - 6px)", minWidth: 130, padding: "10px 12px", borderRadius: 12, cursor: "pointer", background: a.c + "0a", border: `1px solid ${a.c}22` }}>
                           <div style={{ fontSize: 15, fontWeight: 800, color: a.c, fontFamily: "'JetBrains Mono',monospace" }}>{a.age}</div>
                           <div style={{ fontSize: 11, fontWeight: 600, color: "#cbd5e1", marginTop: 2 }}>{a.risk}</div>
                           <div className="age-detail" style={{ display: "none", fontSize: 11, color: "#94a3b8", marginTop: 6, lineHeight: 1.5, borderTop: `1px solid ${a.c}15`, paddingTop: 6, animation: "fadeSlide 0.3s ease" }}>{a.desc}</div>
@@ -267,9 +263,8 @@ export default function LandingPage() {
                   <div style={{ textAlign: "center", marginTop: 16, padding: "14px 0" }}>
                     <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>Узнать свою плотность костей точно</div>
                     <button onClick={() => navigate("/clinics")}
-                      style={{ padding: "12px 28px", border: "none", borderRadius: 12, background: "linear-gradient(135deg,#8b5cf6,#a78bfa)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", boxShadow: "0 0 20px #8b5cf620", transition: "transform 0.2s, box-shadow 0.2s" }}
-                      onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = "0 6px 30px #8b5cf630"; }}
-                      onMouseOut={e => { e.target.style.transform = "none"; e.target.style.boxShadow = "0 0 20px #8b5cf620"; }}>
+                      className="btn-lift-purple"
+                      style={{ padding: "12px 28px", border: "none", borderRadius: 12, background: "linear-gradient(135deg,#8b5cf6,#a78bfa)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", boxShadow: "0 0 20px #8b5cf620" }}>
                       Записаться на DXA →
                     </button>
                   </div>
@@ -317,9 +312,8 @@ export default function LandingPage() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 28 }}>
           {THREATS.map((t, i) => (
             <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
-              <div style={{ ...card, padding: 14, borderColor: t.c + "1a", transition: "transform 0.3s, box-shadow 0.3s" }}
-                onMouseOver={e => { e.currentTarget.style.transform = "translateY(-4px) scale(1.02)"; e.currentTarget.style.boxShadow = `0 10px 30px ${t.c}15`; }}
-                onMouseOut={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+              <div className="card-threat"
+                style={{ ...card, '--hover-shadow': `0 10px 30px ${t.c}15`, padding: 14, borderColor: t.c + "1a" }}>
                 <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: t.c, marginBottom: 4 }}>{t.what}</div>
                 <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.55, marginBottom: 8 }}>{t.desc}</div>
@@ -337,9 +331,8 @@ export default function LandingPage() {
             <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.55, margin: "0 0 22px" }}>Бесплатный расчёт за 3 минуты — или точный DXA-анализ</p>
             {[{ label: "Рассчитать состав тела →", bg: "linear-gradient(135deg,#0891b2,#22d3ee)", s: "#22d3ee", href: "/analyzer" }, { label: "Записаться на DXA", bg: "linear-gradient(135deg,#10b981,#34d399)", s: "#10b981", href: "/clinics" }].map((b, i) => (
               <button key={i} onClick={() => navigate(b.href)}
-                style={{ display: "block", width: "100%", padding: 15, marginBottom: 8, border: "none", borderRadius: 14, background: b.bg, color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: `0 0 20px ${b.s}20`, transition: "transform 0.2s, box-shadow 0.2s" }}
-                onMouseOver={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = `0 6px 30px ${b.s}30`; }}
-                onMouseOut={e => { e.target.style.transform = "none"; e.target.style.boxShadow = `0 0 20px ${b.s}20`; }}>
+                className="btn-lift-glow"
+                style={{ '--hover-shadow': `0 6px 30px ${b.s}30`, display: "block", width: "100%", padding: 15, marginBottom: 8, border: "none", borderRadius: 14, background: b.bg, color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: `0 0 20px ${b.s}20` }}>
                 {b.label}
               </button>
             ))}

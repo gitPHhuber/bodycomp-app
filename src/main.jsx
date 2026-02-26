@@ -11,6 +11,7 @@ import BodyComparePage from "./pages/BodyComparePage";
 import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
+import "./styles/interactive.css";
 
 function ScrollToTop() {
   const { pathname } = useLocation();

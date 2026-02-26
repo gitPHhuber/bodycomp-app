@@ -13,7 +13,9 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 479px)");
+
+    const mq = window.matchMedia("(max-width: 639px)");
+
     const handler = (e) => setIsMobile(e.matches);
     setIsMobile(mq.matches);
     mq.addEventListener("change", handler);
