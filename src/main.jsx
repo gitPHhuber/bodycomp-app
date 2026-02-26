@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import AnalyzerPage from "./pages/AnalyzerPage";
 import ClinicsPage from "./pages/ClinicsPage";
 import BodyComparePage from "./pages/BodyComparePage";
+import Header from "./components/Header";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <ScrollToTop />
+      <Header />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/analyzer" element={<AnalyzerPage />} />

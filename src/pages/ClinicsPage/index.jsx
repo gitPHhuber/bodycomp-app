@@ -115,6 +115,12 @@ export default function ClinicsPage() {
 
         {/* Header */}
         <Reveal from="bottom">
+
+          <div style={{ paddingTop: 96, marginBottom: 24 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЗАПИСЬ НА DXA</div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Ближайшие денситометры
+
           <div style={{ paddingTop: 40, marginBottom: 28 }}>
             <div style={{
               fontSize: 11, color: "#22d3ee",
@@ -129,6 +135,7 @@ export default function ClinicsPage() {
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             }}>
               Запись на DXA-сканирование
+
             </h1>
             <p style={{ fontSize: 14, color: "#94a3b8", margin: 0, lineHeight: 1.5 }}>
               Оставьте заявку — мы подберём ближайшую клинику с аппаратом Stratos&nbsp;dR и свяжемся с вами

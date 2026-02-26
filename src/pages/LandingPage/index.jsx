@@ -30,7 +30,7 @@ export default function LandingPage() {
       <div style={{ position: "relative", zIndex: 1, maxWidth: 480, margin: "0 auto", padding: "0 20px 60px" }}>
 
         {}
-        <div style={{ textAlign: "center", paddingTop: 48, paddingBottom: 28 }}>
+        <div style={{ textAlign: "center", paddingTop: 104, paddingBottom: 28 }}>
           <Reveal from="scale" delay={200}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 50, background: "#ef444412", border: "1px solid #ef444430", marginBottom: 20 }}>
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", animation: "pulse2 1.5s ease infinite" }} />

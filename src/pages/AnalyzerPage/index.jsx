@@ -109,7 +109,7 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           {/* Hero */}
-          <div style={{ textAlign: "center", paddingTop: 60, paddingBottom: 40 }}>
+          <div style={{ textAlign: "center", paddingTop: 116, paddingBottom: 40 }}>
             <div style={{
               width: 80, height: 80, borderRadius: 20, margin: "0 auto 24px",
               background: "linear-gradient(135deg, #0891b2, #22d3ee)",
@@ -175,7 +175,7 @@ export default function AnalyzerPage() {
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 40, marginBottom: 32 }}>
+          <div style={{ paddingTop: 96, marginBottom: 32 }}>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 1 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Ваш пол</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Формулы расчёта отличаются для мужчин и женщин</p>
@@ -214,7 +214,7 @@ export default function AnalyzerPage() {
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 40, marginBottom: 32 }}>
+          <div style={{ paddingTop: 96, marginBottom: 32 }}>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 2 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Базовые параметры</h2>
           </div>
@@ -267,7 +267,7 @@ export default function AnalyzerPage() {
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 40, marginBottom: 24 }}>
+          <div style={{ paddingTop: 96, marginBottom: 24 }}>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 3 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Обхваты тела</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Измерьте сантиметровой лентой</p>
@@ -314,7 +314,7 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           {/* Header */}
-          <div style={{ paddingTop: 40, textAlign: "center", marginBottom: 32 }}>
+          <div style={{ paddingTop: 96, textAlign: "center", marginBottom: 32 }}>
             <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>{getBodyTypeIcon(r.bt.type)}</div>
             <h2 style={{
               fontSize: 28, fontWeight: 800, margin: "0 0 6px",
