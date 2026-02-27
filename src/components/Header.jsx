@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import * as tracker from "../lib/tracker";
 
 const NAV_LINKS = [
   { to: "/analyzer", label: "Анализ" },
@@ -78,6 +79,7 @@ export default function Header() {
                 <Link
                   key={link.to}
                   to={link.to}
+                  onClick={() => tracker.trackClick("nav", { to: link.to })}
                   style={{
                     color: linkColor(link.to),
                     textDecoration: "none",
@@ -158,6 +160,7 @@ export default function Header() {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={() => tracker.trackClick("nav_mobile", { to: link.to })}
                 style={{
                   color: linkColor(link.to),
                   textDecoration: "none",

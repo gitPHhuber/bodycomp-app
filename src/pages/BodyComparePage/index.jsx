@@ -4,6 +4,7 @@ import { CSS_KEYFRAMES } from "./keyframes";
 import { useCountUp } from "./useCountUp";
 import { statColor, isDanger, annotColor } from "./colorHelpers";
 import { useMeta } from "../../utils/useMeta";
+import * as tracker from "../../lib/tracker";
 
 export default function BodyComparePage() {
   useMeta(
@@ -57,6 +58,7 @@ export default function BodyComparePage() {
   /* ─── Handlers ─── */
   const switchPerson = useCallback((idx) => {
     if (idx === personIdx || scanning) return;
+    tracker.trackClick("xray_person_tab", { person: XRAY_DATA[idx].id });
     setTransitioning(true);
     setTimeout(() => {
       setPersonIdx(idx);
@@ -69,10 +71,11 @@ export default function BodyComparePage() {
 
   const startScan = useCallback(() => {
     if (scanning) return;
+    tracker.trackClick("xray_scan_start", { person: person.id });
     setScanPos(0);
     setScanComplete(false);
     setScanning(true);
-  }, [scanning]);
+  }, [scanning, person.id]);
 
   /* ─── Derived ─── */
   const scanY = (scanPos / 100) * 460;
@@ -616,11 +619,11 @@ export default function BodyComparePage() {
               : "Дмитрий точно знает свой состав тела. А вы?"}
           </p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            <button onClick={() => window.location.href = "/analyzer"}
+            <button onClick={() => { tracker.trackClick("cta_analyzer_xray"); window.location.href = "/analyzer"; }}
               style={{ padding: "10px 16px", border: "none", borderRadius: 10, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace" }}>
               Рассчитать →
             </button>
-            <button onClick={() => window.location.href = "/clinics"}
+            <button onClick={() => { tracker.trackClick("cta_clinics_xray"); window.location.href = "/clinics"; }}
               style={{ padding: "10px 16px", border: "1px solid #334155", borderRadius: 10, background: "transparent", color: "#94a3b8", fontSize: 13, cursor: "pointer" }}>
               Записаться на DXA
             </button>

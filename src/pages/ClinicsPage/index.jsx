@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { trackGoal } from "../../utils/analytics";
+import * as tracker from "../../lib/tracker";
 import Reveal from "../../components/Reveal";
 import { useMeta } from "../../utils/useMeta";
 import { CLINICS, CITIES } from "./data";
@@ -76,6 +77,7 @@ export default function ClinicsPage() {
       });
       if (res.ok) {
         trackGoal('booking_submit');
+        tracker.trackClick("waitlist_submit", { city: form.city });
         setStatus("sent");
       } else {
         setStatus("error");
@@ -129,6 +131,7 @@ export default function ClinicsPage() {
               <button
                 key={city}
                 onClick={() => {
+                  tracker.trackClick("city_filter", { city });
                   setSelectedCity(city);
                   setSelectedClinicId(null);
                 }}
@@ -170,6 +173,7 @@ export default function ClinicsPage() {
               onSelect={(id) => setSelectedClinicId(id === selectedClinicId ? null : id)}
               onBook={(c) => {
                 trackGoal('clinic_book_click');
+                tracker.trackBookingClick(c.id);
                 setBookingClinic(c);
               }}
             />
@@ -402,6 +406,7 @@ export default function ClinicsPage() {
           onClose={() => setBookingClinic(null)}
           onConfirm={() => {
             trackGoal('booking_confirmed');
+            tracker.trackClick("booking_confirmed");
           }}
         />
       )}
