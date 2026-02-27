@@ -1,14 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { trackGoal } from "../../utils/analytics";
 import * as tracker from "../../lib/tracker";
+import { getSessionId } from "../../lib/tracker";
+import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../context/AuthContext";
 import { Icons, getBodyTypeIcon } from "./Icons";
 import { calc } from "./calculations";
 import Gauge from "./Gauge";
 import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
+import ShareCard from "../../components/ShareCard";
 import { useMeta } from "../../utils/useMeta";
+
+const BodyModel3D = lazy(() => import("../LandingPage/BodyModel3D"));
 
 export default function AnalyzerPage() {
   useMeta(
@@ -27,7 +33,12 @@ export default function AnalyzerPage() {
   const [activity, setActivity] = useState("moderate");
   const [results, setResults] = useState(null);
   const [showDxa, setShowDxa] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [sharingPng, setSharingPng] = useState(false);
   const topRef = useRef(null);
+  const shareCardRef = useRef(null);
+  const { user, profile, requireAuth } = useAuth();
 
   useEffect(() => {
     if (topRef.current) topRef.current.scrollIntoView({ behavior: "smooth" });
@@ -70,6 +81,71 @@ export default function AnalyzerPage() {
       fat_pct: bf, muscle_kg: lm * 0.55, visceral_level: vr.level, bmi,
     });
     setStep(4);
+  }
+
+  async function saveResult() {
+    if (!supabase || !results || saving) return;
+    setSaving(true);
+    try {
+      const { data: userRow } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+
+      if (userRow) {
+        await supabase.from("calc_results").insert({
+          user_id: userRow.id,
+          session_id: getSessionId(),
+          height_cm: parseFloat(height),
+          weight_kg: parseFloat(weight),
+          age: parseInt(age),
+          gender,
+          waist_cm: parseFloat(waist),
+          hip_cm: parseFloat(hip) || null,
+          neck_cm: parseFloat(neck),
+          fat_pct: results.bf,
+          muscle_kg: results.lm * 0.55,
+          visceral_level: results.vr.level,
+          bmi: results.bmi,
+        });
+        setSaved(true);
+      }
+    } catch {
+      // Silent failure
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function shareAsPng() {
+    if (sharingPng) return;
+    setSharingPng(true);
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const el = shareCardRef.current;
+      if (!el) return;
+      const canvas = await html2canvas(el, { backgroundColor: "#020617", scale: 2 });
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      const file = new File([blob], "bodycomp-result.png", { type: "image/png" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], text: "Мой анализ состава тела" });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "bodycomp-result.png";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      trackGoal("share_png");
+      tracker.trackShare("png_card");
+    } catch {
+      // User cancelled or error
+    } finally {
+      setSharingPng(false);
+    }
   }
 
   const activityLabels = {
@@ -369,6 +445,16 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+          {/* 3D Body Model */}
+          <div style={cardStyle}>
+            <div style={{ fontSize: 13, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+              3D-модель
+            </div>
+            <Suspense fallback={<div style={{ height: 280, display: "flex", alignItems: "center", justifyContent: "center", color: "#475569", fontSize: 13 }}>Загрузка модели...</div>}>
+              <BodyModel3D fatPct={r.bf} height={280} />
+            </Suspense>
+          </div>
+
           {/* Stat Cards */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
             <StatCard label="ИМТ" value={r.bmi.toFixed(1)} unit="" sub={r.bmi < 18.5 ? "Дефицит" : r.bmi < 25 ? "Норма" : r.bmi < 30 ? "Избыток" : "Ожирение"} color="#f59e0b" delay={100} />
@@ -400,14 +486,23 @@ export default function AnalyzerPage() {
             border: "1px solid #0891b244",
           }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#22d3ee", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-              {Icons.alert(18, "#22d3ee")} Точность: ±8-12%
+              {Icons.alert(18, "#22d3ee")} Погрешность ±8%
             </div>
             <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
-              Формулы дают приблизительную оценку. Домашние весы-анализаторы ошибаются ещё больше — до ±15%.
+              Этот расчёт имеет погрешность ±8%. DXA-сканирование даёт точность ±1–2%.
             </p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0", margin: "0 0 16px" }}>
-              Хотите узнать <span style={{ color: "#22d3ee" }}>точные цифры</span>? DXA-сканирование — золотой стандарт анализа состава тела, точность ±1-2%.
-            </p>
+            <button
+              className="btn-lift"
+              onClick={() => navigate("/clinics")}
+              style={{
+                background: "none", border: "1px solid #22d3ee44", borderRadius: 12,
+                color: "#22d3ee", padding: "10px 16px", cursor: "pointer",
+                fontSize: 13, fontWeight: 600, marginBottom: 16,
+                fontFamily: "'Outfit', sans-serif",
+              }}
+            >
+              → Найти клинику
+            </button>
             <button
               className="btn-lift-secondary"
               onClick={() => { if (!showDxa) { trackGoal('dxa_info_click'); tracker.trackClick("dxa_info_toggle"); } setShowDxa(!showDxa); }}
@@ -464,8 +559,31 @@ export default function AnalyzerPage() {
             </div>
           )}
 
+          {/* Save Result */}
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <button
+              onClick={() => requireAuth(() => saveResult())}
+              disabled={saved || saving}
+              style={{
+                ...btnPrimary,
+                opacity: saved ? 0.6 : 1,
+                background: saved ? "#10b981" : btnPrimary.background,
+                boxShadow: saved ? "0 0 30px #10b98133" : btnPrimary.boxShadow,
+              }}
+            >
+              {saving ? "Сохраняем..." : saved ? "Сохранено" : "Сохранить результат"}
+            </button>
+          </div>
+
           {/* Share */}
-          <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <button
+              onClick={shareAsPng}
+              disabled={sharingPng}
+              style={{ ...btnPrimary, background: "#1e293b", color: "#94a3b8", boxShadow: "none", fontSize: 14, flex: 1 }}
+            >
+              {sharingPng ? "..." : "Поделиться картинкой"}
+            </button>
             <button
               onClick={() => {
                 trackGoal('share_result');
@@ -483,10 +601,15 @@ export default function AnalyzerPage() {
                   alert("Скопировано!");
                 }
               }}
-              style={{ ...btnPrimary, background: "#1e293b", color: "#94a3b8", boxShadow: "none", fontSize: 14 }}
+              style={{ ...btnPrimary, background: "#1e293b", color: "#94a3b8", boxShadow: "none", fontSize: 14, flex: 1 }}
             >
-              📤 Поделиться результатом
+              Текстом
             </button>
+          </div>
+
+          {/* Hidden share card for html2canvas */}
+          <div style={{ position: "absolute", left: -9999, top: 0 }}>
+            <ShareCard ref={shareCardRef} results={r} />
           </div>
 
           {/* Restart */}

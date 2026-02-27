@@ -3,7 +3,7 @@ import { supabase } from "./supabase";
 // ── Session ID ──────────────────────────────────────────────
 const SESSION_KEY = "bc_session_id";
 
-function getSessionId() {
+export function getSessionId() {
   let id = sessionStorage.getItem(SESSION_KEY);
   if (!id) {
     id = crypto.randomUUID();
@@ -41,6 +41,13 @@ function getUtmParams() {
   return utm;
 }
 
+// ── User ID (set after auth) ────────────────────────────────
+let currentUserId = null;
+
+export function setTrackerUserId(userId) {
+  currentUserId = userId;
+}
+
 // ── Event queue & batching ──────────────────────────────────
 let queue = [];
 let flushTimer = null;
@@ -54,6 +61,7 @@ function enqueue(eventType, page, element, meta) {
 
   queue.push({
     session_id: getSessionId(),
+    user_id: currentUserId || undefined,
     event_type: eventType,
     page: page || window.location.pathname,
     element: element || undefined,
@@ -151,6 +159,7 @@ export function trackCalcComplete(results) {
       .from("calc_results")
       .insert({
         session_id: getSessionId(),
+        user_id: currentUserId || undefined,
         height_cm: results.height_cm,
         weight_kg: results.weight_kg,
         age: results.age,

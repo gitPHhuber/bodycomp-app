@@ -1,10 +1,13 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { trackPageView } from "./utils/analytics";
 import * as tracker from "./lib/tracker";
+import { AuthProvider } from "./context/AuthContext";
+import AuthModal from "./components/AuthModal";
+import ProtectedRoute from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import AnalyzerPage from "./pages/AnalyzerPage";
 import ClinicsPage from "./pages/ClinicsPage";
@@ -13,6 +16,8 @@ import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
 import "./styles/interactive.css";
+
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -78,20 +83,39 @@ function TrackingProvider() {
   return null;
 }
 
+const ProfileFallback = () => (
+  <div style={{
+    minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center",
+    background: "#020617", color: "#64748b", fontFamily: "'JetBrains Mono', monospace", fontSize: 14,
+  }}>
+    Загрузка...
+  </div>
+);
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ScrollToTop />
-      <TrackingProvider />
-      <Header />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/analyzer" element={<AnalyzerPage />} />
-        <Route path="/clinics" element={<ClinicsPage />} />
-        <Route path="/xray" element={<BodyComparePage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <AuthProvider>
+        <ScrollToTop />
+        <TrackingProvider />
+        <Header />
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/analyzer" element={<AnalyzerPage />} />
+          <Route path="/clinics" element={<ClinicsPage />} />
+          <Route path="/xray" element={<BodyComparePage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Suspense fallback={<ProfileFallback />}>
+                <ProfilePage />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+        <AuthModal />
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
