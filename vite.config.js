@@ -11,6 +11,7 @@ export default defineConfig({
         manualChunks: {
           three: ["three"],
           router: ["react-router-dom"],
+          charts: ["recharts"],
         },
       },
     },
