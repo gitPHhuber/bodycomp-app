@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
+import * as tracker from "../../lib/tracker";
 
 export default function BodyModel3D({ fatPct = 25, height = 340 }) {
   const mountRef = useRef(null);
@@ -173,7 +174,7 @@ export default function BodyModel3D({ fatPct = 25, height = 340 }) {
     };
   }, [fatPct, height]);
 
-  const dn = e => { setDragging(true); dRef.current = { x: e.clientX || e.touches?.[0]?.clientX || 0, ry: sRef.current.body?.rotation.y || 0 }; };
+  const dn = e => { setDragging(true); tracker.track3DInteraction("body_model", "rotate"); dRef.current = { x: e.clientX || e.touches?.[0]?.clientX || 0, ry: sRef.current.body?.rotation.y || 0 }; };
   const mv = useCallback(e => {
     if (!dragging || !sRef.current.body) return;
     const x = e.clientX || e.touches?.[0]?.clientX || 0;

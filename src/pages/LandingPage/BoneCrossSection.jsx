@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import * as tracker from "../../lib/tracker";
 
 export default function BoneCrossSection({ density = 0.8, height = 280 }) {
   const mountRef = useRef(null);
@@ -169,7 +170,7 @@ export default function BoneCrossSection({ density = 0.8, height = 280 }) {
     };
     animate();
 
-    const onDown = (e) => { dragRef.current.active = true; dragRef.current.x = (e.clientX || e.touches?.[0]?.clientX || 0); dragRef.current.rotY = femur.rotation.y; };
+    const onDown = (e) => { dragRef.current.active = true; tracker.track3DInteraction("bone_model", "rotate"); dragRef.current.x = (e.clientX || e.touches?.[0]?.clientX || 0); dragRef.current.rotY = femur.rotation.y; };
     const onMove = (e) => { if (!dragRef.current.active) return; const cx = (e.clientX || e.touches?.[0]?.clientX || 0); femur.rotation.y = dragRef.current.rotY + (cx - dragRef.current.x) * 0.01; };
     const onUp = () => { dragRef.current.active = false; };
 
@@ -193,6 +194,7 @@ export default function BoneCrossSection({ density = 0.8, height = 280 }) {
     };
     const onWheel = (e) => {
       e.preventDefault();
+      tracker.track3DInteraction("bone_model", "zoom");
       const factor = e.deltaY > 0 ? 0.92 : 1.08;
       zoomRef.current.scale = Math.max(0.5, Math.min(2.5, zoomRef.current.scale * factor));
     };

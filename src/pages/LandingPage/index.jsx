@@ -7,6 +7,7 @@ import CountingStat from "./CountingStat";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
+import * as tracker from "../../lib/tracker";
 
 const Particles = lazy(() => import("./Particles"));
 const BodyModel3D = lazy(() => import("./BodyModel3D"));
@@ -76,12 +77,12 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={1800}><p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.65, maxWidth: 360, margin: "0 auto" }}>Одинаковый вес — совершенно разное здоровье.</p></Reveal>
           <Reveal from="bottom" delay={2200}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
-              <button onClick={() => navigate("/analyzer")}
+              <button onClick={() => { tracker.trackClick("cta_analyzer_hero"); navigate("/analyzer"); }}
                 className="btn-lift"
                 style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
                 Рассчитать состав тела →
               </button>
-              <button onClick={() => navigate("/xray")}
+              <button onClick={() => { tracker.trackClick("cta_xray_hero"); navigate("/xray"); }}
                 className="btn-ghost-cyan"
                 style={{ padding: 12, border: "1px solid #334155", borderRadius: 14, background: "transparent", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                 Как работает DXA-сканер
@@ -131,7 +132,7 @@ export default function LandingPage() {
           const renderIcon = PROFILE_ICONS[p.icon];
           return (
             <Reveal key={p.id} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
-              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => setRevealed(r => ({ ...r, [p.id]: true }))}>
+              <div style={{ ...card, marginBottom: 14, cursor: "pointer", borderColor: rv ? p.vc + "55" : "#334155", boxShadow: rv ? `0 0 30px ${p.vc}10` : "none", transition: "all 0.35s" }} onClick={() => { if (!rv) tracker.trackClick("profile_reveal", { profile: p.id }); setRevealed(r => ({ ...r, [p.id]: true })); }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
                   <div style={{ width: 50, height: 50, borderRadius: 14, background: "#020617", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #1e293b" }}>
                     {renderIcon ? renderIcon(26, p.vc) : p.icon}
@@ -168,7 +169,7 @@ export default function LandingPage() {
             <h3 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 14px" }}>Два человека по 80 кг. У кого выше риск инфаркта?</h3>
             {[{ id: "a", t: "У того, кто выглядит полнее", ok: false }, { id: "b", t: "У того, у кого больше висцерального жира — даже если стройнее", ok: true }, { id: "c", t: "Риск одинаков — вес же одинаковый", ok: false }].map(o => {
               const s = quiz === o.id, g = quizDone && o.ok, b2 = quizDone && s && !o.ok;
-              return <button key={o.id} onClick={() => { if (!quizDone) { setQuiz(o.id); setTimeout(() => setQuizDone(true), 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b2 ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b2 ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b2 && "✗ "}{o.t}</button>;
+              return <button key={o.id} onClick={() => { if (!quizDone) { if (!quiz) tracker.trackQuizStart("visceral-fat"); setQuiz(o.id); setTimeout(() => { setQuizDone(true); tracker.trackQuizComplete("visceral-fat", o.ok ? 1 : 0, { selected: o.id, correct: o.ok }); }, 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b2 ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b2 ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b2 && "✗ "}{o.t}</button>;
             })}
             {quizDone && <div style={{ padding: 14, borderRadius: 12, background: "#10b98110", border: "1px solid #10b98130", animation: "fadeSlide 0.6s ease", marginTop: 6, fontSize: 13, color: "#cbd5e1", lineHeight: 1.7 }}><b style={{ color: "#10b981" }}>Висцеральный жир</b> невидим снаружи, но является предиктором №1 болезней сердца и диабета. <b>Единственный способ измерить точно — DXA-сканирование.</b></div>}
           </div>
@@ -192,7 +193,7 @@ export default function LandingPage() {
               <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{fd.detail}</div>
             </div>
             <div style={{ padding: "0 4px" }}>
-              <input type="range" min={6} max={45} value={fat} onChange={e => setFat(+e.target.value)} style={{ width: "100%", accentColor: fd.color, height: 6, cursor: "pointer" }} />
+              <input type="range" min={6} max={45} value={fat} onChange={e => { setFat(+e.target.value); tracker.track3DInteraction("body_model", "fat_slider"); }} style={{ width: "100%", accentColor: fd.color, height: 6, cursor: "pointer" }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>
                 <span>6%</span><span>15%</span><span>25%</span><span>35%</span><span>45%</span>
               </div>
@@ -213,7 +214,7 @@ export default function LandingPage() {
           const op = myth === i;
           return (
             <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
-              <div onClick={() => setMyth(op ? null : i)} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
+              <div onClick={() => { if (!op) tracker.trackClick("myth_open", { index: i }); setMyth(op ? null : i); }} style={{ ...card, marginBottom: 10, cursor: "pointer", padding: op ? 22 : 16, borderColor: op ? "#f59e0b30" : "#334155", transition: "all 0.3s" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                   <span style={{ fontSize: 24, transition: "transform 0.3s", transform: op ? "scale(1.25) rotate(-8deg)" : "none" }}>{m.icon}</span>
                   <div style={{ flex: 1 }}>
@@ -261,7 +262,7 @@ export default function LandingPage() {
         {/* ═══ Block 9: Bones (simplified) ═══ */}
         <Reveal from="right" delay={100}>
           <div style={{ marginBottom: 28 }}>
-            <div onClick={() => setBoneOpen(o => !o)} style={{ ...card, cursor: "pointer", borderColor: boneOpen ? "#8b5cf655" : "#ef444440", background: boneOpen ? "linear-gradient(135deg,#0f172a,#1e293b)" : "linear-gradient(135deg,#1a0a0a,#1e293b)", boxShadow: boneOpen ? "0 0 40px #8b5cf610" : "0 0 30px #ef444408", transition: "all 0.5s ease", position: "relative", overflow: "hidden" }}>
+            <div onClick={() => { setBoneOpen(o => { if (!o) tracker.trackClick("bone_section_open"); return !o; }); }} style={{ ...card, cursor: "pointer", borderColor: boneOpen ? "#8b5cf655" : "#ef444440", background: boneOpen ? "linear-gradient(135deg,#0f172a,#1e293b)" : "linear-gradient(135deg,#1a0a0a,#1e293b)", boxShadow: boneOpen ? "0 0 40px #8b5cf610" : "0 0 30px #ef444408", transition: "all 0.5s ease", position: "relative", overflow: "hidden" }}>
               {!boneOpen && <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle, #ef444415, transparent 70%)", animation: "pulse2 3s ease-in-out infinite" }} />}
               <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: boneOpen ? "#8b5cf610" : "#ef444412", border: `1px solid ${boneOpen ? "#8b5cf633" : "#ef444425"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.4s" }}>
@@ -302,11 +303,11 @@ export default function LandingPage() {
                     </div>
                     <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{bd.detail}</div>
                   </div>
-                  <input type="range" min={15} max={100} value={bone} onChange={e => setBone(+e.target.value)} style={{ width: "100%", accentColor: bd.color, height: 6, cursor: "pointer" }} />
+                  <input type="range" min={15} max={100} value={bone} onChange={e => { setBone(+e.target.value); tracker.track3DInteraction("bone_model", "density_slider"); }} style={{ width: "100%", accentColor: bd.color, height: 6, cursor: "pointer" }} />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontFamily: "'JetBrains Mono',monospace", marginTop: 2, marginBottom: 18 }}>
                     <span style={{ color: "#dc2626" }}>Тяжёлый</span><span style={{ color: "#ef4444" }}>Остеопороз</span><span style={{ color: "#f59e0b" }}>Остеопения</span><span style={{ color: "#10b981" }}>Норма</span>
                   </div>
-                  <div onClick={() => navigate("/clinics")} style={{ textAlign: "center", padding: "14px 0", cursor: "pointer" }}>
+                  <div onClick={() => { tracker.trackClick("cta_clinics_bone"); navigate("/clinics"); }} style={{ textAlign: "center", padding: "14px 0", cursor: "pointer" }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: "#a78bfa", transition: "color 0.3s" }}>Хотите узнать свою плотность? →</span>
                   </div>
                 </div>
@@ -321,8 +322,8 @@ export default function LandingPage() {
             <div style={{ marginBottom: 14, animation: "float 3s ease-in-out infinite", display: "inline-block" }}>{Icons.bodyScan(44, "#22d3ee")}</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg,#e2e8f0,#22d3ee)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Узнайте свои реальные цифры</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.55, margin: "0 0 22px" }}>Бесплатный расчёт за 3 минуты — или точный DXA-анализ</p>
-            {[{ label: "Рассчитать состав тела →", bg: "linear-gradient(135deg,#0891b2,#22d3ee)", s: "#22d3ee", href: "/analyzer" }, { label: "Записаться на DXA", bg: "linear-gradient(135deg,#10b981,#34d399)", s: "#10b981", href: "/clinics" }].map((b, i) => (
-              <button key={i} onClick={() => navigate(b.href)}
+            {[{ label: "Рассчитать состав тела →", bg: "linear-gradient(135deg,#0891b2,#22d3ee)", s: "#22d3ee", href: "/analyzer", el: "cta_analyzer_bottom" }, { label: "Записаться на DXA", bg: "linear-gradient(135deg,#10b981,#34d399)", s: "#10b981", href: "/clinics", el: "cta_clinics_bottom" }].map((b, i) => (
+              <button key={i} onClick={() => { tracker.trackClick(b.el); navigate(b.href); }}
                 className="btn-lift-glow"
                 style={{ '--hover-shadow': `0 6px 30px ${b.s}30`, display: "block", width: "100%", padding: 15, marginBottom: 8, border: "none", borderRadius: 14, background: b.bg, color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: `0 0 20px ${b.s}20` }}>
                 {b.label}
