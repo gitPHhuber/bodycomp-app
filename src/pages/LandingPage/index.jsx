@@ -2,13 +2,13 @@ import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import "./keyframes";
 import Reveal from "../../components/Reveal";
-import Particles from "./Particles";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
 import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
 
+const Particles = lazy(() => import("./Particles"));
 const BodyModel3D = lazy(() => import("./BodyModel3D"));
 const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
 const BodyCompare = lazy(() => import("./BodyCompare"));
@@ -39,6 +39,15 @@ export default function LandingPage() {
   const [fat, setFat] = useState(25);
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
+
+  useEffect(() => {
+    const schedule = typeof requestIdleCallback === "function" ? requestIdleCallback : (cb) => setTimeout(cb, 200);
+    const id = schedule(() => setShowParticles(true));
+    return () => {
+      (typeof cancelIdleCallback === "function" ? cancelIdleCallback : clearTimeout)(id);
+    };
+  }, []);
 
   const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
   const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
@@ -47,7 +56,7 @@ export default function LandingPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
-      <Particles />
+      {showParticles && <Suspense fallback={null}><Particles /></Suspense>}
       <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px" }}>
 
         {/* ═══ Block 1: Hero ═══ */}
