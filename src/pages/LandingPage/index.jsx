@@ -104,6 +104,18 @@ export default function LandingPage() {
               </button>
             </div>
           </Reveal>
+          <Reveal from="scale" delay={2400}>
+            <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
+              <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
+                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" loop />
+                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} loop />
+                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} loop />
+              </div>
+              <div style={{ textAlign: "center", paddingBottom: 14 }}>
+                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
+              </div>
+            </div>
+          </Reveal>
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
@@ -279,21 +291,11 @@ export default function LandingPage() {
           );
         })}
 
-        {/* ═══ Block 8: Statistics + Threats (combined) ═══ */}
+        {/* ═══ Block 8: Threats ═══ */}
         <Reveal from="scale" delay={100}>
           <div style={{ marginTop: 18, marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#ef4444", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЦИФРЫ ПО РОССИИ</div>
             <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 14px" }}>Почему это важно</h2>
-            <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                <CountingStat value="14" suffix=" млн" label="больны остеопорозом" duration={3200} />
-                <CountingStat value="20" suffix=" млн" label="остеопения" duration={3800} />
-                <CountingStat value="40" suffix="%" label="скрытый избыток жира" duration={4500} />
-              </div>
-              <div style={{ textAlign: "center", paddingBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
-              </div>
-            </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {THREATS.map((t, i) => (
                 <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 100}>
