@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as tracker from "../lib/tracker";
 import { useAuth } from "../context/AuthContext";
 
@@ -14,6 +14,8 @@ export default function Header() {
   const { user, profile, setShowAuthModal } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [ctaHover, setCtaHover] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
 
@@ -97,6 +99,28 @@ export default function Header() {
                 </Link>
               ))}
 
+              {/* CTA Booking */}
+              <button
+                onClick={() => { tracker.trackClick("header_cta_booking"); navigate("/clinics"); }}
+                onMouseEnter={() => setCtaHover(true)}
+                onMouseLeave={() => setCtaHover(false)}
+                style={{
+                  background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+                  color: "#020617",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "7px 16px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  boxShadow: ctaHover ? "0 0 20px #22d3ee33" : "none",
+                }}
+              >
+                Записаться
+              </button>
+
               {/* Profile / Login */}
               {user ? (
                 <Link
@@ -169,6 +193,24 @@ export default function Header() {
                   </svg>
                 </button>
               )}
+              {/* CTA Booking mobile */}
+              <button
+                onClick={() => { tracker.trackClick("header_cta_booking_mobile"); navigate("/clinics"); }}
+                style={{
+                  background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+                  color: "#020617",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                DXA
+              </button>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 style={{
@@ -307,6 +349,28 @@ export default function Header() {
                 Войти
               </button>
             )}
+
+            {/* CTA Booking in mobile menu */}
+            <button
+              onClick={() => { setMenuOpen(false); tracker.trackClick("header_cta_booking_mobile"); navigate("/clinics"); }}
+              style={{
+                width: "100%",
+                marginTop: 8,
+                background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+                color: "#020617",
+                border: "none",
+                borderRadius: 12,
+                padding: "14px 20px",
+                fontSize: 16,
+                fontWeight: 700,
+                fontFamily: "'JetBrains Mono', monospace",
+                cursor: "pointer",
+                textAlign: "center",
+                transition: "all 0.2s",
+              }}
+            >
+              Записаться на DXA →
+            </button>
           </div>
         </div>
       )}
