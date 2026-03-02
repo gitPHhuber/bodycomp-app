@@ -97,6 +97,15 @@
   border-color: var(--hover-border) !important;
 }
 
+/* -- 10. Pulse glow animation ----------------------------- */
+.btn-pulse {
+  animation: btnPulse 3s ease-in-out infinite;
+}
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 20px #22d3ee20; }
+  50% { box-shadow: 0 0 40px #22d3ee40, 0 0 60px #22d3ee15; }
+}
+
 /* -- Focus-visible for keyboard navigation ----------------- */
 .btn-lift:focus-visible,
 .btn-lift-cyan:focus-visible,

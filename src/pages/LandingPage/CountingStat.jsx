@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function CountingStat({ value, suffix, label, duration = 2000 }) {
+export default function CountingStat({ value, suffix, label, duration = 2000, loop = false }) {
   const [cur, setCur] = useState(0);
   const [started, setStarted] = useState(false);
+  const [cycle, setCycle] = useState(0);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -17,15 +18,23 @@ export default function CountingStat({ value, suffix, label, duration = 2000 }) 
     if (!started) return;
     const num = parseFloat(value);
     if (isNaN(num)) return;
+    setCur(0);
     const s = Date.now();
+    let raf;
+    let timer;
     const tick = () => {
       const p = Math.min((Date.now() - s) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 5);
       setCur(eased * num);
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      } else if (loop) {
+        timer = setTimeout(() => setCycle(c => c + 1), 3000);
+      }
     };
-    requestAnimationFrame(tick);
-  }, [started, value, duration]);
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
+  }, [started, value, duration, loop, cycle]);
 
   const p = parseFloat(value) > 0 ? cur / parseFloat(value) : 0;
   let r, g, b;
@@ -53,7 +62,7 @@ export default function CountingStat({ value, suffix, label, duration = 2000 }) 
   return (
     <div ref={ref} style={{ flex: "0 0 auto", textAlign: "center", padding: "16px 20px", minWidth: 120 }}>
       <div style={{ fontSize: 38, fontWeight: 900, fontFamily: "'JetBrains Mono',monospace", color, textShadow: glow, lineHeight: 1.1 }}>
-        {suffix === "%" ? Math.round(cur) : cur.toFixed(cur < 10 ? 1 : 0).replace(/\.0$/, "")}{suffix}
+        {suffix === "%" ? Math.round(cur) : Math.round(cur).toLocaleString("ru-RU")}{suffix}
       </div>
       <div style={{ fontSize: 11, color: "#64748b", marginTop: 6, lineHeight: 1.3, maxWidth: 110, margin: "6px auto 0" }}>{label}</div>
     </div>
