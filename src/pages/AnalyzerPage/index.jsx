@@ -483,8 +483,17 @@ export default function AnalyzerPage() {
           <div style={{
             background: "linear-gradient(135deg, #0c4a6e22, #164e6333)",
             borderRadius: 20, padding: 24, marginBottom: 16,
-            border: "1px solid #0891b244",
+            border: "1px solid #22d3ee44",
+            boxShadow: "0 0 30px #22d3ee10, inset 0 1px 0 #22d3ee15",
           }}>
+            <h3 style={{
+              fontSize: 18, fontWeight: 800, margin: "0 0 8px",
+              background: "linear-gradient(135deg, #22d3ee, #0891b2)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              lineHeight: 1.3,
+            }}>
+              Хотите узнать точные цифры?
+            </h3>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#22d3ee", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
               {Icons.alert(18, "#22d3ee")} Погрешность ±8%
             </div>
@@ -492,16 +501,18 @@ export default function AnalyzerPage() {
               Этот расчёт имеет погрешность ±8%. DXA-сканирование даёт точность ±1–2%.
             </p>
             <button
-              className="btn-lift"
-              onClick={() => navigate("/clinics")}
+              className="btn-lift btn-pulse"
+              onClick={() => { tracker.trackClick("results_cta_dxa"); navigate("/clinics"); }}
               style={{
-                background: "none", border: "1px solid #22d3ee44", borderRadius: 12,
-                color: "#22d3ee", padding: "10px 16px", cursor: "pointer",
-                fontSize: 13, fontWeight: 600, marginBottom: 16,
-                fontFamily: "'Outfit', sans-serif",
+                width: "100%",
+                background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+                border: "none", borderRadius: 12,
+                color: "#020617", padding: "14px 16px", cursor: "pointer",
+                fontSize: 14, fontWeight: 700, marginBottom: 12,
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
-              → Найти клинику
+              Записаться на DXA →
             </button>
             <button
               className="btn-lift-secondary"
