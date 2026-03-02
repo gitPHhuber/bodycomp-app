@@ -30,6 +30,10 @@ if (typeof document !== "undefined" && !document.getElementById(KEYFRAMES_ID)) {
       0%, 100% { box-shadow: 0 0 0px transparent; }
       50% { box-shadow: 0 0 20px #22d3ee22; }
     }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   `;
   document.head.appendChild(style);
 }
