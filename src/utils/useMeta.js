@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const DEFAULT_TITLE = "Состав тела — узнайте реальные цифры | DXA-анализ";
 const DEFAULT_DESCRIPTION =
@@ -6,37 +6,20 @@ const DEFAULT_DESCRIPTION =
 
 /**
  * Sets document title and meta description.
- * Tags are applied synchronously during render so that prerender bots
- * (which may not wait for useEffect) pick them up immediately.
  * Cleanup on unmount restores the defaults.
  */
 export function useMeta(title, description) {
-  const prev = useRef(null);
-
-  // Apply synchronously during render for prerender / partial-JS bots
-  if (typeof document !== "undefined") {
-    if (!prev.current) {
-      prev.current = {
-        title: document.title,
-        description:
-          document.querySelector('meta[name="description"]')?.getAttribute("content") ?? "",
-      };
-    }
-    document.title = title;
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", description);
-  }
-
   useEffect(() => {
-    // Re-apply in effect in case React hydration reverted synchronous changes
-    document.title = title;
+    const prevTitle = document.title;
     const meta = document.querySelector('meta[name="description"]');
+    const prevDesc = meta?.getAttribute("content") ?? "";
+
+    document.title = title;
     if (meta) meta.setAttribute("content", description);
 
     return () => {
       document.title = DEFAULT_TITLE;
       if (meta) meta.setAttribute("content", DEFAULT_DESCRIPTION);
-      prev.current = null;
     };
   }, [title, description]);
 }

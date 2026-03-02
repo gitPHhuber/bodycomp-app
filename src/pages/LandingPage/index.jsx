@@ -41,6 +41,8 @@ export default function LandingPage() {
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const schedule = typeof requestIdleCallback === "function" ? requestIdleCallback : (cb) => setTimeout(cb, 200);
@@ -48,6 +50,19 @@ export default function LandingPage() {
     return () => {
       (typeof cancelIdleCallback === "function" ? cancelIdleCallback : clearTimeout)(id);
     };
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
@@ -58,7 +73,7 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
       {showParticles && <Suspense fallback={null}><Particles /></Suspense>}
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px", paddingBottom: isMobile ? 80 : 60 }}>
 
         {/* ═══ Block 1: Hero ═══ */}
         <div style={{ textAlign: "center", paddingTop: 104, paddingBottom: 28 }}>
@@ -78,7 +93,7 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2200}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
               <button onClick={() => { tracker.trackClick("cta_analyzer_hero"); navigate("/analyzer"); }}
-                className="btn-lift"
+                className="btn-lift btn-pulse"
                 style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
                 Рассчитать состав тела →
               </button>
@@ -92,6 +107,7 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
+
         {/* ═══ Block 2: BodyCompare ═══ */}
         <Reveal from="left" delay={100}>
           <div style={{ marginBottom: 28 }}>
@@ -103,6 +119,9 @@ export default function LandingPage() {
         </Reveal>
 
         {/* ═══ Block 3: Profiles ═══ */}
+
+        {/* ═══ Block 2: Profiles ═══ */}
+
         <Reveal from="left"><div style={{ marginBottom: 18 }}><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЭКСПЕРИМЕНТ</div><h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Три человека. «Здоровый» ИМТ.</h2></div></Reveal>
         {PROFILES.map((p, i) => {
           const rv = revealed[p.id];
@@ -119,7 +138,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{ padding: "8px 14px", borderRadius: 10, background: "#020617", marginBottom: 12, fontSize: 13, color: "#64748b" }}>{p.scale}</div>
                 {!rv ? (
-                  <div style={{ textAlign: "center", padding: 12, background: "#ef444408", borderRadius: 12, border: "1px dashed #ef444425" }}><span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 600 }}>👆 Нажмите — увидьте правду</span></div>
+                  <div style={{ textAlign: "center", padding: 12, background: "#22d3ee08", borderRadius: 12, border: "1px dashed #22d3ee25", animation: "pulseGlow 2s ease infinite" }}><span style={{ fontSize: 13, color: "#22d3ee", fontWeight: 600 }}>Посмотрите на миф →</span></div>
                 ) : (
                   <div style={{ animation: "fadeSlide 0.6s ease" }}>
                     <div style={{ display: "flex", height: 26, borderRadius: 8, overflow: "hidden", background: "#1e293b", marginBottom: 10 }}>
@@ -132,6 +151,7 @@ export default function LandingPage() {
                       <div style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.6 }}>{p.truth}</div>
                     </div>
                     <div style={{ marginTop: 6, padding: "6px 12px", borderRadius: 8, background: "#0f172a", fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>💡 {p.tip}</div>
+                    <button onClick={(e) => { e.stopPropagation(); tracker.trackClick("profile_cta_analyzer", { profile: p.id }); navigate("/analyzer"); }} style={{ display: "block", marginTop: 8, padding: "8px 16px", border: "none", borderRadius: 10, background: "linear-gradient(135deg, #0891b2, #22d3ee)", color: "#020617", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Узнать свои цифры →</button>
                   </div>
                 )}
               </div>
@@ -139,7 +159,17 @@ export default function LandingPage() {
           );
         })}
 
-        {/* ═══ Block 5: Quiz ═══ */}
+        {/* ═══ Block 3: BodyCompare ═══ */}
+        <Reveal from="left" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-СКАНЕР</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес. Два разных тела.</h2>
+            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Угадаете, кто из них здоров?</p>
+            <Suspense fallback={loader3d}><BodyCompare /></Suspense>
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 4: Quiz ═══ */}
         <Reveal from="left">
           <div style={{ ...card, background: "linear-gradient(135deg,#1e1b4b12,#4c1d9512)", border: "1px solid #7c3aed30", marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#a78bfa", fontFamily: "'JetBrains Mono',monospace", marginBottom: 8, letterSpacing: "0.1em" }}>ПРОВЕРЬТЕ СЕБЯ</div>
@@ -185,12 +215,20 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
+
         {/* ═══ Block 6b: DXA Features ═══ */}
         <Reveal from="scale" delay={100}>
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>DXA покажет то, что не видят весы</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 14px", lineHeight: 1.5 }}>5 минут — и вы узнаете всё о своём теле</p>
+
+        {/* ═══ Block 7: DXA Features ═══ */}
+        <Reveal from="scale" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 14px" }}>Что покажет DXA за 5 минут</h2>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
               {DXA_FEATURES.map((f, i) => (
                 <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 80}>
@@ -206,6 +244,7 @@ export default function LandingPage() {
             <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "#0f172a", border: "1px solid #1e293b" }}>
               <span style={{ fontSize: 12, color: "#64748b", fontFamily: "'JetBrains Mono',monospace" }}>от ₽5 000 · 5 минут · минимальное облучение</span>
             </div>
+
             <button onClick={() => { tracker.trackClick("cta_clinics_dxa_features"); navigate("/clinics"); }}
               className="btn-lift btn-pulse"
               style={{ display: "block", width: "100%", padding: 15, marginTop: 12, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
@@ -215,6 +254,12 @@ export default function LandingPage() {
         </Reveal>
 
         {/* ═══ Block 7: Myths ═══ */}
+
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 8: Myths ═══ */}
+
         <Reveal from="bottom"><div style={{ marginBottom: 14 }}><div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>МИФЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>5 опасных заблуждений</h2></div></Reveal>
         {MYTHS.map((m, i) => {
           const op = myth === i;
@@ -343,6 +388,51 @@ export default function LandingPage() {
           <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p>
         </div>
       </div>
+
+      {/* ═══ Sticky CTA Bar (mobile only) ═══ */}
+      {isMobile && showStickyCta && (
+        <div className="sticky-cta" style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 45,
+          padding: "12px 20px",
+          paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+          background: "linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.95) 30%)",
+          backdropFilter: "blur(12px)",
+          display: "flex",
+          gap: 8,
+          animation: "slideUp 0.3s ease",
+        }}>
+          <button onClick={() => { tracker.trackClick("sticky_cta_analyzer"); navigate("/analyzer"); }} style={{
+            flex: 1,
+            padding: "14px 0",
+            border: "none",
+            borderRadius: 12,
+            background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+            color: "#020617",
+            fontSize: 14,
+            fontWeight: 700,
+            fontFamily: "'JetBrains Mono', monospace",
+            cursor: "pointer",
+          }}>
+            Рассчитать бесплатно
+          </button>
+          <button onClick={() => { tracker.trackClick("sticky_cta_dxa"); navigate("/clinics"); }} style={{
+            padding: "14px 20px",
+            border: "1px solid #334155",
+            borderRadius: 12,
+            background: "#0f172a",
+            color: "#94a3b8",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}>
+            DXA →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
