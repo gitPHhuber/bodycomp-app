@@ -14,6 +14,9 @@ const EVENT_LABELS = {
   scroll_depth: "Скролл",
   time_on_page: "Время на стр.",
   model_interact: "3D модель",
+  form_focus: "Фокус на поле",
+  form_abandon: "Брошенная форма",
+  cta_view: "CTA в viewport",
 };
 
 const EVENT_COLORS = {
@@ -25,6 +28,9 @@ const EVENT_COLORS = {
   quiz_complete: "#8b5cf6",
   booking_click: "#10b981",
   share: "#f59e0b",
+  form_focus: "#06b6d4",
+  form_abandon: "#ef4444",
+  cta_view: "#eab308",
 };
 
 function formatTime(ts) {

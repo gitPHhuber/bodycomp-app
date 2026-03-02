@@ -204,3 +204,15 @@ export function track3DInteraction(model, action) {
 export function trackTimeOnPage(page, seconds) {
   enqueue("time_on_page", page, null, { seconds });
 }
+
+export function trackFormFocus(page, field) {
+  debouncedEnqueue(`form_focus_${page}_${field}`, "form_focus", page, field);
+}
+
+export function trackFormAbandon(page, filledFields) {
+  enqueue("form_abandon", page, null, { filledFields });
+}
+
+export function trackCTAView(element) {
+  debouncedEnqueue(`cta_view_${element}`, "cta_view", null, element);
+}
