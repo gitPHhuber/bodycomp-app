@@ -107,9 +107,9 @@ export default function LandingPage() {
           <Reveal from="scale" delay={2400}>
             <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
               <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" />
-                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} />
-                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} />
+                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" loop />
+                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} loop />
+                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} loop />
               </div>
               <div style={{ textAlign: "center", paddingBottom: 14 }}>
                 <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
@@ -119,18 +119,6 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
-
-        {/* ═══ Block 2: BodyCompare ═══ */}
-        <Reveal from="left" delay={100}>
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-СКАНЕР</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес. Два разных тела.</h2>
-            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Угадаете, кто из них здоров?</p>
-            <Suspense fallback={loader3d}><BodyCompare /></Suspense>
-          </div>
-        </Reveal>
-
-        {/* ═══ Block 3: Profiles ═══ */}
 
         {/* ═══ Block 2: Profiles ═══ */}
 
@@ -228,18 +216,12 @@ export default function LandingPage() {
         </Reveal>
 
 
-        {/* ═══ Block 6b: DXA Features ═══ */}
+        {/* ═══ Block 7: DXA Features ═══ */}
         <Reveal from="scale" delay={100}>
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>DXA покажет то, что не видят весы</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 14px", lineHeight: 1.5 }}>5 минут — и вы узнаете всё о своём теле</p>
-
-        {/* ═══ Block 7: DXA Features ═══ */}
-        <Reveal from="scale" delay={100}>
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 14px" }}>Что покажет DXA за 5 минут</h2>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
               {DXA_FEATURES.map((f, i) => (
@@ -262,11 +244,6 @@ export default function LandingPage() {
               style={{ display: "block", width: "100%", padding: 15, marginTop: 12, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
               Записаться на DXA-сканирование →
             </button>
-          </div>
-        </Reveal>
-
-        {/* ═══ Block 7: Myths ═══ */}
-
           </div>
         </Reveal>
 
