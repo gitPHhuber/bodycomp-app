@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../context/AuthContext";
 import { Icons, getBodyTypeIcon } from "./Icons";
 import { calc } from "./calculations";
+import { SIZE_OPTIONS, SIZE_MAPPINGS } from "./sizeMappings";
 import Gauge from "./Gauge";
 import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
@@ -31,6 +32,8 @@ export default function AnalyzerPage() {
   const [hip, setHip] = useState("");
   const [neck, setNeck] = useState("");
   const [activity, setActivity] = useState("moderate");
+  const [calcMode, setCalcMode] = useState("quick");   // "quick" | "precise"
+  const [clothingSize, setClothingSize] = useState(""); // XS..3XL
   const [results, setResults] = useState(null);
   const [showDxa, setShowDxa] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -45,16 +48,32 @@ export default function AnalyzerPage() {
   }, [step]);
 
   const canProceed2 = age && height && weight;
-  const canProceed3 = waist && neck && (gender === "male" || hip);
+  const canProceed3 = calcMode === "quick"
+    ? !!clothingSize
+    : waist && neck && (gender === "male" || hip);
 
   function calculate() {
     const g = gender;
     const a = parseFloat(age);
     const h = parseFloat(height);
     const w = parseFloat(weight);
-    const wa = parseFloat(waist);
-    const hi = parseFloat(hip) || 0;
-    const ne = parseFloat(neck);
+
+    // In quick mode, use mapped values from clothing size
+    let wa, hi, ne;
+    if (calcMode === "quick" && clothingSize) {
+      const mapped = SIZE_MAPPINGS[g][clothingSize];
+      wa = mapped.waist;
+      ne = mapped.neck;
+      hi = mapped.hip;
+      // Also set state so saveResult() picks up the values
+      setWaist(String(wa));
+      setNeck(String(ne));
+      setHip(String(hi));
+    } else {
+      wa = parseFloat(waist);
+      hi = parseFloat(hip) || 0;
+      ne = parseFloat(neck);
+    }
 
     const bf = Math.max(3, Math.min(55, calc.bodyFatNavy(g, wa, ne, hi, h)));
     const bmi = calc.bmi(w, h);
@@ -73,12 +92,14 @@ export default function AnalyzerPage() {
     const actMult = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, extreme: 1.9 };
     const tdee = bmr * (actMult[activity] || 1.55);
 
-    setResults({ bf, bmi, bmr, whr, ffmi, lm, fm, bt, vr, musclePct, tdee, weight: w, gender: g });
+    setResults({ bf, bmi, bmr, whr, ffmi, lm, fm, bt, vr, musclePct, tdee, weight: w, gender: g, calcMode });
     trackGoal('calculator_complete');
     tracker.trackCalcComplete({
       height_cm: h, weight_kg: w, age: a, gender: g,
       waist_cm: wa, hip_cm: hi || null, neck_cm: ne,
       fat_pct: bf, muscle_kg: lm * 0.55, visceral_level: vr.level, bmi,
+      calc_mode: calcMode,
+      clothing_size: calcMode === "quick" ? clothingSize : undefined,
     });
     setStep(4);
   }
@@ -365,24 +386,119 @@ export default function AnalyzerPage() {
               ← Назад
             </button>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 3 / 3</div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Обхваты тела</h2>
-            <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Измерьте сантиметровой лентой</p>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{calcMode === "quick" ? "Размер одежды" : "Обхваты тела"}</h2>
+            <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>{calcMode === "quick" ? "Выберите ваш размер" : "Измерьте сантиметровой лентой"}</p>
           </div>
 
-          {/* Visual guide */}
-          <div style={{ ...cardStyle, padding: 16, marginBottom: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#22d3ee", marginBottom: 8 }}>📏 Как измерить</div>
-            <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>
-              <b style={{ color: "#e2e8f0" }}>Шея</b> — по основанию, под кадыком<br />
-              <b style={{ color: "#e2e8f0" }}>Талия</b> — на уровне пупка, расслабив живот<br />
-              {gender === "female" && <><b style={{ color: "#e2e8f0" }}>Бёдра</b> — по самой широкой точке ягодиц<br /></>}
-            </div>
+          {/* Mode Tabs */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            {[
+              { id: "quick", label: "Быстрый расчёт" },
+              { id: "precise", label: "Точный расчёт" },
+            ].map(tab => {
+              const active = calcMode === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    if (calcMode !== tab.id) {
+                      setCalcMode(tab.id);
+                      setClothingSize("");
+                      setWaist(""); setNeck(""); setHip("");
+                      setResults(null);
+                      tracker.trackClick("calc_mode_switch", { mode: tab.id });
+                    }
+                  }}
+                  style={{
+                    flex: 1, padding: "12px 16px", borderRadius: 12,
+                    background: active ? "#0891b215" : "#0f172a",
+                    border: `1.5px solid ${active ? "#22d3ee" : "#1e293b"}`,
+                    color: active ? "#22d3ee" : "#94a3b8",
+                    fontSize: 14, fontWeight: active ? 700 : 500,
+                    cursor: "pointer", transition: "all 0.2s",
+                    fontFamily: "'Outfit', sans-serif",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <InputField label="Обхват шеи" value={neck} onChange={setNeck} unit="см" placeholder="38" min={20} max={60} hint="У основания шеи, под кадыком" />
-          <InputField label="Обхват талии" value={waist} onChange={setWaist} unit="см" placeholder="82" min={40} max={180} hint="На уровне пупка" />
-          {gender === "female" && (
-            <InputField label="Обхват бёдер" value={hip} onChange={setHip} unit="см" placeholder="96" min={50} max={180} hint="По самой широкой точке" />
+          {calcMode === "quick" ? (
+            <>
+              {/* Accuracy label */}
+              <div style={{
+                fontSize: 12, color: "#f59e0b", marginBottom: 16,
+                display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                {Icons.alert(14, "#f59e0b")} Приблизительный расчёт (±5–8% точности)
+              </div>
+
+              {/* Size selector */}
+              <div style={{ marginBottom: 24 }}>
+                <label style={{
+                  fontSize: 13, color: "#94a3b8", display: "block", marginBottom: 10,
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>
+                  Ваш размер одежды
+                </label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                  {SIZE_OPTIONS.map(size => {
+                    const active = clothingSize === size;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => setClothingSize(size)}
+                        style={{
+                          padding: "12px 0",
+                          flex: "1 1 calc(25% - 10px)",
+                          minWidth: 60,
+                          borderRadius: 12,
+                          textAlign: "center",
+                          background: active ? "#0891b215" : "#0f172a",
+                          border: `1.5px solid ${active ? "#22d3ee" : "#1e293b"}`,
+                          color: active ? "#22d3ee" : "#94a3b8",
+                          fontSize: 15, fontWeight: active ? 700 : 500,
+                          cursor: "pointer", transition: "all 0.2s",
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Accuracy label */}
+              <div style={{
+                fontSize: 12, color: "#10b981", marginBottom: 16,
+                display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                {Icons.check(14, "#10b981")} Точный расчёт по формуле US Navy (±3–4%)
+              </div>
+
+              {/* Visual guide */}
+              <div style={{ ...cardStyle, padding: 16, marginBottom: 24 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#22d3ee", marginBottom: 8 }}>📏 Как измерить</div>
+                <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>
+                  <b style={{ color: "#e2e8f0" }}>Шея</b> — по основанию, под кадыком<br />
+                  <b style={{ color: "#e2e8f0" }}>Талия</b> — на уровне пупка, расслабив живот<br />
+                  {gender === "female" && <><b style={{ color: "#e2e8f0" }}>Бёдра</b> — по самой широкой точке ягодиц<br /></>}
+                </div>
+              </div>
+
+              <InputField label="Обхват шеи" value={neck} onChange={setNeck} unit="см" placeholder="38" min={20} max={60} hint="У основания шеи, под кадыком" />
+              <InputField label="Обхват талии" value={waist} onChange={setWaist} unit="см" placeholder="82" min={40} max={180} hint="На уровне пупка" />
+              {gender === "female" && (
+                <InputField label="Обхват бёдер" value={hip} onChange={setHip} unit="см" placeholder="96" min={50} max={180} hint="По самой широкой точке" />
+              )}
+            </>
           )}
 
           <div style={{ display: "flex", gap: 12 }}>
@@ -479,6 +595,29 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+          {/* Quick mode DXA upsell banner */}
+          {r.calcMode === "quick" && (
+            <div style={{
+              background: "linear-gradient(135deg, #0c4a6e33, #164e6344)",
+              borderRadius: 20, padding: 24, marginBottom: 16,
+              border: "1px solid #22d3ee44", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 8, lineHeight: 1.5 }}>
+                Хотите точные цифры?
+              </div>
+              <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
+                DXA-сканирование покажет с погрешностью ±1–2%
+              </p>
+              <button
+                className="btn-lift-cyan"
+                onClick={() => { tracker.trackClick("dxa_cta_quick_mode"); navigate("/clinics"); }}
+                style={{ ...btnPrimary, padding: "14px 24px" }}
+              >
+                Записаться на DXA →
+              </button>
+            </div>
+          )}
+
           {/* Accuracy warning + DXA CTA */}
           <div style={{
             background: "linear-gradient(135deg, #0c4a6e22, #164e6333)",
@@ -486,10 +625,12 @@ export default function AnalyzerPage() {
             border: "1px solid #0891b244",
           }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#22d3ee", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-              {Icons.alert(18, "#22d3ee")} Погрешность ±8%
+              {Icons.alert(18, "#22d3ee")} Погрешность {r.calcMode === "quick" ? "±5–8%" : "±3–4%"}
             </div>
             <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
-              Этот расчёт имеет погрешность ±8%. DXA-сканирование даёт точность ±1–2%.
+              {r.calcMode === "quick"
+                ? "Расчёт по размеру одежды имеет погрешность ±5–8%. Для точности ±3–4% введите обхваты вручную, а DXA-сканирование даёт ±1–2%."
+                : "Этот расчёт по формуле US Navy имеет погрешность ±3–4%. DXA-сканирование даёт точность ±1–2%."}
             </p>
             <button
               className="btn-lift"
@@ -615,7 +756,7 @@ export default function AnalyzerPage() {
           {/* Restart */}
           <div style={{ textAlign: "center" }}>
             <button
-              onClick={() => { setStep(0); setGender(""); setResults(null); }}
+              onClick={() => { setStep(0); setGender(""); setResults(null); setCalcMode("quick"); setClothingSize(""); }}
               style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", padding: 8, textDecoration: "underline" }}
             >
               Пройти заново
