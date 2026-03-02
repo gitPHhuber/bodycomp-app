@@ -707,7 +707,7 @@ export default function AnalyzerPage() {
           <div style={{ textAlign: "center" }}>
             <button
 
-              onClick={() => { setStep(0); setGender(""); setResults(null); setCalcMode("quick"); setClothingSize(""); }}
+              onClick={() => { setStep(1); setGender(""); setResults(null); setCalcMode("quick"); setClothingSize(""); }}
 
               style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", padding: 8, textDecoration: "underline" }}
             >

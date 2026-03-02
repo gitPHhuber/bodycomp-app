@@ -1,8 +1,6 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import * as tracker from "./lib/tracker";
 import { AuthProvider } from "./context/AuthContext";
 import AuthModal from "./components/AuthModal";
