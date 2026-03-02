@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { supabase } from "../../lib/supabase";
+
+const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
 
 export default function BookingModal({ clinic, onClose, onConfirm }) {
   const [step, setStep] = useState(1); // 1=date, 2=time, 3=info, 4=done
@@ -6,6 +9,8 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
   const [selectedTime, setSelectedTime] = useState(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Generate next 14 days
   const dates = Array.from({ length: 14 }, (_, i) => {
@@ -173,18 +178,56 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
             </div>
 
             <button
-              onClick={() => { if (name && phone) { setStep(4); if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone }); } }}
-              disabled={!name || !phone}
+              onClick={async () => {
+                if (!name || !phone || submitting) return;
+                setSubmitting(true);
+                setSubmitError(null);
+                const payload = {
+                  clinic_id: clinic.id,
+                  clinic_name: clinic.name,
+                  city: clinic.city,
+                  date: selectedDate.toISOString(),
+                  time: selectedTime,
+                  name,
+                  phone,
+                };
+                try {
+                  if (supabase) {
+                    const { error } = await supabase.from("bookings").insert(payload);
+                    if (error) throw error;
+                  } else {
+                    const res = await fetch(FORMSPREE_URL, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", Accept: "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    if (!res.ok) throw new Error("Formspree error");
+                  }
+                  setStep(4);
+                  if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone });
+                } catch {
+                  setSubmitError("Ошибка отправки. Попробуйте ещё раз.");
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              disabled={!name || !phone || submitting}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
-                background: name && phone ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
-                color: name && phone ? "#020617" : "#475569",
-                fontSize: 15, fontWeight: 700, cursor: name && phone ? "pointer" : "default",
+                background: name && phone && !submitting ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
+                color: name && phone && !submitting ? "#020617" : "#475569",
+                fontSize: 15, fontWeight: 700, cursor: name && phone && !submitting ? "pointer" : "default",
                 fontFamily: "'JetBrains Mono',monospace",
-                boxShadow: name && phone ? "0 0 30px #10b98122" : "none",
+                boxShadow: name && phone && !submitting ? "0 0 30px #10b98122" : "none",
                 transition: "all 0.3s",
               }}
-            >Подтвердить запись ✓</button>
+            >{submitting ? "Отправляем..." : "Подтвердить запись ✓"}</button>
+
+            {submitError && (
+              <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", marginTop: 10, marginBottom: 0 }}>
+                {submitError}
+              </p>
+            )}
 
             <p style={{ fontSize: 11, color: "#334155", textAlign: "center", marginTop: 10 }}>
               Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
