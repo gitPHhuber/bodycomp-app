@@ -1,10 +1,17 @@
-import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+
+import { useState, useEffect } from "react";
+import * as tracker from "../../lib/tracker";
+
 
 const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
 
+
 export default function BookingModal({ clinic, onClose, onConfirm }) {
   const [step, setStep] = useState(1); // 1=date, 2=time, 3=info, 4=done
+
+  useEffect(() => {
+    tracker.trackClick("booking_modal_open", { clinicId: clinic.id });
+  }, []);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [name, setName] = useState("");
@@ -80,7 +87,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               })}
             </div>
             <button
-              onClick={() => selectedDate && setStep(2)}
+              onClick={() => { if (selectedDate) { tracker.trackClick("booking_step_date", { clinicId: clinic.id }); setStep(2); } }}
               disabled={!selectedDate}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
@@ -119,7 +126,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               })}
             </div>
             <button
-              onClick={() => selectedTime && setStep(3)}
+              onClick={() => { if (selectedTime) { tracker.trackClick("booking_step_time", { clinicId: clinic.id }); setStep(3); } }}
               disabled={!selectedTime}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
@@ -178,6 +185,10 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
             </div>
 
             <button
+
+              onClick={() => { if (name && phone) { tracker.trackClick("booking_step_contact", { clinicId: clinic.id }); setStep(4); if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone }); } }}
+              disabled={!name || !phone}
+
               onClick={async () => {
                 if (!name || !phone || submitting) return;
                 setSubmitting(true);
@@ -212,6 +223,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
                 }
               }}
               disabled={!name || !phone || submitting}
+
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
                 background: name && phone && !submitting ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",

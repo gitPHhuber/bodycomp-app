@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trackGoal } from "../../utils/analytics";
 import * as tracker from "../../lib/tracker";
 import Reveal from "../../components/Reveal";
@@ -50,7 +50,26 @@ export default function ClinicsPage() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [focusedField, setFocusedField] = useState(null);
 
+  const formRef = useRef({ name: "", phone: "", status: "idle" });
+  useEffect(() => {
+    formRef.current = { name: form.name, phone: form.phone, status };
+  }, [form.name, form.phone, status]);
+
   useEffect(() => { trackGoal('clinics_page_visit'); }, []);
+
+  useEffect(() => {
+    return () => {
+      const { name, phone, status: s } = formRef.current;
+      if (s !== "sent") {
+        const filled = [];
+        if (name) filled.push("name");
+        if (phone) filled.push("phone");
+        if (filled.length > 0) {
+          tracker.trackFormAbandon("/clinics", filled);
+        }
+      }
+    };
+  }, []);
 
   const filteredClinics = selectedCity === "Все города"
     ? CLINICS
@@ -248,7 +267,7 @@ export default function ClinicsPage() {
                   required
                   value={form.name}
                   onChange={update("name")}
-                  onFocus={() => setFocusedField("name")}
+                  onFocus={() => { setFocusedField("name"); tracker.trackFormFocus("/clinics", "name"); }}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Ваше имя"
                   style={{ ...inputStyle, ...getFocusStyle("name") }}
@@ -263,7 +282,7 @@ export default function ClinicsPage() {
                   required
                   value={form.phone}
                   onChange={update("phone")}
-                  onFocus={() => setFocusedField("phone")}
+                  onFocus={() => { setFocusedField("phone"); tracker.trackFormFocus("/clinics", "phone"); }}
                   onBlur={() => setFocusedField(null)}
                   placeholder="+7 (___) ___-__-__"
                   style={{ ...inputStyle, ...getFocusStyle("phone") }}

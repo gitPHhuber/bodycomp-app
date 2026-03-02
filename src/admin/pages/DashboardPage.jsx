@@ -86,7 +86,7 @@ export default function DashboardPage() {
   async function loadFunnel(dateFrom) {
     let query = supabase
       .from("events")
-      .select("event_type, session_id");
+      .select("event_type, session_id, page, element");
     if (dateFrom) query = query.gte("created_at", dateFrom);
 
     const { data: events } = await query;
@@ -94,29 +94,30 @@ export default function DashboardPage() {
 
     const sessions = {};
     events.forEach((e) => {
-      if (!sessions[e.session_id]) sessions[e.session_id] = new Set();
-      sessions[e.session_id].add(e.event_type);
+      if (!sessions[e.session_id]) {
+        sessions[e.session_id] = { types: new Set(), clinicPage: false, formFocus: false, waitlistSubmit: false };
+      }
+      sessions[e.session_id].types.add(e.event_type);
+      if (e.event_type === "page_view" && e.page === "/clinics") sessions[e.session_id].clinicPage = true;
+      if (e.event_type === "form_focus") sessions[e.session_id].formFocus = true;
+      if (e.event_type === "click" && e.element === "waitlist_submit") sessions[e.session_id].waitlistSubmit = true;
     });
 
     const sessionList = Object.values(sessions);
-    const pageViews = sessionList.filter((s) => s.has("page_view")).length;
-    const calcStarts = sessionList.filter((s) => s.has("calc_start")).length;
-    const calcCompletes = sessionList.filter((s) => s.has("calc_complete")).length;
-
-    let usersQuery = supabase.from("users").select("*", { count: "exact", head: true });
-    if (dateFrom) usersQuery = usersQuery.gte("created_at", dateFrom);
-    const { count: regs } = await usersQuery;
-
-    let bookQuery = supabase.from("bookings").select("*", { count: "exact", head: true });
-    if (dateFrom) bookQuery = bookQuery.gte("created_at", dateFrom);
-    const { count: books } = await bookQuery;
+    const pageViews = sessionList.filter((s) => s.types.has("page_view")).length;
+    const calcStarts = sessionList.filter((s) => s.types.has("calc_start")).length;
+    const calcCompletes = sessionList.filter((s) => s.types.has("calc_complete")).length;
+    const clinicPageViews = sessionList.filter((s) => s.clinicPage).length;
+    const formStarts = sessionList.filter((s) => s.formFocus).length;
+    const waitlistSubmits = sessionList.filter((s) => s.waitlistSubmit).length;
 
     setFunnel([
       { label: "Посещения", value: pageViews },
       { label: "Калькулятор начат", value: calcStarts },
       { label: "Калькулятор завершён", value: calcCompletes },
-      { label: "Регистрация", value: regs || 0 },
-      { label: "Запись на DXA", value: books || 0 },
+      { label: "Страница клиник", value: clinicPageViews },
+      { label: "Форма заявки", value: formStarts },
+      { label: "Заявка отправлена", value: waitlistSubmits },
     ]);
   }
 
