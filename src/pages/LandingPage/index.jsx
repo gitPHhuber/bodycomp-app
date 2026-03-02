@@ -93,11 +93,11 @@ export default function LandingPage() {
           <Reveal from="scale" delay={1900}>
             <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
               <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                <CountingStat value={40000000} suffix=" чел" label="с ожирением в РФ" drift={3} />
-                <CountingStat value={300000} suffix="" label="смертей от ожирения в год" duration={2800} drift={0.5} />
-                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" drift={2} />
-                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} drift={0.005} />
-                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} drift={0.01} />
+                <CountingStat value={40000000} suffix=" чел" label="с ожирением в РФ" drift={0.03} color="#ef4444" />
+                <CountingStat value={300000} suffix="" label="смертей от ожирения в год" duration={2800} drift={0.01} color="#dc2626" />
+                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" drift={0.016} color="#a78bfa" />
+                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} color="#f59e0b" />
+                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} color="#22d3ee" />
               </div>
               <div style={{ textAlign: "center", paddingBottom: 14 }}>
                 <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
