@@ -10,6 +10,8 @@ import AnalyzerPage from "./pages/AnalyzerPage";
 import ClinicsPage from "./pages/ClinicsPage";
 import BodyComparePage from "./pages/BodyComparePage";
 import PrivacyPage from "./pages/PrivacyPage";
+import NewsPage from "./pages/NewsPage";
+import ArticlePage from "./pages/ArticlePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -122,6 +124,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <Route path="/" element={<LandingPage />} />
               <Route path="/analyzer" element={<AnalyzerPage />} />
               <Route path="/clinics" element={<ClinicsPage />} />
+              <Route path="/news" element={<NewsPage />} />
+              <Route path="/news/:slug" element={<ArticlePage />} />
               <Route path="/xray" element={<BodyComparePage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/profile" element={
