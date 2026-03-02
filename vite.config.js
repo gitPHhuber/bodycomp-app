@@ -8,10 +8,11 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ["three"],
-          router: ["react-router-dom"],
-          charts: ["recharts"],
+        manualChunks(id) {
+          if (id.includes("node_modules/three")) return "three";
+          if (id.includes("node_modules/react-router-dom")) return "router";
+          if (id.includes("node_modules/recharts")) return "charts";
+          if (id.includes("/src/admin/")) return "admin";
         },
       },
     },

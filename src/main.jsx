@@ -18,6 +18,7 @@ import Header from "./components/Header";
 import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const AdminApp = lazy(() => import("./admin/AdminApp"));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -92,30 +93,51 @@ const ProfileFallback = () => (
   </div>
 );
 
+const AdminFallback = () => (
+  <div style={{
+    minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+    background: "#020617", color: "#64748b", fontFamily: "'JetBrains Mono', monospace", fontSize: 14,
+  }}>
+    Загрузка...
+  </div>
+);
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <ScrollToTop />
-        <TrackingProvider />
-        <Header />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/analyzer" element={<AnalyzerPage />} />
-          <Route path="/clinics" element={<ClinicsPage />} />
-          <Route path="/xray" element={<BodyComparePage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Suspense fallback={<ProfileFallback />}>
-                <ProfilePage />
-              </Suspense>
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-        <AuthModal />
-      </AuthProvider>
+      <Routes>
+        {/* Admin panel — separate layout, no main Header/AuthProvider */}
+        <Route path="/admin/*" element={
+          <Suspense fallback={<AdminFallback />}>
+            <AdminApp />
+          </Suspense>
+        } />
+
+        {/* Main site */}
+        <Route path="*" element={
+          <AuthProvider>
+            <ScrollToTop />
+            <TrackingProvider />
+            <Header />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/analyzer" element={<AnalyzerPage />} />
+              <Route path="/clinics" element={<ClinicsPage />} />
+              <Route path="/xray" element={<BodyComparePage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Suspense fallback={<ProfileFallback />}>
+                    <ProfilePage />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+            <AuthModal />
+          </AuthProvider>
+        } />
+      </Routes>
     </BrowserRouter>
   </React.StrictMode>
 );
