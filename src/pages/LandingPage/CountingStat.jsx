@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function CountingStat({ value, suffix, label, duration = 2000, loop = false }) {
+export default function CountingStat({ value, suffix, label, duration = 2000 }) {
   const [cur, setCur] = useState(0);
   const [started, setStarted] = useState(false);
-  const [cycle, setCycle] = useState(0);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -21,20 +20,17 @@ export default function CountingStat({ value, suffix, label, duration = 2000, lo
     setCur(0);
     const s = Date.now();
     let raf;
-    let timer;
     const tick = () => {
       const p = Math.min((Date.now() - s) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 5);
       setCur(eased * num);
       if (p < 1) {
         raf = requestAnimationFrame(tick);
-      } else if (loop) {
-        timer = setTimeout(() => setCycle(c => c + 1), 3000);
       }
     };
     raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
-  }, [started, value, duration, loop, cycle]);
+    return () => { cancelAnimationFrame(raf); };
+  }, [started, value, duration]);
 
   const p = parseFloat(value) > 0 ? cur / parseFloat(value) : 0;
   let r, g, b;
