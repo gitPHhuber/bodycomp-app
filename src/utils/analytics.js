@@ -1,4 +1,4 @@
-const METRIKA_ID = null;
+const METRIKA_ID = import.meta.env.VITE_METRIKA_ID || null;
 
 export function trackPageView(url) {
   if (METRIKA_ID && typeof window.ym === "function") {
