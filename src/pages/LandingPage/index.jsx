@@ -107,7 +107,21 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
+
+        {/* ═══ Block 2: BodyCompare ═══ */}
+        <Reveal from="left" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-СКАНЕР</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 4px" }}>Один вес. Два разных тела.</h2>
+            <p style={{ fontSize: 13, color: "#475569", margin: "0 0 14px" }}>Угадаете, кто из них здоров?</p>
+            <Suspense fallback={loader3d}><BodyCompare /></Suspense>
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 3: Profiles ═══ */}
+
         {/* ═══ Block 2: Profiles ═══ */}
+
         <Reveal from="left"><div style={{ marginBottom: 18 }}><div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>ЭКСПЕРИМЕНТ</div><h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Три человека. «Здоровый» ИМТ.</h2></div></Reveal>
         {PROFILES.map((p, i) => {
           const rv = revealed[p.id];
@@ -201,11 +215,20 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
+
+        {/* ═══ Block 6b: DXA Features ═══ */}
+        <Reveal from="scale" delay={100}>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>DXA покажет то, что не видят весы</h2>
+            <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 14px", lineHeight: 1.5 }}>5 минут — и вы узнаете всё о своём теле</p>
+
         {/* ═══ Block 7: DXA Features ═══ */}
         <Reveal from="scale" delay={100}>
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>DXA-АНАЛИЗ</div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 14px" }}>Что покажет DXA за 5 минут</h2>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
               {DXA_FEATURES.map((f, i) => (
                 <Reveal key={i} from={i % 2 === 0 ? "left" : "right"} delay={i * 80}>
@@ -221,10 +244,22 @@ export default function LandingPage() {
             <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "#0f172a", border: "1px solid #1e293b" }}>
               <span style={{ fontSize: 12, color: "#64748b", fontFamily: "'JetBrains Mono',monospace" }}>от ₽5 000 · 5 минут · минимальное облучение</span>
             </div>
+
+            <button onClick={() => { tracker.trackClick("cta_clinics_dxa_features"); navigate("/clinics"); }}
+              className="btn-lift btn-pulse"
+              style={{ display: "block", width: "100%", padding: 15, marginTop: 12, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
+              Записаться на DXA-сканирование →
+            </button>
+          </div>
+        </Reveal>
+
+        {/* ═══ Block 7: Myths ═══ */}
+
           </div>
         </Reveal>
 
         {/* ═══ Block 8: Myths ═══ */}
+
         <Reveal from="bottom"><div style={{ marginBottom: 14 }}><div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>МИФЫ</div><h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>5 опасных заблуждений</h2></div></Reveal>
         {MYTHS.map((m, i) => {
           const op = myth === i;
