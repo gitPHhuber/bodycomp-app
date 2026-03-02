@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import * as tracker from "../../lib/tracker";
+import { supabase } from "../../lib/supabase";
 
 
 const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
@@ -185,14 +186,11 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
             </div>
 
             <button
-
-              onClick={() => { if (name && phone) { tracker.trackClick("booking_step_contact", { clinicId: clinic.id }); setStep(4); if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone }); } }}
-              disabled={!name || !phone}
-
               onClick={async () => {
                 if (!name || !phone || submitting) return;
                 setSubmitting(true);
                 setSubmitError(null);
+                tracker.trackClick("booking_step_contact", { clinicId: clinic.id });
                 const payload = {
                   clinic_id: clinic.id,
                   clinic_name: clinic.name,
@@ -223,7 +221,6 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
                 }
               }}
               disabled={!name || !phone || submitting}
-
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
                 background: name && phone && !submitting ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
