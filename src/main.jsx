@@ -15,6 +15,7 @@ import BodyComparePage from "./pages/BodyComparePage";
 import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
+import ErrorBoundary from "./components/ErrorBoundary";
 import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -119,6 +120,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <ScrollToTop />
             <TrackingProvider />
             <Header />
+            <ErrorBoundary>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/analyzer" element={<AnalyzerPage />} />
@@ -134,6 +136,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               } />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
+            </ErrorBoundary>
             <AuthModal />
           </AuthProvider>
         } />
