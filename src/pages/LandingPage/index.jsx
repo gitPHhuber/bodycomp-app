@@ -107,8 +107,9 @@ export default function LandingPage() {
           <Reveal from="scale" delay={2400}>
             <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
               <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" />
-                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} />
+                <CountingStat value={40000000} suffix=" чел" label="с ожирением в РФ" drift={3} />
+                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" drift={2} />
+                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} drift={0.005} />
                 <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} />
               </div>
               <div style={{ textAlign: "center", paddingBottom: 14 }}>
