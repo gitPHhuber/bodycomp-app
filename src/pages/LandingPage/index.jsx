@@ -90,7 +90,21 @@ export default function LandingPage() {
             </h1>
           </Reveal>
           <Reveal from="bottom" delay={1800}><p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.65, maxWidth: 360, margin: "0 auto" }}>Одинаковый вес — совершенно разное здоровье.</p></Reveal>
-          <Reveal from="bottom" delay={2200}>
+          <Reveal from="scale" delay={1900}>
+            <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
+              <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
+                <CountingStat value={40000000} suffix=" чел" label="с ожирением в РФ" drift={3} />
+                <CountingStat value={300000} suffix="" label="смертей от ожирения в год" duration={2800} drift={0.5} />
+                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" drift={2} />
+                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} drift={0.005} />
+                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} drift={0.01} />
+              </div>
+              <div style={{ textAlign: "center", paddingBottom: 14 }}>
+                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal from="bottom" delay={2600}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
               <button onClick={() => { tracker.trackClick("cta_analyzer_hero"); navigate("/analyzer"); }}
                 className="btn-lift btn-pulse"
@@ -104,26 +118,7 @@ export default function LandingPage() {
               </button>
             </div>
           </Reveal>
-          <Reveal from="scale" delay={2400}>
-            <div style={{ borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b", overflow: "hidden", marginTop: 20 }}>
-              <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-
-                <CountingStat value={40000000} suffix=" чел" label="с ожирением в РФ" drift={3} />
-                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" drift={2} />
-                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} drift={0.005} />
-                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} />
-
-                <CountingStat value={14000000} suffix=" чел" label="с остеопорозом в РФ" loop />
-                <CountingStat value={20} suffix=" млн" label="остеопения" duration={3800} loop />
-                <CountingStat value={40} suffix="%" label="скрытый избыток жира" duration={4500} loop />
-
-              </div>
-              <div style={{ textAlign: "center", paddingBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Каждые <span style={{ color: "#ef4444", fontWeight: 700, fontFamily: "'JetBrains Mono',monospace" }}>5 минут</span> — перелом бедра из-за остеопороза</div>
-              </div>
-            </div>
-          </Reveal>
-          <Reveal from="bottom" delay={2100}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
+          <Reveal from="bottom" delay={2800}><div style={{ marginTop: 20, animation: "float 3s ease-in-out infinite" }}><div style={{ fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>scroll</div><div style={{ fontSize: 24, color: "#334155" }}>↓</div></div></Reveal>
         </div>
 
 
