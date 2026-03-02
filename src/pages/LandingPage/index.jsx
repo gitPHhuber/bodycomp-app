@@ -41,6 +41,8 @@ export default function LandingPage() {
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const schedule = typeof requestIdleCallback === "function" ? requestIdleCallback : (cb) => setTimeout(cb, 200);
@@ -48,6 +50,19 @@ export default function LandingPage() {
     return () => {
       (typeof cancelIdleCallback === "function" ? cancelIdleCallback : clearTimeout)(id);
     };
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyCta(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
@@ -58,7 +73,7 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "#020617", color: "#e2e8f0", fontFamily: "'Outfit',sans-serif", overflow: "hidden" }}>
       {showParticles && <Suspense fallback={null}><Particles /></Suspense>}
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 640, margin: "0 auto", padding: "0 20px 60px", paddingBottom: isMobile ? 80 : 60 }}>
 
         {/* ═══ Block 1: Hero ═══ */}
         <div style={{ textAlign: "center", paddingTop: 104, paddingBottom: 28 }}>
@@ -78,7 +93,7 @@ export default function LandingPage() {
           <Reveal from="bottom" delay={2200}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
               <button onClick={() => { tracker.trackClick("cta_analyzer_hero"); navigate("/analyzer"); }}
-                className="btn-lift"
+                className="btn-lift btn-pulse"
                 style={{ padding: 14, border: "none", borderRadius: 14, background: "linear-gradient(135deg,#0891b2,#22d3ee)", color: "#020617", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", boxShadow: "0 0 20px #22d3ee20" }}>
                 Рассчитать состав тела →
               </button>
@@ -338,6 +353,51 @@ export default function LandingPage() {
           <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p>
         </div>
       </div>
+
+      {/* ═══ Sticky CTA Bar (mobile only) ═══ */}
+      {isMobile && showStickyCta && (
+        <div className="sticky-cta" style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 45,
+          padding: "12px 20px",
+          paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+          background: "linear-gradient(180deg, transparent 0%, rgba(2,6,23,0.95) 30%)",
+          backdropFilter: "blur(12px)",
+          display: "flex",
+          gap: 8,
+          animation: "slideUp 0.3s ease",
+        }}>
+          <button onClick={() => { tracker.trackClick("sticky_cta_analyzer"); navigate("/analyzer"); }} style={{
+            flex: 1,
+            padding: "14px 0",
+            border: "none",
+            borderRadius: 12,
+            background: "linear-gradient(135deg, #0891b2, #22d3ee)",
+            color: "#020617",
+            fontSize: 14,
+            fontWeight: 700,
+            fontFamily: "'JetBrains Mono', monospace",
+            cursor: "pointer",
+          }}>
+            Рассчитать бесплатно
+          </button>
+          <button onClick={() => { tracker.trackClick("sticky_cta_dxa"); navigate("/clinics"); }} style={{
+            padding: "14px 20px",
+            border: "1px solid #334155",
+            borderRadius: 12,
+            background: "#0f172a",
+            color: "#94a3b8",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}>
+            DXA →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
