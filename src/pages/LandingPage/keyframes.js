@@ -27,8 +27,8 @@ if (typeof document !== "undefined" && !document.getElementById(KEYFRAMES_ID)) {
       50% { opacity: 0.6; transform: scale(1.1); }
     }
     @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0px transparent; }
-      50% { box-shadow: 0 0 20px #22d3ee22; }
+      0%, 100% { box-shadow: 0 0 5px #22d3ee15; }
+      50% { box-shadow: 0 0 25px #22d3ee55, 0 0 45px #22d3ee25; }
     }
   `;
   document.head.appendChild(style);
