@@ -8,7 +8,7 @@ import ClinicCard from "./ClinicCard";
 import MapView from "./MapView";
 import BookingModal from "./BookingModal";
 
-const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORMSPREE_ID";
+const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
 
 const labelStyle = {
   display: "block",
