@@ -22,7 +22,7 @@ export default function AnalyzerPage() {
     "Бесплатный расчёт состава тела за 3 минуты. Процент жира по формуле Navy, ИМТ, FFMI, базовый метаболизм, висцеральный риск."
   );
   const navigate = useNavigate();
-  const [step, setStep] = useState(0); // 0=intro, 1=gender, 2=basics, 3=measurements, 4=results
+  const [step, setStep] = useState(1); // 1=gender, 2=basics, 3=measurements, 4=results
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
@@ -43,6 +43,11 @@ export default function AnalyzerPage() {
   useEffect(() => {
     if (topRef.current) topRef.current.scrollIntoView({ behavior: "smooth" });
   }, [step]);
+
+  useEffect(() => {
+    trackGoal('calculator_start');
+    tracker.trackCalcStart();
+  }, []);
 
   const canProceed2 = age && height && weight;
   const canProceed3 = waist && neck && (gender === "male" || hip);
@@ -190,82 +195,16 @@ export default function AnalyzerPage() {
     border: "1px solid #334155",
   };
 
-  // ── STEP 0: Intro
-  if (step === 0) {
-    return (
-      <div style={pageStyle}>
-        <div ref={topRef} />
-        <div style={containerStyle}>
-          {/* Hero */}
-          <div style={{ textAlign: "center", paddingTop: 116, paddingBottom: 40 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: 20, margin: "0 auto 24px",
-              background: "linear-gradient(135deg, #0891b2, #22d3ee)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 0 60px #22d3ee44",
-            }}>
-              {Icons.bodyScan(44, "#020617")}
-            </div>
-            <h1 style={{
-              fontSize: 32, fontWeight: 800, lineHeight: 1.15, margin: "0 0 12px",
-              background: "linear-gradient(135deg, #e2e8f0, #22d3ee)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              fontFamily: "'Outfit', sans-serif",
-            }}>
-              Узнайте реальный<br />состав вашего тела
-            </h1>
-            <p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 32px", maxWidth: 340, marginLeft: "auto", marginRight: "auto" }}>
-              Процент жира, мышечная масса, метаболизм и риски — за 3 минуты. Бесплатно.
-            </p>
-            <button
-              className="btn-lift-cyan"
-              style={btnPrimary}
-              onClick={() => { trackGoal('calculator_start'); tracker.trackCalcStart(); setStep(1); }}
-            >
-              Начать анализ →
-            </button>
-          </div>
-
-          {/* Features */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32 }}>
-            {[
-              { icon: Icons.timer(30, "#22d3ee"), title: "3 минуты", sub: "Быстрый анализ" },
-              { icon: Icons.hexagon(30, "#22d3ee"), title: "6 метрик", sub: "Полная картина" },
-              { icon: Icons.shield(30, "#22d3ee"), title: "Без регистрации", sub: "Данные не хранятся" },
-              { icon: Icons.report(30, "#22d3ee"), title: "Отчёт", sub: "Можно поделиться" },
-            ].map((f, i) => (
-              <div key={i} style={{
-                ...cardStyle, padding: "20px 16px", textAlign: "center", marginBottom: 0,
-              }}>
-                <div style={{ marginBottom: 10, display: "flex", justifyContent: "center" }}>{f.icon}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{f.title}</div>
-                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{f.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Trust */}
-          <div style={{ textAlign: "center", padding: "16px 0" }}>
-            <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.6 }}>
-              Расчёт по формуле US Navy Body Fat Formula<br />
-              используемой Министерством обороны США
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // ── STEP 1: Gender
   if (step === 1) {
     return (
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 96, marginBottom: 32 }}>
-            <button onClick={() => setStep(0)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
-              ← Назад
-            </button>
+          <div style={{ paddingTop: 72, marginBottom: 32 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 20px", color: "#e2e8f0" }}>
+              Рассчитайте состав тела
+            </h1>
             <div style={{ fontSize: 12, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>ШАГ 1 / 3</div>
             <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>Ваш пол</h2>
             <p style={{ fontSize: 14, color: "#94a3b8", marginTop: 6 }}>Формулы расчёта отличаются для мужчин и женщин</p>
@@ -304,7 +243,7 @@ export default function AnalyzerPage() {
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 96, marginBottom: 32 }}>
+          <div style={{ paddingTop: 72, marginBottom: 32 }}>
             <button onClick={() => setStep(1)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
               ← Назад
             </button>
@@ -360,7 +299,7 @@ export default function AnalyzerPage() {
       <div style={pageStyle}>
         <div ref={topRef} />
         <div style={containerStyle}>
-          <div style={{ paddingTop: 96, marginBottom: 24 }}>
+          <div style={{ paddingTop: 72, marginBottom: 24 }}>
             <button onClick={() => setStep(2)} style={{ background: "none", border: "none", color: "#64748b", fontSize: 13, cursor: "pointer", padding: "4px 0", marginBottom: 12, display: "flex", alignItems: "center", gap: 4 }}>
               ← Назад
             </button>
@@ -410,7 +349,7 @@ export default function AnalyzerPage() {
         <div ref={topRef} />
         <div style={containerStyle}>
           {/* Header */}
-          <div style={{ paddingTop: 96, textAlign: "center", marginBottom: 32 }}>
+          <div style={{ paddingTop: 72, textAlign: "center", marginBottom: 32 }}>
             <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>{getBodyTypeIcon(r.bt.type)}</div>
             <h2 style={{
               fontSize: 28, fontWeight: 800, margin: "0 0 6px",
@@ -615,11 +554,35 @@ export default function AnalyzerPage() {
           {/* Restart */}
           <div style={{ textAlign: "center" }}>
             <button
-              onClick={() => { setStep(0); setGender(""); setResults(null); }}
+              onClick={() => { setStep(1); setGender(""); setResults(null); }}
               style={{ background: "none", border: "none", color: "#475569", fontSize: 13, cursor: "pointer", padding: 8, textDecoration: "underline" }}
             >
               Пройти заново
             </button>
+          </div>
+
+          {/* Methodology */}
+          <div style={{ ...cardStyle, marginTop: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", margin: "0 0 12px" }}>
+              Методология расчёта
+            </h3>
+            <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8 }}>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ color: "#22d3ee", fontWeight: 600 }}>% жира</span> — формула US Navy Body Fat Formula, используемая Министерством обороны США. Рассчитывается по обхватам шеи, талии и бёдер с учётом роста.
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ color: "#22d3ee", fontWeight: 600 }}>ИМТ</span> — индекс массы тела (BMI). Отношение веса к квадрату роста (кг/м²).
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ color: "#22d3ee", fontWeight: 600 }}>FFMI</span> — индекс массы без жира (Fat-Free Mass Index). Оценка мышечного развития с поправкой на рост.
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <span style={{ color: "#22d3ee", fontWeight: 600 }}>Метаболизм</span> — базовый обмен по формуле Mifflin-St Jeor. TDEE учитывает уровень физической активности.
+              </div>
+              <div>
+                <span style={{ color: "#22d3ee", fontWeight: 600 }}>Висцеральный риск</span> — оценка по соотношению талия/бёдра (WHR) с пороговыми значениями ВОЗ.
+              </div>
+            </div>
           </div>
 
           {/* Disclaimer */}
