@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { trackGoal } from "../../utils/analytics";
 import * as tracker from "../../lib/tracker";
 import { getSessionId } from "../../lib/tracker";
 import { supabase } from "../../lib/supabase";
@@ -48,7 +47,6 @@ export default function AnalyzerPage() {
   }, [step]);
 
   useEffect(() => {
-    trackGoal('calculator_start');
     tracker.trackCalcStart();
   }, []);
 
@@ -98,7 +96,6 @@ export default function AnalyzerPage() {
     const tdee = bmr * (actMult[activity] || 1.55);
 
     setResults({ bf, bmi, bmr, whr, ffmi, lm, fm, bt, vr, musclePct, tdee, weight: w, gender: g, calcMode });
-    trackGoal('calculator_complete');
     tracker.trackCalcComplete({
       height_cm: h, weight_kg: w, age: a, gender: g,
       waist_cm: wa, hip_cm: hi || null, neck_cm: ne,
@@ -165,7 +162,6 @@ export default function AnalyzerPage() {
         a.click();
         URL.revokeObjectURL(url);
       }
-      trackGoal("share_png");
       tracker.trackShare("png_card");
     } catch {
       // User cancelled or error
@@ -596,7 +592,7 @@ export default function AnalyzerPage() {
             </button>
             <button
               className="btn-lift-secondary"
-              onClick={() => { if (!showDxa) { trackGoal('dxa_info_click'); tracker.trackClick("dxa_info_toggle"); } setShowDxa(!showDxa); }}
+              onClick={() => { if (!showDxa) { tracker.trackClick("dxa_info_toggle"); } setShowDxa(!showDxa); }}
               style={btnSecondary}
             >
               {showDxa ? "Скрыть" : "Узнать про DXA →"}
@@ -677,7 +673,6 @@ export default function AnalyzerPage() {
             </button>
             <button
               onClick={() => {
-                trackGoal('share_result');
                 tracker.trackShare("calc_result");
                 const text = `Мой анализ состава тела:\n` +
                   `▸ ${r.bt.type}\n` +

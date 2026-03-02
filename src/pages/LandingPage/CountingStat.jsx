@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-export default function CountingStat({ value, suffix, label, duration = 2000 }) {
+export default function CountingStat({ value, suffix, label, duration = 2000, loop = false }) {
   const [cur, setCur] = useState(0);
   const [started, setStarted] = useState(false);
+  const [cycle, setCycle] = useState(0);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -13,8 +14,7 @@ export default function CountingStat({ value, suffix, label, duration = 2000 }) 
     return () => o.disconnect();
   }, [started]);
 
-  useEffect(() => {
-    if (!started) return;
+  const runAnimation = useCallback(() => {
     const num = parseFloat(value);
     if (isNaN(num)) return;
     setCur(0);
@@ -26,11 +26,18 @@ export default function CountingStat({ value, suffix, label, duration = 2000 }) 
       setCur(eased * num);
       if (p < 1) {
         raf = requestAnimationFrame(tick);
+      } else if (loop) {
+        setTimeout(() => setCycle(c => c + 1), 1000);
       }
     };
     raf = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(raf); };
-  }, [started, value, duration]);
+  }, [value, duration, loop]);
+
+  useEffect(() => {
+    if (!started) return;
+    return runAnimation();
+  }, [started, cycle, runAnimation]);
 
   const p = parseFloat(value) > 0 ? cur / parseFloat(value) : 0;
   let r, g, b;
