@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 import { ARTICLES } from "../../content/articles";
+import { useJsonLd } from "../../utils/useJsonLd";
 
 /* ── Data ─────────────────────────────────────────────────── */
 
@@ -96,6 +97,24 @@ export default function ArticlePage() {
   useMeta(
     articleMeta?.metaTitle || "Статья не найдена | ASVOMED",
     articleMeta?.description || "Запрошенная статья не найдена"
+  );
+
+  useJsonLd(
+    articleMeta
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": articleMeta.title,
+          "datePublished": articleMeta.publishedAt,
+          "author": {
+            "@type": "Organization",
+            "name": articleMeta.authorName || "ASVOMED",
+          },
+          "mainEntityOfPage": `https://bodycomp.ru/news/${articleMeta.slug}`,
+          "image": [articleMeta.image || "https://bodycomp.ru/og-image.png"],
+        }
+      : null,
+    "news-article"
   );
 
   const [openRisk, setOpenRisk] = useState(null);
@@ -196,9 +215,9 @@ export default function ArticlePage() {
             fontFamily: "'JetBrains Mono', monospace",
             flexWrap: "wrap",
           }}>
-            <span>2 марта 2026</span>
-            <span>7 мин</span>
-            <span>Редакция ASVOMED</span>
+            <span>{articleMeta.date}</span>
+            <span>{articleMeta.readTime}</span>
+            <span>{articleMeta.authorName || "Редакция ASVOMED"}</span>
           </div>
           <div style={{ marginTop: 12, fontSize: 12, color: "#94a3b8", lineHeight: 1.6 }}>
             <div><strong style={{ color: "#cbd5e1" }}>Автор:</strong> Редакция ASVOMED</div>

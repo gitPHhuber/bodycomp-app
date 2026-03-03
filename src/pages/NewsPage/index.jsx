@@ -19,6 +19,7 @@ const ARTICLES = [
 ];
 
 import { ARTICLES, NEWS_META } from "../../content/articles";
+import { useJsonLd } from "../../utils/useJsonLd";
 
 
 const card = {
@@ -30,6 +31,33 @@ const card = {
 
 export default function NewsPage() {
   useMeta(NEWS_META.title, NEWS_META.description);
+
+  useJsonLd(
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "name": "Новости и статьи",
+          "url": "https://bodycomp.ru/news",
+          "mainEntity": { "@id": "https://bodycomp.ru/news#blog" },
+        },
+        {
+          "@type": "Blog",
+          "@id": "https://bodycomp.ru/news#blog",
+          "name": "Новости и статьи",
+          "url": "https://bodycomp.ru/news",
+          "blogPost": ARTICLES.map((article) => ({
+            "@type": "BlogPosting",
+            "headline": article.title,
+            "url": `https://bodycomp.ru/news/${article.slug}`,
+          })),
+        },
+      ],
+    },
+    "news-collection"
+  );
+
 
   const navigate = useNavigate();
 
