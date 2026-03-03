@@ -14,6 +14,8 @@ export const ARTICLES = [
     image: "https://bodycomp.ru/og-image.png",
     tag: "ЭКСПЕРТИЗА",
     tagColor: "#ef4444",
+    updatedAt: "3 марта 2026",
+    sourcesCount: 6,
   },
 ];
 
