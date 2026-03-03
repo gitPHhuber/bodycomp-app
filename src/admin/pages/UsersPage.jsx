@@ -17,6 +17,10 @@ const STATUS_LABELS = {
 
 const SOURCES = ["website", "telegram", "referral"];
 
+function normalizeUtm(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 export default function UsersPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -25,7 +29,11 @@ export default function UsersPage() {
   const [filterSource, setFilterSource] = useState("");
   const [filterCity, setFilterCity] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterUtmSource, setFilterUtmSource] = useState("");
+  const [filterUtmCampaign, setFilterUtmCampaign] = useState("");
   const [cities, setCities] = useState([]);
+  const [utmSources, setUtmSources] = useState([]);
+  const [utmCampaigns, setUtmCampaigns] = useState([]);
 
   useEffect(() => { loadUsers(); }, []);
 
@@ -57,6 +65,23 @@ export default function UsersPage() {
         .from("bookings")
         .select("user_id, status");
 
+      // Load latest tracked page_view/click events meta per user
+      const userIds = usersData.map((u) => u.id).filter(Boolean);
+      let latestEventByUser = {};
+      if (userIds.length > 0) {
+        const { data: events } = await supabase
+          .from("events")
+          .select("user_id, session_id, event_type, created_at, meta")
+          .in("event_type", ["page_view", "click"])
+          .in("user_id", userIds)
+          .order("created_at", { ascending: false });
+
+        (events || []).forEach((e) => {
+          if (!e.user_id || latestEventByUser[e.user_id]) return;
+          latestEventByUser[e.user_id] = e;
+        });
+      }
+
       const bookingMap = {};
       (bookings || []).forEach((b) => {
         if (!bookingMap[b.user_id] || b.status === "completed") {
@@ -67,6 +92,14 @@ export default function UsersPage() {
       // Combine
       const enriched = usersData.map((u) => ({
         ...u,
+        last_event_type: latestEventByUser[u.id]?.event_type || null,
+        last_session_id: latestEventByUser[u.id]?.session_id || null,
+        last_event_meta: latestEventByUser[u.id]?.meta || null,
+        utm_source: normalizeUtm(latestEventByUser[u.id]?.meta?.utm?.utm_source),
+        utm_medium: normalizeUtm(latestEventByUser[u.id]?.meta?.utm?.utm_medium),
+        utm_campaign: normalizeUtm(latestEventByUser[u.id]?.meta?.utm?.utm_campaign),
+        utm_ref: normalizeUtm(latestEventByUser[u.id]?.meta?.utm?.ref),
+        last_source: normalizeUtm(latestEventByUser[u.id]?.meta?.utm?.utm_source) || u.source || "—",
         calc_count: calcCounts[u.id] || 0,
         status: bookingMap[u.id] === "completed" ? "dxa_done"
           : bookingMap[u.id] ? "dxa_booked"
@@ -78,6 +111,11 @@ export default function UsersPage() {
       // Extract unique cities
       const uniqueCities = [...new Set(usersData.map((u) => u.city).filter(Boolean))].sort();
       setCities(uniqueCities);
+
+      const uniqueUtmSources = [...new Set(enriched.map((u) => u.utm_source).filter(Boolean))].sort();
+      const uniqueUtmCampaigns = [...new Set(enriched.map((u) => u.utm_campaign).filter(Boolean))].sort();
+      setUtmSources(uniqueUtmSources);
+      setUtmCampaigns(uniqueUtmCampaigns);
     } catch (err) {
       console.error("Load users error:", err);
     } finally {
@@ -94,6 +132,8 @@ export default function UsersPage() {
       if (!match) return false;
     }
     if (filterSource && u.source !== filterSource) return false;
+    if (filterUtmSource && u.utm_source !== filterUtmSource) return false;
+    if (filterUtmCampaign && u.utm_campaign !== filterUtmCampaign) return false;
     if (filterCity && u.city !== filterCity) return false;
     if (filterStatus && u.status !== filterStatus) return false;
     return true;
@@ -133,6 +173,8 @@ export default function UsersPage() {
         {v}
       </span>
     )},
+    { key: "last_source", label: "Последний источник", maxWidth: 160, render: (v) => v || "—" },
+    { key: "utm_campaign", label: "Кампания", maxWidth: 180, render: (v) => v || "—" },
     { key: "created_at", label: "Регистрация", render: (v) => formatDate(v) },
     { key: "last_seen_at", label: "Последний визит", render: (v) => formatDate(v) },
     { key: "calc_count", label: "Расчёты", maxWidth: 80 },
@@ -196,6 +238,14 @@ export default function UsersPage() {
         <select value={filterCity} onChange={(e) => setFilterCity(e.target.value)} style={selectStyle}>
           <option value="">Все города</option>
           {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={filterUtmSource} onChange={(e) => setFilterUtmSource(e.target.value)} style={selectStyle}>
+          <option value="">UTM source: все</option>
+          {utmSources.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={filterUtmCampaign} onChange={(e) => setFilterUtmCampaign(e.target.value)} style={selectStyle}>
+          <option value="">UTM campaign: все</option>
+          {utmCampaigns.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={selectStyle}>
           <option value="">Все статусы</option>
