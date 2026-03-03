@@ -474,23 +474,48 @@ function QuizAnalytics({ period }) {
 // ─── Click Analytics ───────────────────────────────────────
 function ClickAnalytics({ period }) {
   const [clicks, setClicks] = useState([]);
+  const [elementFilter, setElementFilter] = useState("");
+  const [pageFilter, setPageFilter] = useState("all");
+  const [periodFilter, setPeriodFilter] = useState(period);
+  const [pageOptions, setPageOptions] = useState([]);
 
-  useEffect(() => { load(); }, [period]);
+  useEffect(() => {
+    setPeriodFilter(period);
+  }, [period]);
+
+  useEffect(() => { load(); }, [periodFilter, pageFilter, elementFilter]);
 
   async function load() {
     if (!supabase) return;
-    const dateFrom = getDateRange(period);
+    const dateFrom = getDateRange(periodFilter);
 
-    let query = supabase.from("events").select("element").eq("event_type", "click");
+    let query = supabase.from("events").select("element, page").eq("event_type", "click");
     if (dateFrom) query = query.gte("created_at", dateFrom);
+    if (pageFilter !== "all") query = query.eq("page", pageFilter);
+    if (elementFilter.trim()) query = query.ilike("element", `%${elementFilter.trim()}%`);
+
     const { data } = await query;
 
     if (data) {
       const counts = {};
-      data.forEach((e) => { if (e.element) counts[e.element] = (counts[e.element] || 0) + 1; });
+      const pages = new Set();
+
+      data.forEach((e) => {
+        const page = e.page || "(без page)";
+        if (e.page) pages.add(e.page);
+        if (!e.element) return;
+
+        const key = `${e.element}|||${page}`;
+        if (!counts[key]) counts[key] = { element: e.element, page, count: 0 };
+        counts[key].count += 1;
+      });
+
+      setPageOptions(Array.from(pages).sort());
       setClicks(
-        Object.entries(counts).sort(([, a], [, b]) => b - a).slice(0, 20)
-          .map(([element, count]) => ({ element, count }))
+        Object.values(counts)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 20)
+          .map((row) => ({ ...row, label: `${row.element} • ${row.page}` }))
       );
     }
   }
@@ -498,12 +523,68 @@ function ClickAnalytics({ period }) {
   return (
     <div style={cardStyle}>
       <h3 style={sectionTitle}>Топ-20 кликаемых элементов</h3>
+
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
+        <input
+          value={elementFilter}
+          onChange={(e) => setElementFilter(e.target.value)}
+          placeholder="element contains"
+          style={{
+            background: colors.bg,
+            color: colors.text,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 8,
+            padding: "8px 10px",
+            fontFamily: fonts.body,
+            fontSize: 12,
+          }}
+        />
+
+        <select
+          value={pageFilter}
+          onChange={(e) => setPageFilter(e.target.value)}
+          style={{
+            background: colors.bg,
+            color: colors.text,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 8,
+            padding: "8px 10px",
+            fontFamily: fonts.body,
+            fontSize: 12,
+          }}
+        >
+          <option value="all">Все page</option>
+          {pageOptions.map((page) => (
+            <option key={page} value={page}>{page}</option>
+          ))}
+        </select>
+
+        <select
+          value={periodFilter}
+          onChange={(e) => setPeriodFilter(e.target.value)}
+          style={{
+            background: colors.bg,
+            color: colors.text,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 8,
+            padding: "8px 10px",
+            fontFamily: fonts.body,
+            fontSize: 12,
+          }}
+        >
+          <option value="today">Сегодня</option>
+          <option value="week">7 дней</option>
+          <option value="month">30 дней</option>
+          <option value="all">Все время</option>
+        </select>
+      </div>
+
       <div style={{ width: "100%", height: 500 }}>
         {clicks.length > 0 ? (
           <ResponsiveContainer>
-            <BarChart data={clicks} layout="vertical" margin={{ top: 5, right: 10, bottom: 5, left: 120 }}>
+            <BarChart data={clicks} layout="vertical" margin={{ top: 5, right: 10, bottom: 5, left: 220 }}>
               <XAxis type="number" tick={axisTick} axisLine={{ stroke: colors.border }} tickLine={false} />
-              <YAxis type="category" dataKey="element" tick={{ ...axisTick, fontSize: 10 }} axisLine={false} tickLine={false} width={115} />
+              <YAxis type="category" dataKey="label" tick={{ ...axisTick, fontSize: 10 }} axisLine={false} tickLine={false} width={215} />
               <Tooltip {...tooltipStyle} />
               <Bar dataKey="count" fill="#a78bfa" radius={[0, 4, 4, 0]} name="Кликов" />
             </BarChart>

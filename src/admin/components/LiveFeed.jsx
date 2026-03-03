@@ -37,6 +37,12 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+function getMetaContext(meta) {
+  if (!meta || typeof meta !== "object") return [];
+  const keys = ["city", "mode", "slug"];
+  return keys.filter((key) => meta[key]).map((key) => `${key}: ${meta[key]}`);
+}
+
 export default function LiveFeed() {
   const [events, setEvents] = useState([]);
   const containerRef = useRef(null);
@@ -47,7 +53,7 @@ export default function LiveFeed() {
     // Load initial events
     supabase
       .from("events")
-      .select("id, event_type, page, element, created_at, session_id")
+      .select("id, event_type, page, element, meta, created_at, session_id")
       .order("created_at", { ascending: false })
       .limit(20)
       .then(({ data }) => {
@@ -100,6 +106,9 @@ export default function LiveFeed() {
       ) : (
         events.map((ev) => {
           const color = EVENT_COLORS[ev.event_type] || colors.textDim;
+          const metaContext = getMetaContext(ev.meta);
+          const mainContext = [ev.page, ev.element].filter(Boolean).join(" • ");
+          const contextText = [...(mainContext ? [mainContext] : []), ...metaContext].join(" • ");
           return (
             <div
               key={ev.id}
@@ -140,7 +149,7 @@ export default function LiveFeed() {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}>
-                {ev.page || ev.element || ""}
+                {contextText}
               </span>
             </div>
           );
