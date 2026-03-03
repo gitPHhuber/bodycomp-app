@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
+import { ARTICLES } from "../../content/articles";
 
 /* ── Data ─────────────────────────────────────────────────── */
 
@@ -90,9 +91,11 @@ export default function ArticlePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const articleMeta = ARTICLES.find((article) => article.slug === slug);
+
   useMeta(
-    "Почему дешёвый денситометр — это дорого | ASVOMED",
-    "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам и потере пациентов"
+    articleMeta?.metaTitle || "Статья не найдена | ASVOMED",
+    articleMeta?.description || "Запрошенная статья не найдена"
   );
 
   const [openRisk, setOpenRisk] = useState(null);
@@ -107,7 +110,7 @@ export default function ArticlePage() {
   }, []);
 
   // Redirect unknown slugs
-  if (slug !== "stratos-vs-cheap") {
+  if (!articleMeta) {
     return (
       <div style={{
         minHeight: "100dvh", background: "#020617", color: "#e2e8f0",
