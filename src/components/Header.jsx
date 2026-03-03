@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as tracker from "../lib/tracker";
 import { useAuth } from "../context/AuthContext";
+import { useAdminStatus } from "../hooks/useAdminStatus";
 
 const NAV_LINKS = [
   { to: "/analyzer", label: "Анализ" },
@@ -13,6 +14,7 @@ const NAV_LINKS = [
 export default function Header() {
   const { pathname } = useLocation();
   const { user, profile, setShowAuthModal } = useAuth();
+  const { isAdmin } = useAdminStatus();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [ctaHover, setCtaHover] = useState(false);
@@ -32,6 +34,10 @@ export default function Header() {
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  const navLinks = isAdmin
+    ? [...NAV_LINKS, { to: "/admin", label: "Админ" }]
+    : NAV_LINKS;
 
   const linkColor = (to) => (pathname === to ? "#22d3ee" : "#94a3b8");
 
@@ -82,13 +88,13 @@ export default function Header() {
           {/* Desktop nav */}
           {!isMobile && (
             <nav style={{ display: "flex", gap: 24, alignItems: "center" }}>
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => tracker.trackClick("nav", { to: link.to })}
                   style={{
-                    color: linkColor(link.to),
+                    color: link.to === "/admin" ? "#f59e0b" : linkColor(link.to),
                     textDecoration: "none",
                     fontSize: 14,
                     fontWeight: 600,
@@ -272,13 +278,13 @@ export default function Header() {
               gap: 8,
             }}
           >
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => tracker.trackClick("nav_mobile", { to: link.to })}
                 style={{
-                  color: linkColor(link.to),
+                  color: link.to === "/admin" ? "#f59e0b" : linkColor(link.to),
                   textDecoration: "none",
                   fontSize: 18,
                   fontWeight: 600,
@@ -287,7 +293,7 @@ export default function Header() {
                   borderRadius: 12,
                   background:
                     pathname === link.to
-                      ? "rgba(34,211,238,0.08)"
+                      ? (link.to === "/admin" ? "rgba(245,158,11,0.08)" : "rgba(34,211,238,0.08)")
                       : "transparent",
                   transition: "background 0.2s",
                 }}

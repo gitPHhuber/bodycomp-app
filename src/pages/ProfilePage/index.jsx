@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminStatus } from "../../hooks/useAdminStatus";
 import { supabase } from "../../lib/supabase";
 import { useMeta } from "../../utils/useMeta";
 
@@ -18,6 +19,7 @@ export default function ProfilePage() {
 
   const navigate = useNavigate();
   const { user, profile, signOut, fetchProfile } = useAuth();
+  const { isAdmin } = useAdminStatus();
   const [tab, setTab] = useState("data");
 
   // Profile edit state
@@ -181,6 +183,29 @@ export default function ProfilePage() {
           >
             Выйти
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 8,
+                background: "linear-gradient(135deg, #f59e0b22, #d9770622)",
+                border: "1px solid #f59e0b44",
+                color: "#f59e0b",
+                padding: "8px 20px",
+                borderRadius: 10,
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "'JetBrains Mono', monospace",
+                transition: "all 0.2s",
+              }}
+            >
+              Админ-панель
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
