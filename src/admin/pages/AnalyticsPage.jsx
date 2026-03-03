@@ -80,6 +80,8 @@ function ContentAnalytics({ period }) {
   const [scrollData, setScrollData] = useState([]);
   const [timeData, setTimeData] = useState([]);
   const [bounceRate, setBounceRate] = useState(0);
+  const [attentionPages, setAttentionPages] = useState([]);
+  const [selectedAttentionPage, setSelectedAttentionPage] = useState(null);
 
   useEffect(() => { load(); }, [period]);
 
@@ -158,7 +160,104 @@ function ContentAnalytics({ period }) {
       const bouncedSessions = Object.values(sessionPages).filter((s) => s.size === 1).length;
       setBounceRate(totalSessions > 0 ? ((bouncedSessions / totalSessions) * 100).toFixed(1) : 0);
     }
+
+    // Attention score by page (time + scroll + interactions)
+    let attentionQuery = supabase.from("events")
+      .select("event_type, page, element, session_id, created_at, meta")
+      .in("event_type", ["page_view", "time_on_page", "scroll_depth", "form_focus", "click"]);
+    if (dateFrom) attentionQuery = attentionQuery.gte("created_at", dateFrom);
+    const { data: attentionEvents } = await attentionQuery;
+
+    if (attentionEvents) {
+      const metricsByPage = {};
+
+      const ensurePage = (page) => {
+        if (!metricsByPage[page]) {
+          metricsByPage[page] = {
+            page,
+            totalTime: 0,
+            timeCount: 0,
+            maxScroll: 0,
+            clickCount: 0,
+            formFocusCount: 0,
+            formFields: new Set(),
+          };
+        }
+      };
+
+      const bySession = {};
+      attentionEvents.forEach((e) => {
+        if (!e.session_id) return;
+        if (!bySession[e.session_id]) bySession[e.session_id] = [];
+        bySession[e.session_id].push(e);
+      });
+
+      Object.values(bySession).forEach((events) => {
+        events.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        let currentPage = null;
+
+        events.forEach((e) => {
+          if (e.page) currentPage = e.page;
+          const resolvedPage = e.page || currentPage;
+          if (!resolvedPage) return;
+
+          ensurePage(resolvedPage);
+          const pageData = metricsByPage[resolvedPage];
+
+          if (e.event_type === "time_on_page" && Number.isFinite(e.meta?.seconds)) {
+            pageData.totalTime += e.meta.seconds;
+            pageData.timeCount += 1;
+          }
+
+          if (e.event_type === "scroll_depth" && Number.isFinite(e.meta?.depth)) {
+            pageData.maxScroll = Math.max(pageData.maxScroll, e.meta.depth);
+          }
+
+          if (e.event_type === "click") {
+            pageData.clickCount += 1;
+          }
+
+          if (e.event_type === "form_focus") {
+            pageData.formFocusCount += 1;
+            if (e.element) pageData.formFields.add(e.element);
+          }
+        });
+      });
+
+      const normalized = Object.values(metricsByPage).map((m) => ({
+        page: m.page,
+        avgTime: m.timeCount > 0 ? m.totalTime / m.timeCount : 0,
+        maxScroll: m.maxScroll,
+        clickCount: m.clickCount,
+        formFieldsCount: m.formFields.size,
+        interactionCount: m.clickCount + m.formFocusCount,
+      }));
+
+      const maxAvgTime = Math.max(...normalized.map((m) => m.avgTime), 1);
+      const maxInteractions = Math.max(...normalized.map((m) => m.interactionCount), 1);
+
+      const withScores = normalized
+        .map((m) => ({
+          ...m,
+          score: Math.round(
+            ((m.avgTime / maxAvgTime) * 40)
+            + ((m.maxScroll / 100) * 35)
+            + ((m.interactionCount / maxInteractions) * 25)
+          ),
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+      setAttentionPages(withScores);
+      setSelectedAttentionPage((prev) => {
+        if (!withScores.length) return null;
+        if (prev && withScores.some((p) => p.page === prev)) return prev;
+        return withScores[0].page;
+      });
+    }
   }
+
+  const selectedAttentionMetrics = attentionPages.find((p) => p.page === selectedAttentionPage);
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
@@ -221,6 +320,58 @@ function ContentAnalytics({ period }) {
         </div>
         <div style={{ fontSize: 13, color: colors.textDim, fontFamily: fonts.body, marginTop: 8 }}>
           сессий с одной страницей
+        </div>
+      </div>
+
+      {/* Attention block */}
+      <div style={{ ...cardStyle, gridColumn: "1 / -1" }}>
+        <h3 style={sectionTitle}>Attention</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 16 }}>
+          <div style={{ width: "100%", height: 320 }}>
+            {attentionPages.length > 0 ? (
+              <ResponsiveContainer>
+                <BarChart data={attentionPages} layout="vertical" margin={{ top: 5, right: 12, bottom: 5, left: 90 }}>
+                  <XAxis type="number" domain={[0, 100]} tick={axisTick} axisLine={{ stroke: colors.border }} tickLine={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="page"
+                    tick={{ ...axisTick, fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={85}
+                  />
+                  <Tooltip {...tooltipStyle} />
+                  <Bar
+                    dataKey="score"
+                    fill="#14b8a6"
+                    radius={[0, 4, 4, 0]}
+                    name="Attention score"
+                    onClick={(entry) => setSelectedAttentionPage(entry?.page || null)}
+                    style={{ cursor: "pointer" }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <EmptyState />}
+          </div>
+
+          <div style={{ border: `1px solid ${colors.border}`, borderRadius: 10, padding: 12, background: `${colors.bgSecondary || colors.card}` }}>
+            <div style={{ fontSize: 11, color: colors.textDim, fontFamily: fonts.mono, marginBottom: 8 }}>
+              Детализация (клик по странице в топе)
+            </div>
+            {selectedAttentionMetrics ? (
+              <>
+                <div style={{ fontSize: 13, color: colors.text, fontFamily: fonts.body, fontWeight: 700, marginBottom: 10 }}>
+                  {selectedAttentionMetrics.page}
+                </div>
+                <MetricRow label="Composite score" value={selectedAttentionMetrics.score} accent={colors.accent} />
+                <MetricRow label="Время на странице (сред., сек)" value={selectedAttentionMetrics.avgTime.toFixed(1)} />
+                <MetricRow label="Глубина скролла (макс, %)" value={Math.round(selectedAttentionMetrics.maxScroll)} />
+                <MetricRow label="Click count" value={selectedAttentionMetrics.clickCount} />
+                <MetricRow label="Form focus (уник. полей)" value={selectedAttentionMetrics.formFieldsCount} />
+                <MetricRow label="Interactions (click + form_focus)" value={selectedAttentionMetrics.interactionCount} />
+              </>
+            ) : <EmptyState />}
+          </div>
         </div>
       </div>
     </div>
@@ -680,6 +831,15 @@ function EmptyState() {
       height: "100%", color: colors.textDim, fontFamily: fonts.mono, fontSize: 12,
     }}>
       Нет данных за период
+    </div>
+  );
+}
+
+function MetricRow({ label, value, accent }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "7px 0", borderBottom: `1px solid ${colors.border}` }}>
+      <span style={{ fontSize: 12, color: colors.textMuted, fontFamily: fonts.body }}>{label}</span>
+      <span style={{ fontSize: 12, color: accent || colors.text, fontFamily: fonts.mono, fontWeight: 700 }}>{value}</span>
     </div>
   );
 }
