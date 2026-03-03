@@ -90,9 +90,25 @@ export default function ArticlePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const articleStructuredDataBySlug = {
+    "stratos-vs-cheap": {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "Почему дешёвый денситометр — это дорого",
+      datePublished: "2026-03-02",
+      author: {
+        "@type": "Organization",
+        name: "Редакция ASVOMED",
+      },
+      mainEntityOfPage: "https://bodycomp.ru/news/stratos-vs-cheap",
+      image: ["https://bodycomp.ru/og-image.png"],
+    },
+  };
+
   useMeta(
     "Почему дешёвый денситометр — это дорого | ASVOMED",
-    "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам и потере пациентов"
+    "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам и потере пациентов",
+    articleStructuredDataBySlug[slug]
   );
 
   const [openRisk, setOpenRisk] = useState(null);

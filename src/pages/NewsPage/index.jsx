@@ -22,9 +22,26 @@ const card = {
 };
 
 export default function NewsPage() {
+  const newsStructuredData = {
+    "@context": "https://schema.org",
+    "@type": ["CollectionPage", "Blog"],
+    name: "Новости и статьи | ASVOMED",
+    url: "https://bodycomp.ru/news",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: ARTICLES.map((article, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://bodycomp.ru/news/${article.slug}`,
+        name: article.title,
+      })),
+    },
+  };
+
   useMeta(
     "Новости и статьи | ASVOMED",
-    "Экспертные статьи о денситометрии, DXA-сканировании и анализе состава тела"
+    "Экспертные статьи о денситометрии, DXA-сканировании и анализе состава тела",
+    newsStructuredData
   );
 
   const navigate = useNavigate();
