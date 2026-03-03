@@ -1,7 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
+
+
+const ARTICLES = [
+  {
+    slug: "stratos-vs-cheap",
+    title: "Почему дешёвый денситометр — это дорого",
+    subtitle: "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам",
+    date: "2 марта 2026",
+    updatedAt: "3 марта 2026",
+    author: "Редакция ASVOMED",
+    readTime: "7 мин",
+    sourcesCount: 6,
+    tag: "ЭКСПЕРТИЗА",
+    tagColor: "#ef4444",
+  },
+];
+
 import { ARTICLES, NEWS_META } from "../../content/articles";
+
 
 const card = {
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
@@ -31,9 +49,25 @@ export default function NewsPage() {
         <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 8px" }}>
           Новости и статьи
         </h1>
-        <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 28px", lineHeight: 1.5 }}>
+        <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 16px", lineHeight: 1.5 }}>
           Экспертные материалы о DXA-технологиях и здоровье
         </p>
+
+        <div
+          onClick={() => {
+            tracker.trackClick("expert_qa_open_from_news");
+            navigate("/expert-qa");
+          }}
+          style={{ ...card, marginBottom: 20, borderColor: "#22d3ee33", cursor: "pointer" }}
+        >
+          <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono', monospace", marginBottom: 8 }}>
+            НОВАЯ ПУБЛИЧНАЯ СТРАНИЦА
+          </div>
+          <h2 style={{ fontSize: 18, margin: "0 0 8px" }}>Экспертные Q/A: DXA, % жира, точность и ограничения</h2>
+          <p style={{ fontSize: 13, color: "#94a3b8", margin: 0, lineHeight: 1.6 }}>
+            Ответы на частые вопросы с указанием ограничений методов и ссылками на источники.
+          </p>
+        </div>
 
         {ARTICLES.map((article) => (
           <div
@@ -44,7 +78,6 @@ export default function NewsPage() {
             }}
             style={{ ...card, marginBottom: 14, cursor: "pointer", transition: "border-color 0.3s" }}
           >
-            {/* Tag badge */}
             <div style={{ marginBottom: 14 }}>
               <span style={{
                 display: "inline-flex",
@@ -55,12 +88,7 @@ export default function NewsPage() {
                 background: article.tagColor + "15",
                 border: `1px solid ${article.tagColor}30`,
               }}>
-                <span style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: article.tagColor,
-                }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: article.tagColor }} />
                 <span style={{
                   fontSize: 10,
                   fontWeight: 700,
@@ -74,33 +102,26 @@ export default function NewsPage() {
               </span>
             </div>
 
-            {/* Title */}
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.35 }}>
               {article.title}
             </h2>
 
-            {/* Subtitle */}
-            <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 14px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 12px", lineHeight: 1.6 }}>
               {article.subtitle}
             </p>
 
-            {/* Meta + CTA */}
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 14, lineHeight: 1.6 }}>
+              <div><strong style={{ color: "#94a3b8" }}>Автор:</strong> {article.author}</div>
+              <div><strong style={{ color: "#94a3b8" }}>Дата:</strong> {article.date} · <strong style={{ color: "#94a3b8" }}>Обновлено:</strong> {article.updatedAt}</div>
+              <div><strong style={{ color: "#94a3b8" }}>Источники:</strong> {article.sourcesCount} внешних публикаций</div>
+            </div>
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{
-                display: "flex",
-                gap: 12,
-                fontSize: 12,
-                color: "#64748b",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}>
+              <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#64748b", fontFamily: "'JetBrains Mono', monospace" }}>
                 <span>{article.date}</span>
                 <span>{article.readTime}</span>
               </div>
-              <span style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#22d3ee",
-              }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#22d3ee" }}>
                 Читать →
               </span>
             </div>

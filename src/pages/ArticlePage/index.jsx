@@ -194,10 +194,17 @@ export default function ArticlePage() {
           <div style={{
             display: "flex", gap: 16, fontSize: 12, color: "#64748b",
             fontFamily: "'JetBrains Mono', monospace",
+            flexWrap: "wrap",
           }}>
             <span>2 марта 2026</span>
             <span>7 мин</span>
             <span>Редакция ASVOMED</span>
+          </div>
+          <div style={{ marginTop: 12, fontSize: 12, color: "#94a3b8", lineHeight: 1.6 }}>
+            <div><strong style={{ color: "#cbd5e1" }}>Автор:</strong> Редакция ASVOMED</div>
+            <div><strong style={{ color: "#cbd5e1" }}>Дата публикации:</strong> 2 марта 2026</div>
+            <div><strong style={{ color: "#cbd5e1" }}>Дата обновления:</strong> 3 марта 2026</div>
+            <div><strong style={{ color: "#cbd5e1" }}>Источники:</strong> ISCD, NIH, публикации в PubMed (см. раздел «Источники»)</div>
           </div>
         </div>
 
@@ -510,6 +517,34 @@ export default function ArticlePage() {
           >
             Узнать подробнее о Stratos dR →
           </button>
+        </div>
+
+        {/* ═══ Инфоблоки для ключевой статьи ═══ */}
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={sectionHead("#22d3ee")}>Что это</h2>
+          <p style={bodyText}>Материал объясняет, как различия в DXA-оборудовании влияют на точность интерпретации показателей плотности кости и состава тела.</p>
+          <p style={bodyText}>Цель статьи — снизить риск ошибочной трактовки результатов и помочь клиникам выбирать методику с учётом клинических задач.</p>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={sectionHead("#10b981")}>Кому подходит / не подходит</h2>
+          <p style={bodyText}>Подходит руководителям клиник, врачам лучевой диагностики, эндокринологам и пациентам, которые отслеживают динамику в долгую.</p>
+          <p style={bodyText}>Не подходит как единственный источник для постановки диагноза: решение по лечению должно приниматься на очной консультации специалиста.</p>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={sectionHead("#f59e0b")}>Точность и ограничения</h2>
+          <p style={bodyText}>Даже при высокой технологичности метода результат зависит от протокола сканирования, позиционирования пациента и сопоставимости оборудования между визитами.</p>
+          <p style={bodyText}>Для корректной динамики рекомендуется проходить контрольные исследования в одной клинике и на одном классе аппаратов.</p>
+        </div>
+
+        <div style={{ ...cardStyle, padding: 18, marginBottom: 26 }}>
+          <h2 style={{ ...sectionHead("#a78bfa"), marginBottom: 10 }}>Источники</h2>
+          <ul style={{ margin: 0, paddingLeft: 18, color: "#cbd5e1", lineHeight: 1.7 }}>
+            <li><a href="https://iscd.org/learn/official-positions/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>ISCD Official Positions</a></li>
+            <li><a href="https://www.bones.nih.gov/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>NIH: Bone Health & Osteoporosis</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>PubMed: публикации по сравнительной точности DXA-систем</a></li>
+          </ul>
         </div>
 
         {/* ═══ Legal Disclaimer ═══ */}

@@ -409,6 +409,40 @@ export default function ClinicsPage() {
           </div>
         </Reveal>
 
+        <Reveal from="bottom" delay={220}>
+          <div style={{ marginTop: 20, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Что это</h3>
+            <p style={{ margin: "0 0 8px", color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Каталог клиник для записи на DXA-исследование состава тела и минеральной плотности костей.</p>
+            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Здесь можно выбрать город, клинику и оставить заявку на удобное время.</p>
+          </div>
+        </Reveal>
+
+        <Reveal from="bottom" delay={230}>
+          <div style={{ marginTop: 12, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Кому подходит / не подходит</h3>
+            <p style={{ margin: "0 0 8px", color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Подходит пациентам, которым нужна инструментальная оценка состава тела и/или костной плотности.</p>
+            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Не подходит для экстренных состояний и не заменяет очный осмотр врача.</p>
+          </div>
+        </Reveal>
+
+        <Reveal from="bottom" delay={240}>
+          <div style={{ marginTop: 12, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Точность и ограничения</h3>
+            <p style={{ margin: "0 0 8px", color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Точность зависит от качества оборудования, калибровки и соблюдения протокола исследования в клинике.</p>
+            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>Результаты должны интерпретироваться специалистом с учётом клинической картины и анамнеза.</p>
+          </div>
+        </Reveal>
+
+        <Reveal from="bottom" delay={250}>
+          <div style={{ marginTop: 12, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Источники</h3>
+            <ul style={{ margin: 0, paddingLeft: 18, color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+              <li><a href="https://iscd.org/learn/official-positions/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>ISCD Official Positions</a></li>
+              <li><a href="https://www.bones.nih.gov/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>NIH Osteoporosis Resource</a></li>
+            </ul>
+          </div>
+        </Reveal>
+
         {/* Footer */}
         <div style={{ textAlign: "center", padding: "24px 0 0", marginTop: 24, borderTop: "1px solid #1e293b" }}>
           <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>
