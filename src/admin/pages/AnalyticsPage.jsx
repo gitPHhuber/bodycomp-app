@@ -12,6 +12,7 @@ const TABS = [
   { key: "calculator", label: "Калькулятор" },
   { key: "quizzes", label: "Квизы" },
   { key: "clicks", label: "Клики" },
+  { key: "journeys", label: "Journeys" },
   { key: "cohorts", label: "Когорты" },
 ];
 
@@ -69,6 +70,7 @@ export default function AnalyticsPage() {
       {tab === "calculator" && <CalculatorAnalytics period={period} />}
       {tab === "quizzes" && <QuizAnalytics period={period} />}
       {tab === "clicks" && <ClickAnalytics period={period} />}
+      {tab === "journeys" && <JourneyAnalytics period={period} />}
       {tab === "cohorts" && <CohortAnalysis />}
     </div>
   );
@@ -509,6 +511,181 @@ function ClickAnalytics({ period }) {
             </BarChart>
           </ResponsiveContainer>
         ) : <EmptyState />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Journey Analytics ─────────────────────────────────────
+function JourneyAnalytics({ period }) {
+  const [topJourneys, setTopJourneys] = useState([]);
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [conversionPaths, setConversionPaths] = useState([]);
+
+  useEffect(() => { load(); }, [period]);
+
+  async function load() {
+    if (!supabase) return;
+    const dateFrom = getDateRange(period);
+
+    let pvQuery = supabase
+      .from("events")
+      .select("session_id, page, created_at")
+      .eq("event_type", "page_view")
+      .not("session_id", "is", null);
+    if (dateFrom) pvQuery = pvQuery.gte("created_at", dateFrom);
+
+    const { data: pageViews } = await pvQuery;
+    if (!pageViews || pageViews.length === 0) {
+      setTopJourneys([]);
+      setTotalSessions(0);
+      setConversionPaths([]);
+      return;
+    }
+
+    const sessionEvents = {};
+    pageViews.forEach((event) => {
+      if (!event.session_id || !event.page || !event.created_at) return;
+      if (!sessionEvents[event.session_id]) sessionEvents[event.session_id] = [];
+      sessionEvents[event.session_id].push(event);
+    });
+
+    const sessionPaths = {};
+    Object.entries(sessionEvents).forEach(([sessionId, events]) => {
+      const orderedPages = events
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map((e) => e.page)
+        .filter(Boolean);
+
+      if (orderedPages.length === 0) return;
+
+      const compactPath = orderedPages.filter((page, idx) => idx === 0 || orderedPages[idx - 1] !== page);
+      sessionPaths[sessionId] = compactPath;
+    });
+
+    const total = Object.keys(sessionPaths).length;
+    setTotalSessions(total);
+
+    const pathCounts = {};
+    Object.values(sessionPaths).forEach((pages) => {
+      const chain = pages.join(" -> ");
+      pathCounts[chain] = (pathCounts[chain] || 0) + 1;
+    });
+
+    setTopJourneys(
+      Object.entries(pathCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([path, count]) => ({
+          path,
+          count,
+          share: total > 0 ? ((count / total) * 100).toFixed(1) : "0.0",
+        }))
+    );
+
+    let convQuery = supabase
+      .from("events")
+      .select("session_id, event_type, element, created_at")
+      .in("event_type", ["booking_click", "click"])
+      .not("session_id", "is", null);
+    if (dateFrom) convQuery = convQuery.gte("created_at", dateFrom);
+
+    const { data: conversionEvents } = await convQuery;
+    if (!conversionEvents || conversionEvents.length === 0) {
+      setConversionPaths([]);
+      return;
+    }
+
+    const conversionStats = {};
+    conversionEvents.forEach((event) => {
+      const isWaitlistSubmit = event.event_type === "click" && event.element === "waitlist_submit";
+      const isBookingClick = event.event_type === "booking_click";
+      if (!isWaitlistSubmit && !isBookingClick) return;
+      if (!sessionPaths[event.session_id]) return;
+
+      const conversionKey = isWaitlistSubmit ? "waitlist_submit" : "booking_click";
+      const pages = sessionPaths[event.session_id];
+      const shortPath = [...pages.slice(-3), conversionKey].join(" -> ");
+      const key = `${conversionKey}::${shortPath}`;
+      conversionStats[key] = {
+        conversion: conversionKey,
+        path: shortPath,
+        count: (conversionStats[key]?.count || 0) + 1,
+      };
+    });
+
+    setConversionPaths(
+      Object.values(conversionStats)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+    );
+  }
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
+      <div style={cardStyle}>
+        <h3 style={sectionTitle}>Top journey-цепочки</h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: fonts.mono, fontSize: 12 }}>
+            <thead>
+              <tr>
+                <th style={cohortTh}>Путь</th>
+                <th style={cohortTh}>Сессии</th>
+                <th style={cohortTh}>Доля</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topJourneys.map((item) => (
+                <tr key={item.path}>
+                  <td style={{ ...cohortTd, color: colors.text }}>{item.path}</td>
+                  <td style={cohortTd}>{item.count}</td>
+                  <td style={cohortTd}>{item.share}%</td>
+                </tr>
+              ))}
+              {topJourneys.length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{ ...cohortTd, textAlign: "center", color: colors.textDim, padding: 24 }}>
+                    Нет данных за период
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ marginTop: 10, fontSize: 12, color: colors.textDim, fontFamily: fonts.body }}>
+          Всего сессий в периоде: {totalSessions}
+        </div>
+      </div>
+
+      <div style={cardStyle}>
+        <h3 style={sectionTitle}>Короткие конверсионные пути</h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: fonts.mono, fontSize: 12 }}>
+            <thead>
+              <tr>
+                <th style={cohortTh}>Конверсия</th>
+                <th style={cohortTh}>Путь</th>
+                <th style={cohortTh}>Сессии</th>
+              </tr>
+            </thead>
+            <tbody>
+              {conversionPaths.map((item) => (
+                <tr key={`${item.conversion}:${item.path}`}>
+                  <td style={cohortTd}>{item.conversion}</td>
+                  <td style={{ ...cohortTd, color: colors.text }}>{item.path}</td>
+                  <td style={cohortTd}>{item.count}</td>
+                </tr>
+              ))}
+              {conversionPaths.length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{ ...cohortTd, textAlign: "center", color: colors.textDim, padding: 24 }}>
+                    Нет данных по конверсиям за период
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
