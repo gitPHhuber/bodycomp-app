@@ -14,6 +14,7 @@ import { ARTICLES, NEWS_META } from "../src/content/articles.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
+const BASE_URL = "https://bodycomp.ru";
 
 const ROUTES = [
   {
@@ -21,29 +22,34 @@ const ROUTES = [
     title: "Калькулятор состава тела онлайн — процент жира, мышцы, метаболизм",
     description:
       "Бесплатный расчёт состава тела за 3 минуты. Процент жира по формуле Navy, ИМТ, FFMI, базовый метаболизм, висцеральный риск.",
+    url: `${BASE_URL}/analyzer`,
   },
   {
     path: "/clinics",
     title: "Запись на DXA-сканирование тела — найти клинику",
     description:
       "Запишитесь на точный DXA-анализ состава тела. Stratos dR — золотой стандарт. Процент жира, мышцы, кости за 5 минут.",
+    url: `${BASE_URL}/clinics`,
   },
   {
     path: "/xray",
     title: "Рентген состава тела — сравните двух людей с одинаковым весом",
     description:
       "Интерактивный DXA-сканер: посмотрите, как одинаковый вес скрывает совершенно разное здоровье. Skinny fat vs атлет.",
+    url: `${BASE_URL}/xray`,
   },
   {
     path: "/privacy",
     title: "Политика конфиденциальности — BodyComp",
     description:
       "Политика обработки персональных данных сайта BodyComp. Информация о сборе, хранении и защите ваших данных.",
+    url: `${BASE_URL}/privacy`,
   },
   {
     path: "/news",
     title: NEWS_META.title,
     description: NEWS_META.description,
+    url: `${BASE_URL}/news`,
   },
 ];
 
@@ -51,6 +57,7 @@ const ARTICLE_ROUTES = ARTICLES.map((article) => ({
   path: `/news/${article.slug}`,
   title: article.metaTitle || article.title,
   description: article.description || article.subtitle,
+  url: `${BASE_URL}/news/${article.slug}`,
 }));
 
 const ALL_ROUTES = [...ROUTES, ...ARTICLE_ROUTES];
@@ -82,6 +89,18 @@ for (const route of ALL_ROUTES) {
   html = html.replace(
     /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/,
     `<meta property="og:description" content="${route.description}" />`
+  );
+
+  // Replace og:url
+  html = html.replace(
+    /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
+    `<meta property="og:url" content="${route.url}" />`
+  );
+
+  // Replace canonical
+  html = html.replace(
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
+    `<link rel="canonical" href="${route.url}" />`
   );
 
   // Replace twitter:title
