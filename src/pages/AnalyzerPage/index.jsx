@@ -734,6 +734,32 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+          <div style={{ ...cardStyle, marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", margin: "0 0 12px" }}>Что это</h3>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: "0 0 8px" }}>Онлайн-калькулятор даёт ориентировочную оценку состава тела на базе антропометрических формул.</p>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: 0 }}>Это предварительный инструмент, который помогает понять направление изменений до инструментальной диагностики.</p>
+          </div>
+
+          <div style={{ ...cardStyle, marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", margin: "0 0 12px" }}>Кому подходит / не подходит</h3>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: "0 0 8px" }}>Подходит для первичной самооценки и мониторинга трендов между визитами к специалисту.</p>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: 0 }}>Не подходит для постановки диагноза и не заменяет DXA-исследование и очную консультацию врача.</p>
+          </div>
+
+          <div style={{ ...cardStyle, marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", margin: "0 0 12px" }}>Точность и ограничения</h3>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: "0 0 8px" }}>Формульные методы чувствительны к точности замеров обхватов, пола, возраста и индивидуальных особенностей телосложения.</p>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, margin: 0 }}>При клинических задачах и спорных значениях следует использовать инструментальные методы с врачебной интерпретацией.</p>
+          </div>
+
+          <div style={{ ...cardStyle, marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", margin: "0 0 12px" }}>Источники</h3>
+            <ul style={{ margin: 0, paddingLeft: 18, color: "#94a3b8", lineHeight: 1.8, fontSize: 13 }}>
+              <li><a href="https://www.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>NCBI / PubMed</a></li>
+              <li><a href="https://www.who.int/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>WHO guidance materials</a></li>
+            </ul>
+          </div>
+
           {/* Disclaimer */}
           <div style={{ textAlign: "center", padding: "24px 0 0", borderTop: "1px solid #1e293b", marginTop: 24 }}>
             <p style={{ fontSize: 10, color: "#334155", lineHeight: 1.6 }}>

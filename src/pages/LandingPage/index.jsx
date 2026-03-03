@@ -365,6 +365,32 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
+        <div style={{ marginBottom: 22, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Что это</h3>
+          <p style={{ margin: "0 0 8px", color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Это обзорная страница о составе тела и возможностях DXA. Она помогает понять, почему вес на весах не равен качеству состава тела.</p>
+          <p style={{ margin: 0, color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Далее можно перейти к бесплатному расчёту или к записи на инструментальное исследование в клинике.</p>
+        </div>
+
+        <div style={{ marginBottom: 22, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Кому подходит / не подходит</h3>
+          <p style={{ margin: "0 0 8px", color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Подходит тем, кто хочет оценить риски по жиру, мышечной массе и костному здоровью в динамике.</p>
+          <p style={{ margin: 0, color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Не подходит как замена медицинскому заключению: итоговую интерпретацию должен делать специалист.</p>
+        </div>
+
+        <div style={{ marginBottom: 22, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Точность и ограничения</h3>
+          <p style={{ margin: "0 0 8px", color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Оценка состава тела зависит от выбранного метода, условий измерения и повторяемости протокола.</p>
+          <p style={{ margin: 0, color: "#cbd5e1", fontSize: 14, lineHeight: 1.6 }}>Для сравнения результатов во времени желательно использовать один тип исследования и одну клинику.</p>
+        </div>
+
+        <div style={{ marginBottom: 24, padding: 18, borderRadius: 16, background: "#0f172a", border: "1px solid #1e293b" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17 }}>Источники</h3>
+          <ul style={{ margin: 0, paddingLeft: 18, color: "#cbd5e1", lineHeight: 1.7, fontSize: 14 }}>
+            <li><a href="https://iscd.org/learn/official-positions/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>ISCD Official Positions</a></li>
+            <li><a href="https://www.who.int/" target="_blank" rel="noopener noreferrer" style={{ color: "#22d3ee" }}>World Health Organization (WHO)</a></li>
+          </ul>
+        </div>
+
         <div style={{ textAlign: "center", padding: "14px 0", borderTop: "1px solid #1e293b" }}>
           <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6 }}>Образовательный контент. Имеются противопоказания, необходима консультация специалиста.</p>
         </div>
