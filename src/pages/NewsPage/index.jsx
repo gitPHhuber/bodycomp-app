@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 import { ARTICLES, NEWS_META } from "../../content/articles";
+import { useJsonLd } from "../../utils/useJsonLd";
 
 const card = {
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
@@ -12,6 +13,33 @@ const card = {
 
 export default function NewsPage() {
   useMeta(NEWS_META.title, NEWS_META.description);
+
+  useJsonLd(
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "name": "Новости и статьи",
+          "url": "https://bodycomp.ru/news",
+          "mainEntity": { "@id": "https://bodycomp.ru/news#blog" },
+        },
+        {
+          "@type": "Blog",
+          "@id": "https://bodycomp.ru/news#blog",
+          "name": "Новости и статьи",
+          "url": "https://bodycomp.ru/news",
+          "blogPost": ARTICLES.map((article) => ({
+            "@type": "BlogPosting",
+            "headline": article.title,
+            "url": `https://bodycomp.ru/news/${article.slug}`,
+          })),
+        },
+      ],
+    },
+    "news-collection"
+  );
+
 
   const navigate = useNavigate();
 
