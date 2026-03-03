@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { ARTICLES, NEWS_META } from "../src/content/articles.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
@@ -39,11 +40,24 @@ const ROUTES = [
     description:
       "Политика обработки персональных данных сайта BodyComp. Информация о сборе, хранении и защите ваших данных.",
   },
+  {
+    path: "/news",
+    title: NEWS_META.title,
+    description: NEWS_META.description,
+  },
 ];
+
+const ARTICLE_ROUTES = ARTICLES.map((article) => ({
+  path: `/news/${article.slug}`,
+  title: article.metaTitle || article.title,
+  description: article.description || article.subtitle,
+}));
+
+const ALL_ROUTES = [...ROUTES, ...ARTICLE_ROUTES];
 
 const template = readFileSync(resolve(DIST, "index.html"), "utf-8");
 
-for (const route of ROUTES) {
+for (const route of ALL_ROUTES) {
   let html = template;
 
   // Replace <title>
@@ -88,4 +102,4 @@ for (const route of ROUTES) {
   console.log(`  ✓ ${route.path}/index.html`);
 }
 
-console.log(`\nGenerated static meta for ${ROUTES.length} routes.`);
+console.log(`\nGenerated static meta for ${ALL_ROUTES.length} routes.`);

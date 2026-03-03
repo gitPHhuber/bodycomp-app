@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 
+
 const ARTICLES = [
   {
     slug: "stratos-vs-cheap",
@@ -17,6 +18,9 @@ const ARTICLES = [
   },
 ];
 
+import { ARTICLES, NEWS_META } from "../../content/articles";
+
+
 const card = {
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
   borderRadius: 20,
@@ -25,10 +29,7 @@ const card = {
 };
 
 export default function NewsPage() {
-  useMeta(
-    "Новости и статьи | ASVOMED",
-    "Экспертные статьи о денситометрии, DXA-сканировании и анализе состава тела"
-  );
+  useMeta(NEWS_META.title, NEWS_META.description);
 
   const navigate = useNavigate();
 
