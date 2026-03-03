@@ -1,23 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
-
-
-const ARTICLES = [
-  {
-    slug: "stratos-vs-cheap",
-    title: "Почему дешёвый денситометр — это дорого",
-    subtitle: "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам",
-    date: "2 марта 2026",
-    updatedAt: "3 марта 2026",
-    author: "Редакция ASVOMED",
-    readTime: "7 мин",
-    sourcesCount: 6,
-    tag: "ЭКСПЕРТИЗА",
-    tagColor: "#ef4444",
-  },
-];
-
 import { ARTICLES, NEWS_META } from "../../content/articles";
 import { useJsonLd } from "../../utils/useJsonLd";
 
@@ -139,7 +122,7 @@ export default function NewsPage() {
             </p>
 
             <div style={{ fontSize: 12, color: "#64748b", marginBottom: 14, lineHeight: 1.6 }}>
-              <div><strong style={{ color: "#94a3b8" }}>Автор:</strong> {article.author}</div>
+              <div><strong style={{ color: "#94a3b8" }}>Автор:</strong> {article.authorName}</div>
               <div><strong style={{ color: "#94a3b8" }}>Дата:</strong> {article.date} · <strong style={{ color: "#94a3b8" }}>Обновлено:</strong> {article.updatedAt}</div>
               <div><strong style={{ color: "#94a3b8" }}>Источники:</strong> {article.sourcesCount} внешних публикаций</div>
             </div>
