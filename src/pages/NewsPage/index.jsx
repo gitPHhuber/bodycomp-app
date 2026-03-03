@@ -1,18 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
-
-const ARTICLES = [
-  {
-    slug: "stratos-vs-cheap",
-    title: "Почему дешёвый денситометр — это дорого",
-    subtitle: "Как устаревшая технология карандашного луча приводит к ошибочным диагнозам",
-    date: "2 марта 2026",
-    readTime: "7 мин",
-    tag: "ЭКСПЕРТИЗА",
-    tagColor: "#ef4444",
-  },
-];
+import { ARTICLES, NEWS_META } from "../../content/articles";
 
 const card = {
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
@@ -22,10 +11,7 @@ const card = {
 };
 
 export default function NewsPage() {
-  useMeta(
-    "Новости и статьи | ASVOMED",
-    "Экспертные статьи о денситометрии, DXA-сканировании и анализе состава тела"
-  );
+  useMeta(NEWS_META.title, NEWS_META.description);
 
   const navigate = useNavigate();
 
