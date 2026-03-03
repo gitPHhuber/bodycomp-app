@@ -51,6 +51,54 @@ npm run build      # Сборка в dist/
 npm run preview    # Превью сборки
 ```
 
+## Настройка админ-панели (OTP) и аналитики пользователей
+
+Админка доступна по пути `/admin` и работает через Supabase (email OTP + роль администратора).
+
+### 1) Переменные окружения
+
+1. Скопируйте `.env.example` в `.env` (локально) и заполните минимум:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+2. Для Netlify задайте эти же значения в **Site configuration → Environment variables**.
+
+Если эти переменные не заданы, админка и трекинг отключаются в рантайме.
+
+### 2) Доступ в админку
+
+1. Откройте `/admin/login`.
+2. Введите email и получите OTP-код.
+3. После подтверждения кода доступ даётся только пользователям с ролью `admin` или `superadmin`.
+
+### 3) Роли администраторов в Supabase
+
+В проекте используется таблица `admin_users` (добавление администраторов делается через Supabase Dashboard).
+
+Минимально в таблице должны быть значения:
+- `email` — email администратора
+- `role` — `admin` или `superadmin`
+
+### 4) Проверка SQL-функции роли
+
+Админка запрашивает роль через RPC `get_admin_role`.
+Если функции нет, её нужно создать в Supabase SQL Editor (один раз):
+
+```sql
+create or replace function public.get_admin_role()
+returns text
+language sql
+security definer
+set search_path = public
+as $$
+  select role
+  from public.admin_users
+  where lower(email) = lower(auth.jwt()->>'email')
+  limit 1;
+$$;
+```
+
+После этого вход по OTP на `/admin` начнёт корректно проверять права.
+
 ## Кастомный домен
 
 1. В Netlify: **Domain management** → **Add custom domain**
