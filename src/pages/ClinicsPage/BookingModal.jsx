@@ -326,14 +326,22 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
                 if (!name || !phone || submitting) return;
                 setSubmitting(true);
                 setSubmitError(null);
+                const utm = tracker.getUtmParams();
                 const payload = {
-                  clinic_id: clinic.id,
-                  clinic_name: clinic.name,
-                  city: clinic.city,
-                  date: selectedDate.toISOString(),
-                  time: selectedTime,
+                  session_id: tracker.getSessionId(),
                   name,
                   phone,
+                  clinic_id: clinic.id,
+                  clinic_name: clinic.name,
+                  desired_date: selectedDate.toISOString().slice(0, 10),
+                  desired_time: selectedTime,
+                  utm_source: utm.utm_source || null,
+                  utm_medium: utm.utm_medium || null,
+                  utm_campaign: utm.utm_campaign || null,
+                  utm_content: utm.utm_content || null,
+                  source_page: window.location.href,
+                  referrer: document.referrer || null,
+                  status: 'lead',
                 };
                 try {
                   if (supabase) {
