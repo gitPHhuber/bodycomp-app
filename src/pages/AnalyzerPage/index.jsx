@@ -12,6 +12,7 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
+import RecommendationCard from "./RecommendationCard";
 import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 
@@ -518,6 +519,19 @@ export default function AnalyzerPage() {
               {r.vr.level === "Низкий" ? Icons.check(24, r.vr.color) : r.vr.level === "Повышенный" ? Icons.alert(24, r.vr.color) : Icons.danger(24, r.vr.color)}
             </div>
           </div>
+
+          {/* Personalized DXA Recommendation */}
+          {results && (
+            <RecommendationCard
+              bodyType={r.bt}
+              fatPct={r.bf}
+              bmi={r.bmi}
+              ffmi={r.ffmi}
+              visceralRisk={r.vr}
+              gender={gender}
+              age={age}
+            />
+          )}
 
           {/* Bonus Offer Banner */}
           {results && <OfferBanner visible={!!results} />}
