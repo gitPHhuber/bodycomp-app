@@ -12,10 +12,7 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
-import ArchetypeCard from "./ArchetypeCard";
-import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
-import { determineArchetype } from "./archetypes";
 
 
 export default function AnalyzerPage() {
@@ -36,7 +33,6 @@ export default function AnalyzerPage() {
   const [calcMode, setCalcMode] = useState("quick");   // "quick" | "precise"
   const [clothingSize, setClothingSize] = useState(""); // XS..3XL
   const [results, setResults] = useState(null);
-  const [showDxa, setShowDxa] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sharingPng, setSharingPng] = useState(false);
@@ -457,14 +453,6 @@ export default function AnalyzerPage() {
   if (step === 4 && results) {
     const r = results;
     const fatRanges = calc.fatRanges(r.gender);
-    const archetype = determineArchetype({
-      fatPct: r.bf,
-      bmi: r.bmi,
-      ffmi: r.ffmi,
-      whr: r.whr,
-      age: parseInt(age),
-      sex: gender,
-    });
 
     return (
       <div style={pageStyle}>
@@ -530,128 +518,6 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
-
-          {/* Archetype Card */}
-          <ArchetypeCard archetype={archetype} fatPct={r.bf} bmi={r.bmi} />
-
-          <OfferBanner archetype={archetype} visible={!!r} />
-
-
-          {/* Quick mode DXA upsell banner */}
-          {r.calcMode === "quick" && (
-            <div style={{
-              background: "linear-gradient(135deg, #0c4a6e33, #164e6344)",
-              borderRadius: 20, padding: 24, marginBottom: 16,
-              border: "1px solid #22d3ee44", textAlign: "center",
-            }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 8, lineHeight: 1.5 }}>
-                Хотите точные цифры?
-              </div>
-              <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
-                DXA-сканирование покажет с погрешностью ±1–2%
-              </p>
-              <button
-                className="btn-lift-cyan"
-                onClick={() => { tracker.trackClick("dxa_cta_quick_mode"); navigate("/clinics"); }}
-                style={{ ...btnPrimary, padding: "14px 24px" }}
-              >
-                Записаться на DXA →
-              </button>
-            </div>
-          )}
-
-          {/* Accuracy warning + DXA CTA */}
-          <div style={{
-            background: "linear-gradient(135deg, #0c4a6e22, #164e6333)",
-            borderRadius: 20, padding: 24, marginBottom: 16,
-            border: "1px solid #22d3ee44",
-            boxShadow: "0 0 30px #22d3ee10, inset 0 1px 0 #22d3ee15",
-          }}>
-            <h3 style={{
-              fontSize: 18, fontWeight: 800, margin: "0 0 8px",
-              background: "linear-gradient(135deg, #22d3ee, #0891b2)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-              lineHeight: 1.3,
-            }}>
-              Хотите узнать точные цифры?
-            </h3>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#22d3ee", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-              {Icons.alert(18, "#22d3ee")} Погрешность {r.calcMode === "quick" ? "±5–8%" : "±3–4%"}
-            </div>
-            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.7, margin: "0 0 16px" }}>
-              {r.calcMode === "quick"
-                ? "Расчёт по размеру одежды имеет погрешность ±5–8%. Для точности ±3–4% введите обхваты вручную, а DXA-сканирование даёт ±1–2%."
-                : "Этот расчёт по формуле US Navy имеет погрешность ±3–4%. DXA-сканирование даёт точность ±1–2%."}
-            </p>
-            <button
-              className="btn-lift btn-pulse"
-              onClick={() => { tracker.trackClick("results_cta_dxa"); navigate("/clinics"); }}
-              style={{
-                width: "100%",
-                background: "linear-gradient(135deg, #0891b2, #22d3ee)",
-                border: "none", borderRadius: 12,
-                color: "#020617", padding: "14px 16px", cursor: "pointer",
-                fontSize: 14, fontWeight: 700, marginBottom: 12,
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
-              Записаться на DXA →
-            </button>
-            <button
-              className="btn-lift-secondary"
-              onClick={() => { if (!showDxa) { tracker.trackClick("dxa_info_toggle"); } setShowDxa(!showDxa); }}
-              style={btnSecondary}
-            >
-              {showDxa ? "Скрыть" : "Узнать про DXA →"}
-            </button>
-          </div>
-
-          {/* DXA Section */}
-          {showDxa && (
-            <div style={{
-              background: "linear-gradient(135deg, #064e3b22, #10b98122)",
-              borderRadius: 20, padding: 24, marginBottom: 16,
-              border: "1px solid #10b98144",
-              animation: "fadeIn 0.5s ease",
-            }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#10b981", margin: "0 0 12px" }}>
-                DXA-сканирование тела
-              </h3>
-              <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.8, marginBottom: 16 }}>
-                DXA (двухэнергетическая рентгеновская абсорбциометрия) за 5 минут определяет:<br /><br />
-                <span style={{ color: "#10b981" }}>▸</span> Точный % жира по каждой зоне тела<br />
-                <span style={{ color: "#10b981" }}>▸</span> Мышечную массу и её распределение<br />
-                <span style={{ color: "#10b981" }}>▸</span> Плотность костей (риск остеопороза)<br />
-                <span style={{ color: "#10b981" }}>▸</span> Висцеральный жир (невидимый враг)<br />
-                <span style={{ color: "#10b981" }}>▸</span> Асимметрию мышц лево/право<br /><br />
-                Доза облучения минимальна — в 10 раз меньше рентгена грудной клетки.
-              </div>
-
-              <div style={{
-                background: "#0f172a", borderRadius: 14, padding: 16, marginBottom: 16,
-                border: "1px solid #334155",
-              }}>
-                <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>Партнёр</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>Санаторий-партнёр ASVOMED</div>
-                <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 12 }}>DXA-денситометр Stratos dR (Франция)</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#10b98122", color: "#10b981", fontSize: 12 }}>Body Composition</span>
-                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#22d3ee22", color: "#22d3ee", fontSize: 12 }}>Денситометрия</span>
-                  <span style={{ padding: "4px 10px", borderRadius: 8, background: "#8b5cf622", color: "#8b5cf6", fontSize: 12 }}>3D-DXA</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => navigate("/clinics")}
-                style={btnSecondary}
-              >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{Icons.calendar(18, "#020617")} Записаться на DXA</span>
-              </button>
-              <p style={{ fontSize: 11, color: "#64748b", textAlign: "center", marginTop: 8 }}>
-                Или напишите нам в <a href="https://t.me/asvomed" target="_blank" rel="noopener" style={{ color: "#22d3ee", textDecoration: "underline" }}>Telegram</a>
-              </p>
-            </div>
-          )}
 
           {/* Save Result */}
           <div style={{ textAlign: "center", marginBottom: 12 }}>
