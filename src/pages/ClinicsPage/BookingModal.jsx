@@ -258,6 +258,55 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
             </div>
 
             <button
+
+
+
+              onClick={async () => {
+                tracker.trackClick("booking_step_contact", { clinicId: clinic.id });
+                if (!name || !phone || submitting) return;
+                setSubmitting(true);
+                setSubmitError(null);
+                const utm = tracker.getUtmParams();
+                const payload = {
+                  session_id: tracker.getSessionId(),
+                  name,
+                  phone,
+                  clinic_id: clinic.id,
+                  clinic_name: clinic.name,
+                  desired_date: selectedDate.toISOString().slice(0, 10),
+                  desired_time: selectedTime,
+                  utm_source: utm.utm_source || null,
+                  utm_medium: utm.utm_medium || null,
+                  utm_campaign: utm.utm_campaign || null,
+                  utm_content: utm.utm_content || null,
+                  source_page: window.location.href,
+                  referrer: document.referrer || null,
+                  status: 'lead',
+                };
+                try {
+                  if (supabase) {
+                    const { error } = await supabase.from("bookings").insert(payload);
+                    if (error) throw error;
+                  } else {
+                    const res = await fetch(FORMSPREE_URL, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", Accept: "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    if (!res.ok) throw new Error("Formspree error");
+                  }
+                  setStep(4);
+                  if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone });
+                } catch {
+                  setSubmitError("Ошибка отправки. Попробуйте ещё раз.");
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              disabled={!name || !phone || submitting}
+
+              onClick={handleConfirm}
+
               onClick={handleSubmit}
               disabled={!name || !phone || submitting}
               style={{
