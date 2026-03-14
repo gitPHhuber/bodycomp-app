@@ -577,10 +577,6 @@ export default function ArticlePage() {
             <span style={{ color: "#94a3b8" }}>Статья</span>
           </div>
 
-          <ArticleContent article={articleMeta} />
-          <RelatedArticles currentSlug={slug} articles={ARTICLES} />
-
-
           {/* E-E-A-T: Author & date meta */}
           <ArticleMeta
             authorName={articleMeta.authorName}
@@ -602,6 +598,9 @@ export default function ArticlePage() {
 
           {/* Sources */}
           <SourcesList sources={articleMeta.sources} />
+
+          {/* Related articles */}
+          <RelatedArticles currentSlug={slug} articles={ARTICLES} />
 
           {/* Medical Disclaimer */}
           <div style={{
