@@ -28,7 +28,10 @@ export const ARTICLES = [
     readTime: "7 мин",
     authorName: "Редакция BODYCOMP",
     tag: "СРАВНЕНИЕ",
+    image: "https://bodycomp.ru/og-image.png",
     tagColor: "#3b82f6",
+    updatedAt: "15 марта 2026",
+    sourcesCount: 3,
     contentType: "article",
     sources: [
       { id: 1, text: "Ackland TR et al. Current status of body composition assessment in sport. Sports Med (2012);42:227-249." },
