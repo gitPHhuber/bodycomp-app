@@ -220,6 +220,7 @@ export function trackCTAView(element) {
 
 export function trackGoal(goalName, meta) {
   enqueue("goal", null, null, { goal: goalName, ...meta });
+}
 
 // ── Generic event ───────────────────────────────────────────
 export function trackEvent(eventType, meta) {

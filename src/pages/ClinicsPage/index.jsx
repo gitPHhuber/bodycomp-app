@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
-import { trackGoal } from "../../utils/analytics";
 import { supabase } from "../../lib/supabase";
-
-
 import * as tracker from "../../lib/tracker";
 const { trackGoal } = tracker;
 import Reveal from "../../components/Reveal";
