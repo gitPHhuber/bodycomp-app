@@ -12,6 +12,8 @@ import ContentPage from "./pages/ContentPage";
 import ContentEditorPage from "./pages/ContentEditorPage";
 import TelegramPage from "./pages/TelegramPage";
 import SettingsPage from "./pages/SettingsPage";
+import MoneyFunnelPage from "./pages/MoneyFunnelPage";
+import BookingsPage from "./pages/BookingsPage";
 
 export default function AdminApp() {
   return (
@@ -23,6 +25,8 @@ export default function AdminApp() {
             <AdminLayout>
               <Routes>
                 <Route index element={<DashboardPage />} />
+                <Route path="funnel" element={<MoneyFunnelPage />} />
+                <Route path="bookings" element={<BookingsPage />} />
                 <Route path="users" element={<UsersPage />} />
                 <Route path="users/:id" element={<UserDetailPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
