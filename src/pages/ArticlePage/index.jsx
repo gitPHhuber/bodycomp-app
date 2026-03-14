@@ -86,6 +86,196 @@ const bodyText = {
   margin: "0 0 16px",
 };
 
+/* ── Section-based article renderer ──────────────────────── */
+
+function ArticleContent({ article, isMobile, navigate }) {
+  const tagColor = article.tagColor || "#3b82f6";
+
+  const renderSourceRef = (text) => {
+    return text.replace(/\[(\d+)\]/g, (_, num) => `⁽${num}⁾`);
+  };
+
+  return (
+    <>
+      {/* ═══ Hero ═══ */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ marginBottom: 16 }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "4px 12px", borderRadius: 50,
+            background: `${tagColor}15`, border: `1px solid ${tagColor}30`,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: tagColor }} />
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: tagColor,
+              fontFamily: "'JetBrains Mono', monospace",
+              textTransform: "uppercase", letterSpacing: "0.05em",
+            }}>
+              {article.tag}
+            </span>
+          </span>
+        </div>
+        <h1 style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.15, margin: "0 0 12px" }}>
+          {article.title}
+        </h1>
+        <p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 16px" }}>
+          {article.subtitle}
+        </p>
+        <div style={{
+          display: "flex", gap: 16, fontSize: 12, color: "#64748b",
+          fontFamily: "'JetBrains Mono', monospace", flexWrap: "wrap",
+        }}>
+          <span>{article.date}</span>
+          <span>{article.readTime}</span>
+          <span>{article.authorName}</span>
+        </div>
+      </div>
+
+      {/* ═══ Sections ═══ */}
+      {article.sections.map((section, i) => {
+        switch (section.type) {
+          case "lead":
+            return (
+              <p key={i} style={{
+                fontSize: 17, lineHeight: 1.8, color: "#e2e8f0",
+                margin: "0 0 28px", fontWeight: 400,
+                borderLeft: `3px solid ${tagColor}`,
+                paddingLeft: 16,
+              }}>
+                {renderSourceRef(section.text)}
+              </p>
+            );
+          case "heading":
+            return section.level === 2 ? (
+              <h2 key={i} style={sectionHead(tagColor)}>{section.text}</h2>
+            ) : (
+              <h3 key={i} style={{ fontSize: 18, fontWeight: 700, margin: "0 0 14px", color: "#e2e8f0" }}>
+                {section.text}
+              </h3>
+            );
+          case "paragraph":
+            return (
+              <p key={i} style={bodyText}>{renderSourceRef(section.text)}</p>
+            );
+          case "list":
+            return (
+              <ul key={i} style={{ margin: "0 0 24px", paddingLeft: 20, color: "#cbd5e1", lineHeight: 1.8 }}>
+                {section.items.map((item, j) => (
+                  <li key={j} style={{ fontSize: 15, marginBottom: 6 }}>{item}</li>
+                ))}
+              </ul>
+            );
+          case "comparison_table":
+            return (
+              <div key={i} style={{ ...cardStyle, borderRadius: 16, overflow: "hidden", marginBottom: 28 }}>
+                {/* Table header */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1.2fr 1fr 1fr" : "1.5fr 1fr 1fr",
+                  padding: "12px 16px",
+                  background: "#020617",
+                  borderBottom: "1px solid #1e293b",
+                  fontSize: 11, fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>
+                  <span style={{ color: "#64748b" }}>{section.headers[0]}</span>
+                  <span style={{ color: "#f97316" }}>{section.headers[1]}</span>
+                  <span style={{ color: "#22d3ee" }}>{section.headers[2]}</span>
+                </div>
+                {/* Table rows */}
+                {section.rows.map((row, ri) => (
+                  <div key={ri} style={{
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1.2fr 1fr 1fr" : "1.5fr 1fr 1fr",
+                    padding: "10px 16px",
+                    borderBottom: ri < section.rows.length - 1 ? "1px solid #1e293b20" : "none",
+                    fontSize: isMobile ? 12 : 13,
+                    lineHeight: 1.5,
+                    background: ri % 2 === 0 ? "transparent" : "#0f172a40",
+                  }}>
+                    <span style={{ color: "#94a3b8" }}>{row[0]}</span>
+                    <span style={{ color: "#f97316" }}>{row[1]}</span>
+                    <span style={{ color: "#22d3ee" }}>{row[2]}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          case "cta": {
+            const isBooking = section.variant === "booking";
+            const bg = isBooking
+              ? "linear-gradient(135deg, #0891b2, #22d3ee)"
+              : "linear-gradient(135deg, #f59e0b, #fbbf24)";
+            const textColor = "#020617";
+            return (
+              <button
+                key={i}
+                onClick={() => {
+                  tracker.trackClick(`article_cta_${article.slug}_${section.variant}`);
+                  navigate(section.link);
+                }}
+                style={{
+                  display: "block", width: "100%", padding: 16,
+                  border: "none", borderRadius: 14,
+                  background: bg, color: textColor,
+                  fontSize: 15, fontWeight: 700, cursor: "pointer",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  boxShadow: isBooking ? "0 0 20px #22d3ee20" : "0 0 20px #f59e0b20",
+                  marginBottom: 12,
+                }}
+              >
+                {section.text} →
+              </button>
+            );
+          }
+          default:
+            return null;
+        }
+      })}
+
+      {/* ═══ Sources ═══ */}
+      {article.sources && article.sources.length > 0 && (
+        <div style={{ ...cardStyle, padding: 18, marginBottom: 26, marginTop: 20 }}>
+          <h2 style={{ ...sectionHead("#a78bfa"), marginBottom: 10 }}>Источники</h2>
+          <ol style={{ margin: 0, paddingLeft: 20, color: "#cbd5e1", lineHeight: 1.7, fontSize: 13 }}>
+            {article.sources.map((src) => (
+              <li key={src.id} style={{ marginBottom: 4 }}>{src.text}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* ═══ Internal links ═══ */}
+      <div style={{ marginBottom: 26 }}>
+        <h2 style={sectionHead("#64748b")}>Читайте также</h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {[
+            { to: "/news/skinny-fat", label: "Что такое Skinny Fat и чем он опасен" },
+            { to: "/repeat-dxa", label: "Как часто повторять DXA" },
+            { to: "/analyzer", label: "Калькулятор состава тела" },
+          ].map((link, li) => (
+            <Link key={li} to={link.to} style={{
+              color: "#22d3ee", fontSize: 14, textDecoration: "none",
+              padding: "8px 0", borderBottom: "1px solid #1e293b",
+            }}>
+              → {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ═══ Legal Disclaimer ═══ */}
+      <div style={{
+        textAlign: "center", padding: "14px 0",
+        borderTop: "1px solid #1e293b",
+      }}>
+        <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6, margin: 0 }}>
+          Имеются противопоказания. Необходима консультация специалиста. Материал носит информационный характер.
+        </p>
+      </div>
+    </>
+  );
+}
+
 /* ── Component ────────────────────────────────────────────── */
 
 export default function ArticlePage() {
@@ -95,7 +285,7 @@ export default function ArticlePage() {
   const articleMeta = ARTICLES.find((article) => article.slug === slug);
 
   useMeta(
-    articleMeta?.metaTitle || "Статья не найдена | ASVOMED",
+    articleMeta?.metaTitle || "Статья не найдена | BODYCOMP",
     articleMeta?.description || "Запрошенная статья не найдена"
   );
 
@@ -108,7 +298,7 @@ export default function ArticlePage() {
           "datePublished": articleMeta.publishedAt,
           "author": {
             "@type": "Organization",
-            "name": articleMeta.authorName || "ASVOMED",
+            "name": articleMeta.authorName || "BODYCOMP",
           },
           "mainEntityOfPage": `https://bodycomp.ru/news/${articleMeta.slug}`,
           "image": [articleMeta.image || "https://bodycomp.ru/og-image.png"],
@@ -144,6 +334,32 @@ export default function ArticlePage() {
         }}>
           К списку статей
         </button>
+      </div>
+    );
+  }
+
+  // ── Section-based articles (contentType: 'article') ──
+  if (articleMeta.contentType === "article" && articleMeta.sections) {
+    return (
+      <div style={{
+        minHeight: "100dvh", background: "#020617", color: "#e2e8f0",
+        fontFamily: "'Outfit', sans-serif",
+      }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 20px 60px", paddingTop: 104 }}>
+          {/* Breadcrumbs */}
+          <div style={{
+            fontSize: 11, color: "#64748b",
+            fontFamily: "'JetBrains Mono', monospace",
+            marginBottom: 24, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap",
+          }}>
+            <Link to="/" style={{ color: "#64748b", textDecoration: "none" }}>Главная</Link>
+            <span>→</span>
+            <Link to="/news" style={{ color: "#64748b", textDecoration: "none" }}>Новости</Link>
+            <span>→</span>
+            <span style={{ color: "#94a3b8" }}>Статья</span>
+          </div>
+          <ArticleContent article={articleMeta} isMobile={isMobile} navigate={navigate} />
+        </div>
       </div>
     );
   }
