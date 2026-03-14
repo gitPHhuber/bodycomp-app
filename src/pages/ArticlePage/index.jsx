@@ -4,6 +4,7 @@ import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 import { ARTICLES } from "../../content/articles";
 import { useJsonLd } from "../../utils/useJsonLd";
+import ArticleContent from "../../components/ArticleContent";
 
 /* ── Data ─────────────────────────────────────────────────── */
 
@@ -149,6 +150,85 @@ export default function ArticlePage() {
   }
 
   const visibleRows = showAllRows ? COMPARISON : COMPARISON.slice(0, 5);
+
+  /* ═══ Universal section-based articles ═══ */
+  if (articleMeta.sections) {
+    return (
+      <div style={{
+        minHeight: "100dvh",
+        background: "#020617",
+        color: "#e2e8f0",
+        fontFamily: "'Outfit', sans-serif",
+      }}>
+        <div style={{
+          maxWidth: 640,
+          margin: "0 auto",
+          padding: "0 20px 60px",
+          paddingTop: 104,
+        }}>
+
+          {/* Breadcrumbs */}
+          <div style={{
+            fontSize: 11,
+            color: "#64748b",
+            fontFamily: "'JetBrains Mono', monospace",
+            marginBottom: 24,
+            display: "flex",
+            gap: 6,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}>
+            <Link to="/" style={{ color: "#64748b", textDecoration: "none" }}>Главная</Link>
+            <span>→</span>
+            <Link to="/news" style={{ color: "#64748b", textDecoration: "none" }}>Новости</Link>
+            <span>→</span>
+            <span style={{ color: "#94a3b8" }}>Статья</span>
+          </div>
+
+          {/* Hero */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 12px",
+                borderRadius: 50,
+                background: articleMeta.tagColor + "15",
+                border: `1px solid ${articleMeta.tagColor}30`,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: articleMeta.tagColor }} />
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color: articleMeta.tagColor,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  textTransform: "uppercase", letterSpacing: "0.05em",
+                }}>
+                  {articleMeta.tag}
+                </span>
+              </span>
+            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.15, margin: "0 0 12px" }}>
+              {articleMeta.title}
+            </h1>
+            <p style={{ fontSize: 16, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 16px" }}>
+              {articleMeta.subtitle}
+            </p>
+            <div style={{
+              display: "flex", gap: 16, fontSize: 12, color: "#64748b",
+              fontFamily: "'JetBrains Mono', monospace",
+              flexWrap: "wrap",
+            }}>
+              <span>{articleMeta.date}</span>
+              <span>{articleMeta.readTime}</span>
+              <span>{articleMeta.authorName}</span>
+            </div>
+          </div>
+
+          <ArticleContent sections={articleMeta.sections} sources={articleMeta.sources} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
