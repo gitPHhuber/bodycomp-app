@@ -13,9 +13,11 @@ import PrivacyPage from "./pages/PrivacyPage";
 import NewsPage from "./pages/NewsPage";
 import ArticlePage from "./pages/ArticlePage";
 import ExpertQAPage from "./pages/ExpertQAPage";
+import RepeatDxaPage from "./pages/RepeatDxaPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
+import YandexMetrika from "./components/YandexMetrika";
 import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -118,6 +120,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         {/* Main site */}
         <Route path="*" element={
           <AuthProvider>
+            <YandexMetrika />
             <ScrollToTop />
             <TrackingProvider />
             <Header />
@@ -134,6 +137,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <Route path="/news" element={<NewsPage />} />
               <Route path="/news/:slug" element={<ArticlePage />} />
               <Route path="/expert-qa" element={<ExpertQAPage />} />
+              <Route path="/repeat-dxa" element={<RepeatDxaPage />} />
               <Route path="/xray" element={<BodyComparePage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/profile" element={

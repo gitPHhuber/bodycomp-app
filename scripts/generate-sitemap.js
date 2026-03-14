@@ -58,6 +58,12 @@ const staticUrls = [
     priority: "0.8",
     files: ["src/pages/NewsPage/index.jsx", "src/content/articles.js"],
   },
+  {
+    path: "/repeat-dxa",
+    changefreq: "weekly",
+    priority: "0.8",
+    files: ["src/pages/RepeatDxaPage/index.jsx", "src/main.jsx"],
+  },
 ];
 
 const articleUrls = ARTICLES.filter((article) => !article.noindex).map((article) => ({

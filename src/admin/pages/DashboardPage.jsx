@@ -23,7 +23,7 @@ const tooltipStyle = {
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState("week");
-  const [stats, setStats] = useState({ usersToday: 0, usersWeek: 0, usersTotal: 0, calcsToday: 0, bookings: 0, conversion: 0 });
+  const [stats, setStats] = useState({ usersToday: 0, usersWeek: 0, usersTotal: 0, calcsToday: 0, bookings: 0, conversion: 0, bookingsPeriod: 0, completedPeriod: 0 });
   const [funnel, setFunnel] = useState([]);
   const [visitChart, setVisitChart] = useState([]);
   const [cities, setCities] = useState([]);
@@ -45,6 +45,12 @@ export default function DashboardPage() {
 
     try {
       // Stats queries in parallel
+      // Build period-filtered booking queries
+      let bPeriodQ = supabase.from("bookings").select("*", { count: "exact", head: true });
+      if (dateFrom) bPeriodQ = bPeriodQ.gte("created_at", dateFrom);
+      let bCompletedQ = supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "completed");
+      if (dateFrom) bCompletedQ = bCompletedQ.gte("created_at", dateFrom);
+
       const [
         { count: usersTotal },
         { count: usersToday },
@@ -52,6 +58,8 @@ export default function DashboardPage() {
         { count: calcsToday },
         { count: bookingsCount },
         { count: calcsTotal },
+        { count: bookingsPeriod },
+        { count: completedPeriod },
       ] = await Promise.all([
         supabase.from("users").select("*", { count: "exact", head: true }),
         supabase.from("users").select("*", { count: "exact", head: true }).gte("created_at", todayStart),
@@ -59,10 +67,12 @@ export default function DashboardPage() {
         supabase.from("calc_results").select("*", { count: "exact", head: true }).gte("created_at", todayStart),
         supabase.from("bookings").select("*", { count: "exact", head: true }),
         supabase.from("calc_results").select("*", { count: "exact", head: true }),
+        bPeriodQ,
+        bCompletedQ,
       ]);
 
       const conversion = calcsTotal > 0 ? ((bookingsCount / calcsTotal) * 100).toFixed(1) : 0;
-      setStats({ usersToday, usersWeek, usersTotal, calcsToday, bookings: bookingsCount, conversion });
+      setStats({ usersToday, usersWeek, usersTotal, calcsToday, bookings: bookingsCount, conversion, bookingsPeriod: bookingsPeriod || 0, completedPeriod: completedPeriod || 0 });
 
       // Funnel
       await loadFunnel(dateFrom);
@@ -259,6 +269,20 @@ export default function DashboardPage() {
           sub="расчёт → запись"
           color={colors.accent}
           icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+        />
+        <StatCard
+          label="Заявки"
+          value={stats.bookingsPeriod}
+          sub="за период"
+          color="#8b5cf6"
+          icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        />
+        <StatCard
+          label="Completed"
+          value={stats.completedPeriod}
+          sub="выполненных сканов"
+          color="#10b981"
+          icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </div>
 
