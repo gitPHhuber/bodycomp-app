@@ -166,10 +166,14 @@ export default function DxaTimeline() {
             {/* Actions */}
             <div style={{ display: "flex", gap: 8 }}>
               {r.report_url && (
-                <a
-                  href={r.report_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={async () => {
+                    if (!supabase) return;
+                    const { data } = await supabase.storage
+                      .from("dxa-reports")
+                      .createSignedUrl(r.report_url, 300);
+                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                  }}
                   style={{
                     padding: "8px 14px", borderRadius: 10,
                     background: "#1e293b", border: "1px solid #334155",
@@ -178,7 +182,7 @@ export default function DxaTimeline() {
                   }}
                 >
                   PDF
-                </a>
+                </button>
               )}
               <button
                 onClick={() => setEditItem(r)}

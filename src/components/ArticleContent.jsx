@@ -122,7 +122,6 @@ function CtaSection({ variant, text, link }) {
   );
 }
 
-
 /* ── Comparison table ──────────────────────────────────── */
 
 function ComparisonTableSection({ headers, rows }) {
@@ -131,7 +130,7 @@ function ComparisonTableSection({ headers, rows }) {
       {/* Header */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: `1.2fr ${headers.slice(1).map(() => "1fr").join(" ")}`,
+        gridTemplateColumns: `1.5fr ${"1fr ".repeat(headers.length - 1).trim()}`,
         padding: "12px 16px",
         background: "#020617",
         borderBottom: "1px solid #1e293b",
@@ -140,14 +139,14 @@ function ComparisonTableSection({ headers, rows }) {
         fontFamily: "'JetBrains Mono', monospace",
       }}>
         {headers.map((h, i) => (
-          <span key={i} style={{ color: i === 0 ? "#64748b" : "#22d3ee" }}>{h}</span>
+          <span key={i} style={{ color: i === 0 ? "#64748b" : "#94a3b8" }}>{h}</span>
         ))}
       </div>
       {/* Rows */}
       {rows.map((row, i) => (
         <div key={i} style={{
           display: "grid",
-          gridTemplateColumns: `1.2fr ${row.slice(1).map(() => "1fr").join(" ")}`,
+          gridTemplateColumns: `1.5fr ${"1fr ".repeat(row.length - 1).trim()}`,
           padding: "10px 16px",
           borderBottom: i < rows.length - 1 ? "1px solid #1e293b20" : "none",
           fontSize: 13,
@@ -201,6 +200,9 @@ function RelatedLinksSection({ links }) {
           </Link>
         ))}
       </div>
+    </div>
+  );
+}
 
 /* ── Fat norms table ───────────────────────────────────── */
 
@@ -316,7 +318,6 @@ function FatNormsTableSection({ headers, rows }) {
           })}
         </tbody>
       </table>
-
     </div>
   );
 }
@@ -327,11 +328,7 @@ const INTERNAL_LINKS = [
   { to: "/news/skinny-fat", label: "Скрытый жир: нормальный вес, но высокий процент жира" },
   { to: "/news/dxa-vs-bioimpedance", label: "DXA vs биоимпеданс: какой анализ состава тела точнее" },
   { to: "/news/weight-plateau", label: "Почему вес стоит: теряете жир или мышцы?" },
-
   { to: "/news/body-fat-norms", label: "Нормы процента жира по возрасту и полу" },
-
-  { to: "/news/body-fat-norms", label: "Норма процента жира у мужчин и женщин по возрасту" },
-
   { to: "/repeat-dxa", label: "Повторное DXA: когда и зачем" },
   { to: "/analyzer", label: "Калькулятор состава тела" },
 ];
@@ -378,53 +375,10 @@ function SourcesSection({ sources }) {
   );
 }
 
-/* ── Comparison table ───────────────────────────────────── */
-
-function ComparisonTableSection({ headers, rows }) {
-  return (
-    <div style={{ ...cardStyle, borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
-      {/* Header */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: `1.5fr ${"1fr ".repeat(headers.length - 1).trim()}`,
-        padding: "12px 16px",
-        background: "#020617",
-        borderBottom: "1px solid #1e293b",
-        fontSize: 11,
-        fontWeight: 700,
-        fontFamily: "'JetBrains Mono', monospace",
-      }}>
-        {headers.map((h, i) => (
-          <span key={i} style={{ color: i === 0 ? "#64748b" : "#94a3b8" }}>{h}</span>
-        ))}
-      </div>
-      {/* Rows */}
-      {rows.map((row, i) => (
-        <div key={i} style={{
-          display: "grid",
-          gridTemplateColumns: `1.5fr ${"1fr ".repeat(row.length - 1).trim()}`,
-          padding: "10px 16px",
-          borderBottom: i < rows.length - 1 ? "1px solid #1e293b20" : "none",
-          fontSize: 13,
-          lineHeight: 1.5,
-        }}>
-          {row.map((cell, j) => (
-            <span key={j} style={{ color: j === 0 ? "#94a3b8" : "#cbd5e1" }}>{cell}</span>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /* ── Main component ─────────────────────────────────────── */
 
 export default function ArticleContent({ article }) {
-
   const { sections, sources } = article;
-
-  const sections = article?.sections || [];
-
 
   return (
     <>
@@ -440,24 +394,18 @@ export default function ArticleContent({ article }) {
             return <ListSection key={i} items={section.items} />;
           case "cta":
             return <CtaSection key={i} variant={section.variant} text={section.text} link={section.link} />;
-
           case "comparison_table":
             return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
           case "related_links":
             return <RelatedLinksSection key={i} links={section.links} />;
-
-
           case "fat_norms_table":
             return <FatNormsTableSection key={i} headers={section.headers} rows={section.rows} sex={section.sex} />;
-
-          case "comparison_table":
-            return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
-
           default:
             return null;
         }
       })}
 
+      <SourcesSection sources={sources} />
       <InternalLinksSection />
     </>
   );
