@@ -5,6 +5,9 @@ import * as tracker from "../../lib/tracker";
 import { ARTICLES } from "../../content/articles";
 import { useJsonLd } from "../../utils/useJsonLd";
 import ArticleContent from "../../components/ArticleContent";
+import ArticleMeta from "../../components/ArticleMeta";
+import ReviewedBy from "../../components/ReviewedBy";
+import SourcesList from "../../components/SourcesList";
 
 /* ── Data (B2B article: stratos-vs-cheap) ────────────────── */
 
@@ -487,10 +490,29 @@ export default function ArticlePage() {
           "@context": "https://schema.org",
           "@type": "Article",
           "headline": articleMeta.title,
+          "description": articleMeta.description,
           "datePublished": articleMeta.publishedAt,
+          "dateModified": articleMeta.updatedAt || articleMeta.publishedAt,
           "author": {
             "@type": "Organization",
             "name": articleMeta.authorName || "BODYCOMP",
+            "url": "https://bodycomp.ru",
+          },
+          ...(articleMeta.reviewerName ? {
+            "reviewedBy": {
+              "@type": "Person",
+              "name": articleMeta.reviewerName,
+              "jobTitle": articleMeta.reviewerQualification,
+            },
+          } : {}),
+          "publisher": {
+            "@type": "Organization",
+            "name": "BODYCOMP",
+            "url": "https://bodycomp.ru",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://bodycomp.ru/og-image.png",
+            },
           },
           "mainEntityOfPage": `https://bodycomp.ru/news/${articleMeta.slug}`,
           "image": [articleMeta.image || "https://bodycomp.ru/og-image.png"],
@@ -550,7 +572,40 @@ export default function ArticlePage() {
             <span>→</span>
             <span style={{ color: "#94a3b8" }}>Статья</span>
           </div>
-          <ArticleContent article={articleMeta} isMobile={isMobile} navigate={navigate} />
+
+          {/* E-E-A-T: Author & date meta */}
+          <ArticleMeta
+            authorName={articleMeta.authorName}
+            reviewerName={articleMeta.reviewerName}
+            publishedAt={articleMeta.publishedAt}
+            updatedAt={articleMeta.updatedAt}
+            readTime={articleMeta.readTime}
+          />
+
+          {/* Article sections */}
+          <ArticleContent article={articleMeta} />
+
+          {/* E-E-A-T: Reviewer block */}
+          <ReviewedBy
+            name={articleMeta.reviewerName}
+            qualification={articleMeta.reviewerQualification}
+            date={articleMeta.reviewDate}
+          />
+
+          {/* Sources */}
+          <SourcesList sources={articleMeta.sources} />
+
+          {/* Medical Disclaimer */}
+          <div style={{
+            textAlign: "center",
+            padding: "14px 0",
+            borderTop: "1px solid #1e293b",
+          }}>
+            <p style={{ fontSize: 11, color: "#64748b", lineHeight: 1.6, margin: 0 }}>
+              Информация носит ознакомительный характер и не заменяет консультацию врача.
+              Имеются противопоказания. Необходима консультация специалиста.
+            </p>
+          </div>
         </div>
       </div>
     );
