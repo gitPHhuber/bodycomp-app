@@ -9,7 +9,6 @@ import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 const Particles = lazy(() => import("./Particles"));
-const ReportLeadMagnet = lazy(() => import("../../components/ReportLeadMagnet"));
 const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
 const BodyCompare = lazy(() => import("./BodyCompare"));
 
@@ -33,11 +32,6 @@ const ROTATING_PHRASES = [
   "Вы знаете свой реальный % жира?",
 ];
 
-const TRUST_ITEMS = [
-  { icon: "\u{1F512}", title: "Данные защищены", desc: "152-ФЗ, шифрование, серверы в РФ" },
-  { icon: "\u{1F916}", title: "ИИ помогает, не собирает", desc: "Модели анализа не хранят личные данные" },
-  { icon: "\u{1F3E5}", title: "Клиники-партнёры", desc: "Лицензированные медицинские центры" },
-];
 
 export default function LandingPage() {
   useMeta(
@@ -338,32 +332,6 @@ export default function LandingPage() {
           </div>
         </Reveal>
 
-        {/* ═══ Block 10: Trust ═══ */}
-        <Reveal from="bottom" delay={100}>
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6, textAlign: "center" }}>ДОВЕРИЕ</div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 14px", textAlign: "center", color: "#94a3b8" }}>Используем передовые технологии для исследования состава тела</h2>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 10 }}>
-              {TRUST_ITEMS.map((item, i) => (
-                <div key={i} style={{ ...card, padding: 18, textAlign: "center", borderColor: "#22d3ee1a" }}>
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>{item.icon}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>{item.title}</div>
-                  <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>{item.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-
-        {/* ═══ Lead Magnet: Report Protocol ═══ */}
-        <Reveal from="bottom" delay={100}>
-          <div style={{ marginBottom: 28 }}>
-            <Suspense fallback={null}>
-              <ReportLeadMagnet variant="inline" source="landing" />
-            </Suspense>
-          </div>
-        </Reveal>
 
         {/* ═══ Block 11: Final CTA ═══ */}
         <Reveal from="bottom">
