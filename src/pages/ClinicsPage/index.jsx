@@ -457,9 +457,9 @@ export default function ClinicsPage() {
         <BookingModal
           clinic={bookingClinic}
           onClose={() => setBookingClinic(null)}
-          onConfirm={() => {
+          onConfirm={(result) => {
             trackGoal('booking_confirmed');
-            tracker.trackClick("booking_confirmed");
+            tracker.trackBookingConfirmed(result?.bookingId);
           }}
         />
       )}
