@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { trackGoal } from "../../utils/analytics";
+import { supabase } from "../../lib/supabase";
 import * as tracker from "../../lib/tracker";
 import Reveal from "../../components/Reveal";
 import { useMeta } from "../../utils/useMeta";
@@ -8,7 +9,7 @@ import ClinicCard from "./ClinicCard";
 import MapView from "./MapView";
 import BookingModal from "./BookingModal";
 
-const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
+const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
 
 const labelStyle = {
   display: "block",
@@ -33,6 +34,126 @@ const inputStyle = {
   boxSizing: "border-box",
 };
 
+// ── Waitlist Modal ──────────────────────────────────────────
+function WaitlistModal({ city, onClose }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async () => {
+    if (!name || !email || submitting) return;
+    setSubmitting(true);
+    setError(null);
+
+    const payload = {
+      name,
+      email,
+      city,
+      session_id: tracker.getSessionId(),
+      source_page: window.location.pathname,
+    };
+
+    try {
+      let submitted = false;
+
+      if (supabase) {
+        const { error: dbErr } = await supabase.from("waitlist").insert(payload);
+        if (dbErr) throw dbErr;
+        submitted = true;
+      }
+
+      if (!submitted && FORMSPREE_URL) {
+        const res = await fetch(FORMSPREE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Formspree error");
+        submitted = true;
+      }
+
+      if (!submitted) throw new Error("No backend");
+
+      tracker.trackClick("waitlist_interest", { city });
+      setDone(true);
+    } catch {
+      setError("Не удалось отправить. Попробуйте ещё раз.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ position: "absolute", inset: 0, background: "#000a", backdropFilter: "blur(8px)" }} />
+      <div
+        style={{
+          position: "relative", width: "100%", maxWidth: 420,
+          background: "linear-gradient(180deg, #0f172a 0%, #020617 100%)",
+          borderRadius: 24, padding: "28px 24px 32px",
+          animation: "slideUp 0.5s cubic-bezier(0.16,1,0.3,1)",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "#1e293b", border: "none", color: "#94a3b8", width: 32, height: 32, borderRadius: 10, cursor: "pointer", fontSize: 16 }}>✕</button>
+
+        {done ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, color: "#e2e8f0" }}>Спасибо!</div>
+            <div style={{ fontSize: 14, color: "#94a3b8" }}>Мы сообщим, когда запустимся в {city}</div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 11, color: "#f59e0b", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 6 }}>
+              СКОРО В {city.toUpperCase()}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 6, color: "#e2e8f0" }}>
+              Узнать о запуске
+            </div>
+            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 20px", lineHeight: 1.5 }}>
+              Оставьте контакт — мы напишем, когда откроется запись на DXA в {city}
+            </p>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Имя</label>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="Ваше имя"
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = "#f59e0b"} onBlur={e => e.target.style.borderColor = "#334155"} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Email</label>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" type="email"
+                style={inputStyle}
+                onFocus={e => e.target.style.borderColor = "#f59e0b"} onBlur={e => e.target.style.borderColor = "#334155"} />
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={!name || !email || submitting}
+              style={{
+                width: "100%", padding: 14, border: "none", borderRadius: 12,
+                background: name && email && !submitting ? "linear-gradient(135deg,#f59e0b,#fbbf24)" : "#1e293b",
+                color: name && email && !submitting ? "#020617" : "#475569",
+                fontSize: 15, fontWeight: 700, cursor: name && email && !submitting ? "pointer" : "default",
+                fontFamily: "'JetBrains Mono',monospace",
+                transition: "all 0.3s",
+              }}
+            >{submitting ? "Отправляем..." : "Сообщить мне"}</button>
+
+            {error && (
+              <p style={{ fontSize: 13, color: "#f87171", textAlign: "center", marginTop: 10, marginBottom: 0 }}>{error}</p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ───────────────────────────────────────────────
 export default function ClinicsPage() {
   useMeta(
     "Запись на DXA-сканирование тела — найти клинику",
@@ -43,6 +164,7 @@ export default function ClinicsPage() {
   const [selectedCity, setSelectedCity] = useState("Все города");
   const [selectedClinicId, setSelectedClinicId] = useState(null);
   const [bookingClinic, setBookingClinic] = useState(null);
+  const [waitlistCity, setWaitlistCity] = useState(null);
 
   // Form state
   const [form, setForm] = useState({ name: "", phone: "", city: "", comment: "" });
@@ -75,6 +197,9 @@ export default function ClinicsPage() {
     ? CLINICS
     : CLINICS.filter(c => c.city === selectedCity);
 
+  // Only real clinics (with coordinates) for the map
+  const mapClinics = filteredClinics.filter(c => !c.comingSoon);
+
   const update = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const canSubmit = form.name.trim() && form.phone.trim() && agreed && status !== "sending";
@@ -84,23 +209,40 @@ export default function ClinicsPage() {
     if (!canSubmit) return;
     setStatus("sending");
     try {
-      const res = await fetch(FORMSPREE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          phone: form.phone,
-          city: form.city,
-          comment: form.comment,
-        }),
-      });
-      if (res.ok) {
-        trackGoal('booking_submit');
-        tracker.trackClick("waitlist_submit", { city: form.city });
-        setStatus("sent");
-      } else {
-        setStatus("error");
+      const payload = {
+        name: form.name,
+        phone: form.phone,
+        city: form.city,
+        comment: form.comment,
+      };
+
+      let submitted = false;
+
+      if (supabase) {
+        const { error } = await supabase.from("waitlist").insert({
+          ...payload,
+          session_id: tracker.getSessionId(),
+          source_page: window.location.pathname,
+        });
+        if (error) throw error;
+        submitted = true;
       }
+
+      if (!submitted && FORMSPREE_URL) {
+        const res = await fetch(FORMSPREE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Formspree error");
+        submitted = true;
+      }
+
+      if (!submitted) throw new Error("No backend");
+
+      trackGoal('booking_submit');
+      tracker.trackClick("waitlist_submit", { city: form.city });
+      setStatus("sent");
     } catch {
       setStatus("error");
     }
@@ -174,14 +316,16 @@ export default function ClinicsPage() {
           </div>
         </Reveal>
 
-        {/* Map */}
-        <Reveal from="bottom" delay={100}>
-          <MapView
-            clinics={filteredClinics}
-            selectedId={selectedClinicId}
-            onSelect={(id) => setSelectedClinicId(id === selectedClinicId ? null : id)}
-          />
-        </Reveal>
+        {/* Map — only real clinics */}
+        {mapClinics.length > 0 && (
+          <Reveal from="bottom" delay={100}>
+            <MapView
+              clinics={mapClinics}
+              selectedId={selectedClinicId}
+              onSelect={(id) => setSelectedClinicId(id === selectedClinicId ? null : id)}
+            />
+          </Reveal>
+        )}
 
         {/* Clinic cards */}
         {filteredClinics.map(clinic => (
@@ -194,6 +338,10 @@ export default function ClinicsPage() {
                 trackGoal('clinic_book_click');
                 tracker.trackBookingClick(c.id);
                 setBookingClinic(c);
+              }}
+              onWaitlist={(c) => {
+                tracker.trackClick("waitlist_card_click", { city: c.city });
+                setWaitlistCity(c.city);
               }}
             />
           </Reveal>
@@ -461,6 +609,14 @@ export default function ClinicsPage() {
             trackGoal('booking_confirmed');
             tracker.trackClick("booking_confirmed");
           }}
+        />
+      )}
+
+      {/* Waitlist Modal */}
+      {waitlistCity && (
+        <WaitlistModal
+          city={waitlistCity}
+          onClose={() => setWaitlistCity(null)}
         />
       )}
     </div>
