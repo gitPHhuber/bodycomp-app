@@ -124,8 +124,9 @@ function CtaSection({ variant, text, link }) {
 /* ── Internal links ─────────────────────────────────────── */
 
 const INTERNAL_LINKS = [
-  { to: "/news/skinny-fat", label: "Skinny fat: худой снаружи, полный внутри" },
-  { to: "/news/dxa-vs-bioimpedance", label: "DXA vs биоимпеданс: сравнение методов" },
+  { to: "/news/skinny-fat", label: "Скрытый жир: нормальный вес, но высокий процент жира" },
+  { to: "/news/dxa-vs-bioimpedance", label: "DXA vs биоимпеданс: какой анализ состава тела точнее" },
+  { to: "/news/weight-plateau", label: "Почему вес стоит: теряете жир или мышцы?" },
   { to: "/repeat-dxa", label: "Повторное DXA: когда и зачем" },
   { to: "/analyzer", label: "Калькулятор состава тела" },
 ];

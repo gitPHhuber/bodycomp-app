@@ -304,11 +304,6 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
                 }
               }}
               disabled={!name || !phone || submitting}
-
-              onClick={handleConfirm}
-
-              onClick={handleSubmit}
-              disabled={!name || !phone || submitting}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
                 background: name && phone && !submitting ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
