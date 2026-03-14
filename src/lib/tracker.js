@@ -16,7 +16,7 @@ export function getSessionId() {
 const UTM_KEY = "bc_utm";
 let utmParams = null;
 
-function getUtmParams() {
+export function getUtmParams() {
   if (utmParams) return utmParams;
 
   const stored = sessionStorage.getItem(UTM_KEY);
