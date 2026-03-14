@@ -13,6 +13,8 @@ import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
 import { useMeta } from "../../utils/useMeta";
+import { determineArchetype } from "./archetypes";
+import ArchetypeCard from "./ArchetypeCard";
 
 const BodyModel3D = lazy(() => import("../LandingPage/BodyModel3D"));
 
@@ -455,6 +457,14 @@ export default function AnalyzerPage() {
   if (step === 4 && results) {
     const r = results;
     const fatRanges = calc.fatRanges(r.gender);
+    const archetype = determineArchetype({
+      fatPct: r.bf,
+      bmi: r.bmi,
+      ffmi: r.ffmi,
+      whr: r.whr,
+      age: parseInt(age),
+      sex: gender,
+    });
 
     return (
       <div style={pageStyle}>
@@ -529,6 +539,9 @@ export default function AnalyzerPage() {
               {r.vr.level === "Низкий" ? Icons.check(24, r.vr.color) : r.vr.level === "Повышенный" ? Icons.alert(24, r.vr.color) : Icons.danger(24, r.vr.color)}
             </div>
           </div>
+
+          {/* Archetype Card */}
+          <ArchetypeCard archetype={archetype} fatPct={r.bf} bmi={r.bmi} />
 
           {/* Quick mode DXA upsell banner */}
           {r.calcMode === "quick" && (
