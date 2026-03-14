@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+
 import { trackGoal } from "../../utils/analytics";
 import { supabase } from "../../lib/supabase";
+
+
 import * as tracker from "../../lib/tracker";
+const { trackGoal } = tracker;
 import Reveal from "../../components/Reveal";
 import { useMeta } from "../../utils/useMeta";
 import { CLINICS, CITIES } from "./data";
@@ -605,9 +609,9 @@ export default function ClinicsPage() {
         <BookingModal
           clinic={bookingClinic}
           onClose={() => setBookingClinic(null)}
-          onConfirm={() => {
+          onConfirm={(result) => {
             trackGoal('booking_confirmed');
-            tracker.trackClick("booking_confirmed");
+            tracker.trackBookingConfirmed(result?.bookingId);
           }}
         />
       )}
