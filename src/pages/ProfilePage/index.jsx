@@ -6,12 +6,16 @@ import { supabase } from "../../lib/supabase";
 import { useMeta } from "../../utils/useMeta";
 
 const HistoryChart = lazy(() => import("./HistoryChart"));
+
 const DxaCharts = lazy(() => import("./DxaCharts"));
 const NextStepCard = lazy(() => import("./NextStepCard"));
 
+const DxaTimeline = lazy(() => import("./DxaTimeline"));
+
+
 const TABS = [
-  { id: "data", label: "Данные" },
-  { id: "history", label: "История" },
+  { id: "data", label: "Профиль" },
+  { id: "history", label: "Расчёты" },
   { id: "dxa", label: "DXA" },
   { id: "quizzes", label: "Квизы" },
 ];
@@ -27,8 +31,12 @@ export default function ProfilePage() {
   // Profile edit state
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [birthYear, setBirthYear] = useState("");
+  const [gender, setGender] = useState("");
+  const [heightCm, setHeightCm] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [consentRevoking, setConsentRevoking] = useState(false);
 
   // History state
   const [calcResults, setCalcResults] = useState(null);
@@ -47,6 +55,9 @@ export default function ProfilePage() {
     if (profile) {
       setName(profile.name || "");
       setCity(profile.city || "");
+      setBirthYear(profile.birth_year ?? "");
+      setGender(profile.gender || "");
+      setHeightCm(profile.height_cm ?? "");
     }
   }, [profile]);
 
@@ -130,7 +141,13 @@ export default function ProfilePage() {
     try {
       await supabase
         .from("users")
-        .update({ name: name.trim() || null, city: city.trim() || null })
+        .update({
+          name: name.trim() || null,
+          city: city.trim() || null,
+          birth_year: birthYear !== "" ? Number(birthYear) : null,
+          gender: gender || null,
+          height_cm: heightCm !== "" ? Number(heightCm) : null,
+        })
         .eq("auth_id", user.id);
       await fetchProfile(user.id);
       setProfileSaved(true);
@@ -145,6 +162,20 @@ export default function ProfilePage() {
   async function handleSignOut() {
     await signOut();
     navigate("/");
+  }
+
+  async function handleRevokeConsent(field) {
+    if (!supabase || !user || consentRevoking) return;
+    setConsentRevoking(true);
+    try {
+      const updates = { [field]: false, [`${field}_at`]: null };
+      await supabase.from("users").update(updates).eq("auth_id", user.id);
+      await fetchProfile(user.id);
+    } catch {
+      // silent
+    } finally {
+      setConsentRevoking(false);
+    }
   }
 
   const avatarLetter = (profile?.name?.[0] || user?.email?.[0] || "?").toUpperCase();
@@ -307,6 +338,67 @@ export default function ProfilePage() {
                 />
               </div>
 
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                  Год рождения
+                </label>
+                <input
+                  type="number"
+                  value={birthYear}
+                  onChange={(e) => setBirthYear(e.target.value)}
+                  placeholder="1990"
+                  min="1920"
+                  max="2010"
+                  style={inputStyle}
+                  onFocus={(e) => (e.target.style.borderColor = "#22d3ee")}
+                  onBlur={(e) => (e.target.style.borderColor = "#334155")}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                  Пол
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[{ value: "male", label: "Мужской" }, { value: "female", label: "Женский" }].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setGender(opt.value)}
+                      style={{
+                        flex: 1, padding: "12px", border: "1.5px solid",
+                        borderColor: gender === opt.value ? "#22d3ee" : "#334155",
+                        borderRadius: 12,
+                        background: gender === opt.value ? "#22d3ee11" : "#0f172a",
+                        color: gender === opt.value ? "#22d3ee" : "#94a3b8",
+                        fontSize: 14, fontWeight: 600, cursor: "pointer",
+                        fontFamily: "'Outfit', sans-serif", transition: "all 0.2s",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6, fontFamily: "'JetBrains Mono', monospace" }}>
+                  Рост, см
+                </label>
+                <input
+                  type="number"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                  placeholder="175"
+                  min="100"
+                  max="250"
+                  step="0.1"
+                  style={inputStyle}
+                  onFocus={(e) => (e.target.style.borderColor = "#22d3ee")}
+                  onBlur={(e) => (e.target.style.borderColor = "#334155")}
+                />
+              </div>
+
               <button
                 onClick={handleSaveProfile}
                 disabled={profileSaving}
@@ -318,6 +410,67 @@ export default function ProfilePage() {
               >
                 {profileSaving ? "Сохраняем..." : profileSaved ? "Сохранено" : "Сохранить"}
               </button>
+            </div>
+
+            {/* Consents block */}
+            <div style={cardStyle}>
+              <div style={{
+                fontSize: 13, color: "#64748b", textTransform: "uppercase",
+                letterSpacing: "0.08em", marginBottom: 14,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                Мои согласия
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0" }}>Медицинские данные</div>
+                  <div style={{ fontSize: 12, color: "#64748b" }}>
+                    {profile?.consent_health_data
+                      ? `Дано ${profile.consent_health_data_at ? new Date(profile.consent_health_data_at).toLocaleDateString("ru-RU") : ""}`
+                      : "Не дано"}
+                  </div>
+                </div>
+                {profile?.consent_health_data && (
+                  <button
+                    onClick={() => handleRevokeConsent("consent_health_data")}
+                    disabled={consentRevoking}
+                    style={{
+                      padding: "6px 14px", borderRadius: 8,
+                      background: "#ef444422", border: "1px solid #ef444444",
+                      color: "#ef4444", fontSize: 11, cursor: "pointer",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    Отозвать
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0" }}>Маркетинг</div>
+                  <div style={{ fontSize: 12, color: "#64748b" }}>
+                    {profile?.consent_marketing
+                      ? `Дано ${profile.consent_marketing_at ? new Date(profile.consent_marketing_at).toLocaleDateString("ru-RU") : ""}`
+                      : "Не дано"}
+                  </div>
+                </div>
+                {profile?.consent_marketing && (
+                  <button
+                    onClick={() => handleRevokeConsent("consent_marketing")}
+                    disabled={consentRevoking}
+                    style={{
+                      padding: "6px 14px", borderRadius: 8,
+                      background: "#ef444422", border: "1px solid #ef444444",
+                      color: "#ef4444", fontSize: 11, cursor: "pointer",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    Отозвать
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -391,6 +544,7 @@ export default function ProfilePage() {
 
         {/* Tab: DXA */}
         {tab === "dxa" && (
+
           <div style={{ animation: "fadeSlide 0.4s ease" }}>
             {dxaLoading ? (
               <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>
@@ -412,6 +566,11 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+
+          <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>Загрузка...</div>}>
+            <DxaTimeline />
+          </Suspense>
+
         )}
 
         {/* Tab: Quizzes */}
