@@ -16,7 +16,6 @@ import ArchetypeCard from "./ArchetypeCard";
 import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 import { determineArchetype } from "./archetypes";
-import ArchetypeCard from "./ArchetypeCard";
 
 const BodyModel3D = lazy(() => import("../LandingPage/BodyModel3D"));
 
@@ -546,8 +545,7 @@ export default function AnalyzerPage() {
           {/* Archetype Card */}
           <ArchetypeCard archetype={archetype} fatPct={r.bf} bmi={r.bmi} />
 
-          <ArchetypeCard archetype={null} visible={!!r} />
-          <OfferBanner archetype={null} visible={!!r} />
+          <OfferBanner archetype={archetype} visible={!!r} />
 
 
           {/* Quick mode DXA upsell banner */}
