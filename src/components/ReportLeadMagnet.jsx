@@ -10,8 +10,6 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const navigate = useNavigate();
 
 
-
-
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -21,6 +19,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const trackedView = useRef(false);
 
   // Track view
+
 
   const [step, setStep] = useState("form"); // 'form' | 'success'
 
@@ -34,6 +33,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
   // Track view: immediately for modal, IntersectionObserver for inline
   
+
   useEffect(() => {
     if (trackedView.current) return;
 
@@ -51,15 +51,18 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
     const observer = new IntersectionObserver(
 
     const obs = new IntersectionObserver(
+
 
 
       ([entry]) => {
         if (entry.isIntersecting && !trackedView.current) {
           tracker.trackEvent("report_teaser_view", { source });
           trackedView.current = true;
+
 
 
 
@@ -92,6 +95,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
     obs.observe(el);
     return () => obs.disconnect();
   }, [variant, source]);
@@ -99,6 +103,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
 
 
 
@@ -143,10 +148,12 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
       if (supabase) {
         const { error: dbErr } = await supabase.from("bookings").insert(payload);
         if (dbErr) throw dbErr;
       } else if (FORMSPREE_URL) {
+
 
 
 
@@ -164,8 +171,10 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
         if (!res.ok) throw new Error("Formspree error");
       }
+
 
 
       tracker.trackEvent("report_email_submit", {
@@ -176,6 +185,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
       setStep(2);
     } catch {
       setError("Ошибка отправки. Попробуйте ещё раз.");
+
 
 
 
@@ -205,6 +215,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
         } catch (_) { /* fall through */ }
       }
       setError("Не удалось отправить. Попробуйте ещё раз.");
+
 
 
 
@@ -435,6 +446,8 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
+
   // ── Styles ──
   const cardStyle = {
     borderRadius: 22,
@@ -593,6 +606,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
       {step === "form" ? formContent : successContent}
 
 
+
     </div>
   );
 
@@ -623,6 +637,5 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   return card;
 
   return <div ref={ref}>{card}</div>;
-
 
 }
