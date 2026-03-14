@@ -78,8 +78,8 @@ export default function AddDxaResult({ existingResult, onSaved, onClose }) {
           setUploading(false);
           return;
         }
-        const { data: urlData } = supabase.storage.from("dxa-reports").getPublicUrl(path);
-        reportUrl = urlData?.publicUrl || null;
+        // Store the object path — bucket is private, so generate signed URLs on read
+        reportUrl = path;
         setUploading(false);
       }
 

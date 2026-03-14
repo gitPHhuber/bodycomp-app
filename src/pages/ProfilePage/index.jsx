@@ -6,10 +6,8 @@ import { supabase } from "../../lib/supabase";
 import { useMeta } from "../../utils/useMeta";
 
 const HistoryChart = lazy(() => import("./HistoryChart"));
-
 const DxaCharts = lazy(() => import("./DxaCharts"));
 const NextStepCard = lazy(() => import("./NextStepCard"));
-
 const DxaTimeline = lazy(() => import("./DxaTimeline"));
 
 
@@ -544,7 +542,6 @@ export default function ProfilePage() {
 
         {/* Tab: DXA */}
         {tab === "dxa" && (
-
           <div style={{ animation: "fadeSlide 0.4s ease" }}>
             {dxaLoading ? (
               <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>
@@ -563,14 +560,12 @@ export default function ProfilePage() {
                     />
                   </Suspense>
                 )}
+                <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>Загрузка...</div>}>
+                  <DxaTimeline />
+                </Suspense>
               </>
             )}
           </div>
-
-          <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>Загрузка...</div>}>
-            <DxaTimeline />
-          </Suspense>
-
         )}
 
         {/* Tab: Quizzes */}
