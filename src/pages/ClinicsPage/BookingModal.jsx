@@ -320,9 +320,47 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
 
             <button
 
+
+              onClick={async () => {
+                tracker.trackClick("booking_step_contact", { clinicId: clinic.id });
+                if (!name || !phone || submitting) return;
+                setSubmitting(true);
+                setSubmitError(null);
+                const payload = {
+                  clinic_id: clinic.id,
+                  clinic_name: clinic.name,
+                  city: clinic.city,
+                  date: selectedDate.toISOString(),
+                  time: selectedTime,
+                  name,
+                  phone,
+                };
+                try {
+                  if (supabase) {
+                    const { error } = await supabase.from("bookings").insert(payload);
+                    if (error) throw error;
+                  } else {
+                    const res = await fetch(FORMSPREE_URL, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", Accept: "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    if (!res.ok) throw new Error("Formspree error");
+                  }
+                  setStep(4);
+                  if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone });
+                } catch {
+                  setSubmitError("Ошибка отправки. Попробуйте ещё раз.");
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              disabled={!name || !phone || submitting}
+
               onClick={handleConfirm}
 
               onClick={handleSubmit}
+
 
               disabled={!name || !phone || submitting}
               style={{
