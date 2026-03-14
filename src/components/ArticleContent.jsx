@@ -121,12 +121,95 @@ function CtaSection({ variant, text, link }) {
   );
 }
 
+/* ── Comparison table ──────────────────────────────────── */
+
+function ComparisonTableSection({ headers, rows }) {
+  return (
+    <div style={{ ...cardStyle, borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: `1.2fr ${headers.slice(1).map(() => "1fr").join(" ")}`,
+        padding: "12px 16px",
+        background: "#020617",
+        borderBottom: "1px solid #1e293b",
+        fontSize: 11,
+        fontWeight: 700,
+        fontFamily: "'JetBrains Mono', monospace",
+      }}>
+        {headers.map((h, i) => (
+          <span key={i} style={{ color: i === 0 ? "#64748b" : "#22d3ee" }}>{h}</span>
+        ))}
+      </div>
+      {/* Rows */}
+      {rows.map((row, i) => (
+        <div key={i} style={{
+          display: "grid",
+          gridTemplateColumns: `1.2fr ${row.slice(1).map(() => "1fr").join(" ")}`,
+          padding: "10px 16px",
+          borderBottom: i < rows.length - 1 ? "1px solid #1e293b20" : "none",
+          fontSize: 13,
+          lineHeight: 1.5,
+        }}>
+          {row.map((cell, j) => (
+            <span key={j} style={{ color: j === 0 ? "#94a3b8" : "#cbd5e1" }}>{cell}</span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Related links (inline) ────────────────────────────── */
+
+function RelatedLinksSection({ links }) {
+  return (
+    <div style={{
+      ...cardStyle,
+      padding: 16,
+      marginTop: 8,
+      marginBottom: 24,
+    }}>
+      <div style={{
+        fontSize: 12,
+        fontWeight: 700,
+        color: "#64748b",
+        fontFamily: "'JetBrains Mono', monospace",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        marginBottom: 10,
+      }}>
+        Смотрите также
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {links.map((item, i) => (
+          <Link
+            key={i}
+            to={item.url}
+            style={{
+              fontSize: 14,
+              color: "#22d3ee",
+              textDecoration: "none",
+              padding: "6px 0",
+              borderBottom: i < links.length - 1 ? "1px solid #1e293b" : "none",
+              display: "block",
+            }}
+          >
+            → {item.text}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Internal links ─────────────────────────────────────── */
 
 const INTERNAL_LINKS = [
   { to: "/news/skinny-fat", label: "Скрытый жир: нормальный вес, но высокий процент жира" },
   { to: "/news/dxa-vs-bioimpedance", label: "DXA vs биоимпеданс: какой анализ состава тела точнее" },
   { to: "/news/weight-plateau", label: "Почему вес стоит: теряете жир или мышцы?" },
+  { to: "/news/body-fat-norms", label: "Нормы процента жира по возрасту и полу" },
   { to: "/repeat-dxa", label: "Повторное DXA: когда и зачем" },
   { to: "/analyzer", label: "Калькулятор состава тела" },
 ];
@@ -175,7 +258,8 @@ function SourcesSection({ sources }) {
 
 /* ── Main component ─────────────────────────────────────── */
 
-export default function ArticleContent({ sections, sources }) {
+export default function ArticleContent({ article }) {
+  const { sections, sources } = article;
   return (
     <>
       {sections.map((section, i) => {
@@ -190,6 +274,10 @@ export default function ArticleContent({ sections, sources }) {
             return <ListSection key={i} items={section.items} />;
           case "cta":
             return <CtaSection key={i} variant={section.variant} text={section.text} link={section.link} />;
+          case "comparison_table":
+            return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
+          case "related_links":
+            return <RelatedLinksSection key={i} links={section.links} />;
           default:
             return null;
         }

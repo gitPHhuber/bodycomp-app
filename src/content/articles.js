@@ -35,6 +35,7 @@ export const ARTICLES = [
     tag: "РАЗБОР",
     tagColor: "#22d3ee",
     contentType: "article",
+    relatedSlugs: ["body-fat-norms", "dxa-vs-bioimpedance", "weight-plateau"],
     sources: [
       {
         id: 1,
@@ -146,6 +147,14 @@ export const ARTICLES = [
         text: "Записаться на DXA-обследование",
         link: "/clinics",
       },
+      {
+        type: "related_links",
+        links: [
+          { text: "Нормы процента жира по возрасту и полу", url: "/news/body-fat-norms" },
+          { text: "DXA vs биоимпеданс — какой анализ точнее", url: "/news/dxa-vs-bioimpedance" },
+          { text: "Рассчитать состав тела", url: "/analyzer" },
+        ],
+      },
     ],
   },
   {
@@ -164,6 +173,7 @@ export const ARTICLES = [
     updatedAt: "15 марта 2026",
     sourcesCount: 3,
     contentType: "article",
+    relatedSlugs: ["skinny-fat", "body-fat-norms", "weight-plateau"],
     sources: [
       { id: 1, text: "Ackland TR et al. Current status of body composition assessment in sport. Sports Med (2012);42:227-249." },
       { id: 2, text: "Marra M et al. Assessment of body composition in health and disease using BIA and DXA. J Func Morph Kinesiol (2019);4:3." },
@@ -240,7 +250,15 @@ export const ARTICLES = [
         variant: "booking",
         text: "Записаться на точный DXA-анализ",
         link: "/clinics"
-      }
+      },
+      {
+        type: "related_links",
+        links: [
+          { text: "Что такое skinny fat", url: "/news/skinny-fat" },
+          { text: "Нормы процента жира по возрасту и полу", url: "/news/body-fat-norms" },
+          { text: "Рассчитать состав тела", url: "/analyzer" },
+        ],
+      },
     ]
   },
   {
@@ -256,6 +274,7 @@ export const ARTICLES = [
     tag: "РАЗБОР",
     tagColor: "#22d3ee",
     contentType: "article",
+    relatedSlugs: ["skinny-fat", "body-fat-norms", "dxa-vs-bioimpedance"],
     sources: [
       { id: 1, text: "Heymsfield SB et al. Weight loss composition is one-fourth fat-free mass. Am J Clin Nutr (2014);100:189-198." },
       { id: 2, text: "Churchward-Venne TA et al. Role of protein in muscle mass. Appl Physiol Nutr Metab (2014);39:987-997." },
@@ -317,8 +336,115 @@ export const ARTICLES = [
         variant: "booking",
         text: "Узнать точный состав тела на DXA",
         link: "/clinics"
-      }
+      },
+      {
+        type: "related_links",
+        links: [
+          { text: "Что такое skinny fat", url: "/news/skinny-fat" },
+          { text: "Нормы процента жира по возрасту и полу", url: "/news/body-fat-norms" },
+          { text: "Записаться на DXA", url: "/clinics" },
+        ],
+      },
     ]
+  },
+  {
+    slug: "body-fat-norms",
+    title: "Нормы процента жира в теле: таблица по возрасту и полу",
+    subtitle: "Сколько жира — норма, когда пора действовать и как измерить точно",
+    description: "Нормы процента жира для мужчин и женщин по возрасту. Таблица ACE/ACSM, чем опасен избыток и дефицит жира. Калькулятор + DXA.",
+    metaTitle: "Нормы процента жира в теле — таблица по возрасту и полу | BODYCOMP",
+    date: "15 марта 2026",
+    publishedAt: "2026-03-15",
+    readTime: "7 мин",
+    authorName: "Редакция BODYCOMP",
+    image: "https://bodycomp.ru/og-image.png",
+    tag: "СПРАВОЧНИК",
+    tagColor: "#f59e0b",
+    contentType: "article",
+    relatedSlugs: ["skinny-fat", "weight-plateau", "dxa-vs-bioimpedance"],
+    sources: [
+      { id: 1, text: "American Council on Exercise (ACE). Body Fat Percentage Norms." },
+      { id: 2, text: "ACSM's Guidelines for Exercise Testing and Prescription, 11th ed. 2021." },
+      { id: 3, text: "Gallagher D et al. Healthy percentage body fat ranges. Am J Clin Nutr (2000);72:694-701." },
+    ],
+    sections: [
+      {
+        type: "lead",
+        text: "«У меня 25% жира — это нормально?» Зависит от пола, возраста и того, как измерять. Универсального числа не существует. Но есть научно обоснованные диапазоны, которые помогают понять, где вы находитесь — и нужно ли что-то менять.",
+      },
+      { type: "heading", level: 2, text: "Зачем знать свой процент жира" },
+      {
+        type: "paragraph",
+        text: "Вес и ИМТ не различают жир и мышцы. Два человека с одинаковым весом 75 кг могут иметь 15% и 35% жира — и совершенно разное здоровье. Процент жира — более точный индикатор метаболических рисков, чем вес или ИМТ. [3]",
+      },
+      { type: "heading", level: 2, text: "Нормы для мужчин" },
+      {
+        type: "comparison_table",
+        headers: ["Категория", "Возраст 20–39", "Возраст 40–59", "Возраст 60+"],
+        rows: [
+          ["Необходимый жир", "2–5%", "2–5%", "2–5%"],
+          ["Атлеты", "6–13%", "6–13%", "6–13%"],
+          ["Фитнес", "14–17%", "14–17%", "14–17%"],
+          ["Норма", "18–24%", "18–26%", "18–28%"],
+          ["Избыток", "25%+", "27%+", "29%+"],
+        ],
+      },
+      { type: "heading", level: 2, text: "Нормы для женщин" },
+      {
+        type: "comparison_table",
+        headers: ["Категория", "Возраст 20–39", "Возраст 40–59", "Возраст 60+"],
+        rows: [
+          ["Необходимый жир", "10–13%", "10–13%", "10–13%"],
+          ["Атлеты", "14–20%", "14–20%", "14–20%"],
+          ["Фитнес", "21–24%", "21–24%", "21–24%"],
+          ["Норма", "25–31%", "25–33%", "25–35%"],
+          ["Избыток", "32%+", "34%+", "36%+"],
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Данные основаны на рекомендациях American Council on Exercise (ACE) и ACSM. [1][2] Диапазоны ориентировочные — точные границы зависят от индивидуальных факторов.",
+      },
+      { type: "heading", level: 2, text: "Чем опасен избыток жира" },
+      {
+        type: "paragraph",
+        text: "Повышенный процент жира — особенно висцерального — связан с инсулинорезистентностью, метаболическим синдромом, сердечно-сосудистыми заболеваниями и хроническим воспалением. При этом внешне человек может выглядеть нормально (skinny fat).",
+      },
+      { type: "heading", level: 2, text: "Чем опасен дефицит жира" },
+      {
+        type: "paragraph",
+        text: "Жир ниже необходимого минимума (2–5% у мужчин, 10–13% у женщин) опасен: нарушение гормонального фона, аменорея, снижение иммунитета, потеря костной плотности. Экстремально низкий жир — это не «идеал», а риск.",
+      },
+      { type: "heading", level: 2, text: "Как измерить процент жира" },
+      {
+        type: "list",
+        items: [
+          "Калькулятор по обхватам (формула Navy) — бесплатно, погрешность ±5-8%",
+          "Биоимпедансные весы — удобно, но погрешность ±5-15% в зависимости от условий",
+          "DXA-денситометрия — золотой стандарт, погрешность ±1-2%, показывает жир по зонам тела",
+        ],
+      },
+      {
+        type: "cta",
+        variant: "calculator",
+        text: "Рассчитать свой процент жира",
+        link: "/analyzer",
+      },
+      {
+        type: "cta",
+        variant: "booking",
+        text: "Записаться на точный DXA-анализ",
+        link: "/clinics",
+      },
+      {
+        type: "related_links",
+        links: [
+          { text: "Что такое skinny fat", url: "/news/skinny-fat" },
+          { text: "Почему вес стоит на месте", url: "/news/weight-plateau" },
+          { text: "DXA vs биоимпеданс — сравнение", url: "/news/dxa-vs-bioimpedance" },
+        ],
+      },
+    ],
   },
 ];
 

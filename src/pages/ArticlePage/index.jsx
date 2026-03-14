@@ -5,6 +5,7 @@ import * as tracker from "../../lib/tracker";
 import { ARTICLES } from "../../content/articles";
 import { useJsonLd } from "../../utils/useJsonLd";
 import ArticleContent from "../../components/ArticleContent";
+import RelatedArticles from "../../components/RelatedArticles";
 
 /* ── Data (B2B article: stratos-vs-cheap) ────────────────── */
 
@@ -550,7 +551,8 @@ export default function ArticlePage() {
             <span>→</span>
             <span style={{ color: "#94a3b8" }}>Статья</span>
           </div>
-          <ArticleContent article={articleMeta} isMobile={isMobile} navigate={navigate} />
+          <ArticleContent article={articleMeta} />
+          <RelatedArticles currentSlug={slug} articles={ARTICLES} />
         </div>
       </div>
     );
