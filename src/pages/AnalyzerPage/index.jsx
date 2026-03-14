@@ -12,6 +12,7 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
+import RecommendationCard from "./RecommendationCard";
 import { useMeta } from "../../utils/useMeta";
 
 
@@ -518,6 +519,16 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+          {/* Personalized DXA Recommendation */}
+          <RecommendationCard
+            bodyType={r.bt}
+            fatPct={r.bf}
+            bmi={r.bmi}
+            ffmi={r.ffmi}
+            visceralRisk={r.vr}
+            gender={gender}
+            age={age}
+          />
 
           {/* Save Result */}
           <div style={{ textAlign: "center", marginBottom: 12 }}>
