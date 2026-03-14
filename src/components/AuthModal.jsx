@@ -8,6 +8,8 @@ export default function AuthModal() {
   const [email, setEmail] = useState("");
   const [step, setStep] = useState("input"); // input | sending | sent
   const [error, setError] = useState("");
+  const [consentPD, setConsentPD] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -15,6 +17,8 @@ export default function AuthModal() {
       setEmail("");
       setStep("input");
       setError("");
+      setConsentPD(false);
+      setConsentMarketing(false);
     }
   }, [showAuthModal]);
 
@@ -39,8 +43,18 @@ export default function AuthModal() {
     e.preventDefault();
     if (!email || step === "sending") return;
 
+    if (!consentPD) {
+      setError("Необходимо дать согласие на обработку персональных данных");
+      return;
+    }
+
     setError("");
     setStep("sending");
+
+    localStorage.setItem("pending_consent", JSON.stringify({
+      personal_data: true,
+      marketing: consentMarketing,
+    }));
 
     const { error: err } = await signInWithEmail(email.trim());
     if (err) {
@@ -193,6 +207,46 @@ export default function AuthModal() {
                 />
               </div>
 
+              {/* Consent checkboxes */}
+              <label style={{
+                display: "flex", alignItems: "flex-start", gap: 10,
+                marginBottom: 8, cursor: "pointer",
+              }}>
+                <input
+                  type="checkbox"
+                  checked={consentPD}
+                  onChange={(e) => setConsentPD(e.target.checked)}
+                  style={{ marginTop: 3, accentColor: "#22d3ee", width: 16, height: 16, flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.5, fontFamily: "'Outfit', sans-serif" }}>
+                  Согласен на обработку персональных данных{" "}
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer"
+                    style={{ color: "#22d3ee", textDecoration: "underline" }}
+                    onClick={(e) => e.stopPropagation()}>
+                    (Политика конфиденциальности)
+                  </a>
+                </span>
+              </label>
+
+              <label style={{
+                display: "flex", alignItems: "flex-start", gap: 10,
+                marginBottom: 14, cursor: "pointer",
+              }}>
+                <input
+                  type="checkbox"
+                  checked={consentMarketing}
+                  onChange={(e) => setConsentMarketing(e.target.checked)}
+                  style={{ marginTop: 3, accentColor: "#22d3ee", width: 16, height: 16, flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.5, fontFamily: "'Outfit', sans-serif" }}>
+                  Согласен получать информационные материалы
+                  <br />
+                  <span style={{ fontSize: 11, color: "#475569" }}>
+                    Напоминания о повторном обследовании, полезные материалы
+                  </span>
+                </span>
+              </label>
+
               {error && (
                 <div style={{
                   padding: "10px 14px", borderRadius: 10,
@@ -203,7 +257,7 @@ export default function AuthModal() {
                 </div>
               )}
 
-              <button type="submit" style={{ ...btnPrimary, opacity: email ? 1 : 0.5 }} disabled={!email}>
+              <button type="submit" style={{ ...btnPrimary, opacity: (email && consentPD) ? 1 : 0.5 }} disabled={!email || !consentPD}>
                 Войти через magic link
               </button>
             </form>
