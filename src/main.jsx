@@ -8,12 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import AnalyzerPage from "./pages/AnalyzerPage";
 import ClinicsPage from "./pages/ClinicsPage";
-import BodyComparePage from "./pages/BodyComparePage";
 import PrivacyPage from "./pages/PrivacyPage";
-import NewsPage from "./pages/NewsPage";
-import ArticlePage from "./pages/ArticlePage";
-import ExpertQAPage from "./pages/ExpertQAPage";
-import RepeatDxaPage from "./pages/RepeatDxaPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -22,6 +17,11 @@ import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const ClinicPage = lazy(() => import("./pages/ClinicPage"));
+const BodyComparePage = lazy(() => import("./pages/BodyComparePage"));
+const NewsPage = lazy(() => import("./pages/NewsPage"));
+const ArticlePage = lazy(() => import("./pages/ArticlePage"));
+const ExpertQAPage = lazy(() => import("./pages/ExpertQAPage"));
+const RepeatDxaPage = lazy(() => import("./pages/RepeatDxaPage"));
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 
 function ScrollToTop() {
@@ -134,11 +134,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                   <ClinicPage />
                 </Suspense>
               } />
-              <Route path="/news" element={<NewsPage />} />
-              <Route path="/news/:slug" element={<ArticlePage />} />
-              <Route path="/expert-qa" element={<ExpertQAPage />} />
-              <Route path="/repeat-dxa" element={<RepeatDxaPage />} />
-              <Route path="/xray" element={<BodyComparePage />} />
+              <Route path="/news" element={<Suspense fallback={<ProfileFallback />}><NewsPage /></Suspense>} />
+              <Route path="/news/:slug" element={<Suspense fallback={<ProfileFallback />}><ArticlePage /></Suspense>} />
+              <Route path="/expert-qa" element={<Suspense fallback={<ProfileFallback />}><ExpertQAPage /></Suspense>} />
+              <Route path="/repeat-dxa" element={<Suspense fallback={<ProfileFallback />}><RepeatDxaPage /></Suspense>} />
+              <Route path="/xray" element={<Suspense fallback={<ProfileFallback />}><BodyComparePage /></Suspense>} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
