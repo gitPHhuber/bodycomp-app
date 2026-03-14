@@ -12,6 +12,7 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
+import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 
 
@@ -518,6 +519,8 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+          {/* Bonus Offer Banner */}
+          {results && <OfferBanner visible={!!results} />}
 
           {/* Save Result */}
           <div style={{ textAlign: "center", marginBottom: 12 }}>
