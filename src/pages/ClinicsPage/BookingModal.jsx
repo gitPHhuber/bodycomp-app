@@ -1,16 +1,22 @@
 
 import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 import * as tracker from "../../lib/tracker";
+import { supabase } from "../../lib/supabase";
 
 
-const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL || "https://formspree.io/f/YOUR_FORMSPREE_ID";
+const FORMSPREE_URL = import.meta.env.VITE_FORMSPREE_URL;
 
 
 export default function BookingModal({ clinic, onClose, onConfirm }) {
   const [step, setStep] = useState(1); // 1=date, 2=time, 3=info, 4=done
 
+  const isRepeat = window.location.pathname === '/repeat-dxa'
+    || new URLSearchParams(window.location.search).get('scan_type') === 'repeat';
+  const scanType = isRepeat ? 'repeat' : 'primary';
+
   useEffect(() => {
-    tracker.trackClick("booking_modal_open", { clinicId: clinic.id });
+    tracker.trackBookingFormOpen(clinic.id, window.location.pathname);
   }, []);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -29,6 +35,126 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
   const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
   const formatDate = (d) => `${d.getDate()} ${monthNames[d.getMonth()]}`;
+
+  const handleConfirm = async () => {
+    if (!name || !phone || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const utmRaw = sessionStorage.getItem("bc_utm");
+    const utm = utmRaw ? JSON.parse(utmRaw) : {};
+
+    const payload = {
+      name,
+      phone,
+      clinic_id: clinic.id,
+      clinic_name: clinic.name,
+      desired_date: selectedDate ? selectedDate.toISOString() : null,
+      desired_time: selectedTime,
+      session_id: tracker.getSessionId(),
+      utm_source: utm.utm_source || null,
+      utm_medium: utm.utm_medium || null,
+      utm_campaign: utm.utm_campaign || null,
+      source_page: window.location.pathname,
+      scan_type: "primary",
+      status: "lead",
+    };
+
+    try {
+      let submitted = false;
+
+      // 1) Try Supabase
+      if (supabase) {
+        const { error } = await supabase.from("bookings").insert(payload);
+        if (error) throw error;
+        submitted = true;
+      }
+
+      // 2) Fallback to Formspree
+      if (!submitted && FORMSPREE_URL) {
+
+  const handleSubmit = async () => {
+    if (!name || !phone || submitting) return;
+    tracker.trackBookingStep("contact", clinic.id);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const utmParams = tracker.getUtmParams();
+    const payload = {
+      clinic_id: clinic.id,
+      clinic_name: clinic.name,
+      city: clinic.city,
+      date: selectedDate.toISOString(),
+      time: selectedTime,
+      name,
+      phone,
+      session_id: tracker.getSessionId(),
+      utm_source: utmParams.utm_source || null,
+      utm_medium: utmParams.utm_medium || null,
+      utm_campaign: utmParams.utm_campaign || null,
+      source_page: window.location.pathname,
+      scan_type: scanType,
+      offer_variant: null,
+      coupon_code: null,
+    };
+
+    try {
+      let bookingId = null;
+      if (supabase) {
+        const { data, error } = await supabase.from("bookings").insert(payload).select('id').single();
+        if (error) throw error;
+        bookingId = data?.id || null;
+      } else {
+
+        const res = await fetch(FORMSPREE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Formspree error");
+
+        submitted = true;
+      }
+
+      // 3) Neither available
+      if (!submitted) {
+        throw new Error("No submission backend configured");
+      }
+
+      // Success
+      tracker.trackClick("lead_created", {
+        clinic_id: clinic.id,
+        scan_type: "primary",
+      });
+      setStep(4);
+      if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone });
+    } catch {
+      setSubmitError("Не удалось отправить заявку, попробуйте ещё раз.");
+
+      }
+
+      tracker.trackBookingStep("confirm", clinic.id);
+      tracker.trackLeadCreated({
+        clinic_id: clinic.id,
+        scan_type: scanType,
+        offer_variant: null,
+        coupon_code: null,
+        session_id: tracker.getSessionId(),
+      });
+
+      setStep(4);
+      if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone, bookingId });
+    } catch {
+      setSubmitError("Ошибка отправки. Попробуйте ещё раз.");
+
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+
+  const hasPrice = clinic.price > 0;
+
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
@@ -51,7 +177,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{clinic.img}</div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 16 }}>{clinic.name}</div>
-            <div style={{ fontSize: 12, color: "#64748b" }}>{clinic.city} · {clinic.device}</div>
+            <div style={{ fontSize: 12, color: "#64748b" }}>{clinic.city}{clinic.device ? ` · ${clinic.device}` : ""}</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: "auto", background: "#1e293b", border: "none", color: "#94a3b8", width: 32, height: 32, borderRadius: 10, cursor: "pointer", fontSize: 16 }}>✕</button>
         </div>
@@ -87,7 +213,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               })}
             </div>
             <button
-              onClick={() => { if (selectedDate) { tracker.trackClick("booking_step_date", { clinicId: clinic.id }); setStep(2); } }}
+              onClick={() => { if (selectedDate) { tracker.trackBookingStep("date", clinic.id); setStep(2); } }}
               disabled={!selectedDate}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
@@ -126,7 +252,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               })}
             </div>
             <button
-              onClick={() => { if (selectedTime) { tracker.trackClick("booking_step_time", { clinicId: clinic.id }); setStep(3); } }}
+              onClick={() => { if (selectedTime) { tracker.trackBookingStep("time", clinic.id); setStep(3); } }}
               disabled={!selectedTime}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
@@ -163,10 +289,18 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 13, color: "#64748b" }}>Стоимость</span>
-                <div>
-                  <span style={{ fontSize: 15, color: "#22d3ee", fontWeight: 700, fontFamily: "mono" }}>₽{clinic.price.toLocaleString()}</span>
-                  <span style={{ fontSize: 12, color: "#475569", textDecoration: "line-through", marginLeft: 6 }}>₽{clinic.priceOld.toLocaleString()}</span>
-                </div>
+                {hasPrice ? (
+                  <div>
+                    <span style={{ fontSize: 15, color: "#22d3ee", fontWeight: 700, fontFamily: "mono" }}>₽{clinic.price.toLocaleString()}</span>
+                    {clinic.priceOld && (
+                      <span style={{ fontSize: 12, color: "#475569", textDecoration: "line-through", marginLeft: 6 }}>₽{clinic.priceOld.toLocaleString()}</span>
+                    )}
+                  </div>
+                ) : (
+                  <span style={{ fontSize: 14, color: "#f59e0b", fontWeight: 600 }}>
+                    {clinic.priceLabel || "Уточняйте по телефону"}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -185,6 +319,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
             </div>
 
             <button
+
 
               onClick={async () => {
                 tracker.trackClick("booking_step_contact", { clinicId: clinic.id });
@@ -222,6 +357,12 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
               }}
               disabled={!name || !phone || submitting}
 
+              onClick={handleConfirm}
+
+              onClick={handleSubmit}
+
+
+              disabled={!name || !phone || submitting}
               style={{
                 width: "100%", padding: 16, border: "none", borderRadius: 14,
                 background: name && phone && !submitting ? "linear-gradient(135deg,#10b981,#34d399)" : "#1e293b",
@@ -250,7 +391,7 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
           <div style={{ textAlign: "center", padding: "20px 0", animation: "fadeSlide 0.5s ease" }}>
             <div style={{ fontSize: 64, marginBottom: 16, animation: "bounceIn 0.6s ease" }}>✅</div>
             <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, background: "linear-gradient(135deg,#e2e8f0,#10b981)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Запись подтверждена!
+              Заявка принята!
             </div>
             <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.6, marginBottom: 20 }}>
               {formatDate(selectedDate)} в {selectedTime}<br />
@@ -275,11 +416,13 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
                 color: "#020617", fontSize: 14, fontWeight: 700, cursor: "pointer",
                 fontFamily: "mono",
               }}>Готово</button>
-              <a href={`tel:${clinic.phone.replace(/\D/g, "")}`} style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: 48, borderRadius: 12, background: "#1e293b",
-                border: "1px solid #334155", textDecoration: "none", fontSize: 18,
-              }}>📞</a>
+              {clinic.phone && (
+                <a href={`tel:${clinic.phone.replace(/\D/g, "")}`} style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 48, borderRadius: 12, background: "#1e293b",
+                  border: "1px solid #334155", textDecoration: "none", fontSize: 18,
+                }}>📞</a>
+              )}
             </div>
           </div>
         )}
