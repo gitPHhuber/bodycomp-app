@@ -216,3 +216,7 @@ export function trackFormAbandon(page, filledFields) {
 export function trackCTAView(element) {
   debouncedEnqueue(`cta_view_${element}`, "cta_view", null, element);
 }
+
+export function trackGoal(goalName, meta) {
+  enqueue("goal", null, null, { goal: goalName, ...meta });
+}
