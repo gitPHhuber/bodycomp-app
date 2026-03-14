@@ -24,42 +24,6 @@ export default function MapView({ clinics, selectedId, onSelect }) {
         allowFullScreen
       />
 
-      {/* Price markers overlay */}
-      {loaded && activeClinics.length === 1 && (
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div
-            style={{
-              pointerEvents: "auto",
-              cursor: "pointer",
-              transform: "translateY(-28px)",
-            }}
-            onClick={() => onSelect(activeClinics[0].id)}
-          >
-            <div style={{
-              background: selectedId === activeClinics[0].id ? "#22d3ee" : "#10b981",
-              color: "#020617",
-              padding: "4px 10px",
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 700,
-              fontFamily: "'JetBrains Mono', monospace",
-              whiteSpace: "nowrap",
-              boxShadow: selectedId === activeClinics[0].id ? "0 0 20px #22d3ee66" : "0 2px 8px #0008",
-              transition: "all 0.3s",
-            }}>
-              ₽{activeClinics[0].price.toLocaleString()}
-            </div>
-            <div style={{
-              width: 0, height: 0,
-              borderLeft: "6px solid transparent",
-              borderRight: "6px solid transparent",
-              borderTop: `6px solid ${selectedId === activeClinics[0].id ? "#22d3ee" : "#10b981"}`,
-              margin: "0 auto",
-            }} />
-          </div>
-        </div>
-      )}
-
       {!loaded && (
         <div style={{ position: "absolute", inset: 0, background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ fontSize: 14, color: "#475569" }}>Загрузка карты...</div>
