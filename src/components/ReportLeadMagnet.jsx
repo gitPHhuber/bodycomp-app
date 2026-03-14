@@ -11,6 +11,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -23,6 +24,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
   const [step, setStep] = useState("form"); // 'form' | 'success'
 
+
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,10 +32,8 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const ref = useRef(null);
   const trackedView = useRef(false);
 
-
   // Track view: immediately for modal, IntersectionObserver for inline
-
-
+  
   useEffect(() => {
     if (trackedView.current) return;
 
@@ -50,6 +50,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
     const observer = new IntersectionObserver(
 
     const obs = new IntersectionObserver(
@@ -61,9 +62,11 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
           trackedView.current = true;
 
 
+
           observer.disconnect();
 
           obs.disconnect();
+
 
 
         }
@@ -88,6 +91,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
     setError(null);
 
 
+
     obs.observe(el);
     return () => obs.disconnect();
   }, [variant, source]);
@@ -95,6 +99,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
 
 
 
@@ -137,10 +142,12 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
       if (!submitted && FORMSPREE_URL) {
 
 
+
       if (supabase) {
         const { error: dbErr } = await supabase.from("bookings").insert(payload);
         if (dbErr) throw dbErr;
       } else if (FORMSPREE_URL) {
+
 
 
         const res = await fetch(FORMSPREE_URL, {
@@ -156,6 +163,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
         if (!res.ok) throw new Error("Formspree error");
       }
 
@@ -168,6 +176,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
       setStep(2);
     } catch {
       setError("Ошибка отправки. Попробуйте ещё раз.");
+
 
 
       setStep(2);
@@ -196,6 +205,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
         } catch (_) { /* fall through */ }
       }
       setError("Не удалось отправить. Попробуйте ещё раз.");
+
 
 
     } finally {
@@ -268,17 +278,15 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
             textAlign: "center", marginBottom: 20,
             position: "relative", overflow: "hidden",
           }}>
-            <div style={{
-              fontSize: 48, marginBottom: 8, filter: "blur(1px)", opacity: 0.6,
-            }}>
-              📋
-            </div>
-            <div style={{
-              fontSize: 13, color: "#64748b",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}>
-              Образец протокола DXA
-            </div>
+            <img
+              src="/images/report-preview-blur.webp"
+              alt="Пример протокола DXA"
+              style={{
+                width: "100%", height: "100%", objectFit: "cover",
+                filter: "blur(3px)", opacity: 0.7,
+              }}
+              onError={(e) => { e.target.style.display = "none"; }}
+            />
             <div style={{
               position: "absolute", inset: 0,
               background: "linear-gradient(180deg, transparent 40%, #0f172a 100%)",
@@ -611,8 +619,10 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
   return card;
 
   return <div ref={ref}>{card}</div>;
+
 
 }
