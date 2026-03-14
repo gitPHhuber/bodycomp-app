@@ -3,6 +3,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { ARTICLES } from "../src/content/articles.js";
+import { CLINICS } from "../src/pages/ClinicsPage/data.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -66,7 +67,14 @@ const articleUrls = ARTICLES.filter((article) => !article.noindex).map((article)
   files: ["src/content/articles.js"],
 }));
 
-const allUrls = [...staticUrls, ...articleUrls].map((item) => ({
+const clinicUrls = CLINICS.filter((c) => !c.comingSoon).map((c) => ({
+  path: `/clinics/${c.slug}`,
+  changefreq: "weekly",
+  priority: "0.8",
+  files: ["src/pages/ClinicsPage/data.js", "src/pages/ClinicPage/index.jsx"],
+}));
+
+const allUrls = [...staticUrls, ...articleUrls, ...clinicUrls].map((item) => ({
   ...item,
   lastmod: getLastMod(item.files),
 }));
