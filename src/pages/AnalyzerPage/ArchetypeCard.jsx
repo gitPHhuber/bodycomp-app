@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as tracker from "../../lib/tracker";
@@ -159,4 +160,9 @@ export default function ArchetypeCard({ archetype, fatPct, bmi }) {
       </p>
     </div>
   );
+
+export default function ArchetypeCard({ archetype, visible }) {
+  if (!visible || !archetype) return null;
+  return <div>{/* TODO: archetype card content */}</div>;
+
 }

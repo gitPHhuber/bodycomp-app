@@ -12,6 +12,8 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
+import ArchetypeCard from "./ArchetypeCard";
+import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 import { determineArchetype } from "./archetypes";
 import ArchetypeCard from "./ArchetypeCard";
@@ -540,8 +542,13 @@ export default function AnalyzerPage() {
             </div>
           </div>
 
+
           {/* Archetype Card */}
           <ArchetypeCard archetype={archetype} fatPct={r.bf} bmi={r.bmi} />
+
+          <ArchetypeCard archetype={null} visible={!!r} />
+          <OfferBanner archetype={null} visible={!!r} />
+
 
           {/* Quick mode DXA upsell banner */}
           {r.calcMode === "quick" && (
