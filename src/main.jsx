@@ -19,6 +19,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const ClinicPage = lazy(() => import("./pages/ClinicPage"));
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 
 function ScrollToTop() {
@@ -125,6 +126,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <Route path="/" element={<LandingPage />} />
               <Route path="/analyzer" element={<AnalyzerPage />} />
               <Route path="/clinics" element={<ClinicsPage />} />
+              <Route path="/clinics/:clinicSlug" element={
+                <Suspense fallback={<ProfileFallback />}>
+                  <ClinicPage />
+                </Suspense>
+              } />
               <Route path="/news" element={<NewsPage />} />
               <Route path="/news/:slug" element={<ArticlePage />} />
               <Route path="/expert-qa" element={<ExpertQAPage />} />

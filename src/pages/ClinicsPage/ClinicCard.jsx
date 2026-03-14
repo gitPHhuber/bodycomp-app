@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Stars from "./Stars";
 
 export default function ClinicCard({ clinic, isSelected, onSelect, onBook, onWaitlist }) {
@@ -187,6 +188,21 @@ export default function ClinicCard({ clinic, isSelected, onSelect, onBook, onWai
               >📞</a>
             )}
           </div>
+
+          <Link
+            to={`/clinics/${c.slug}`}
+            onClick={e => e.stopPropagation()}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: 12, borderRadius: 12, marginTop: 8,
+              background: "#1e293b", border: "1px solid #334155",
+              color: "#94a3b8", fontSize: 13, fontWeight: 600,
+              textDecoration: "none", fontFamily: "'JetBrains Mono',monospace",
+              transition: "all 0.2s",
+            }}
+          >
+            Подробнее о клинике →
+          </Link>
         </div>
       )}
 

@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { ARTICLES, NEWS_META } from "../src/content/articles.js";
+import { CLINICS } from "../src/pages/ClinicsPage/data.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
@@ -60,7 +61,14 @@ const ARTICLE_ROUTES = ARTICLES.map((article) => ({
   url: `${BASE_URL}/news/${article.slug}`,
 }));
 
-const ALL_ROUTES = [...ROUTES, ...ARTICLE_ROUTES];
+const CLINIC_ROUTES = CLINICS.filter((c) => !c.comingSoon).map((c) => ({
+  path: `/clinics/${c.slug}`,
+  title: `DXA-обследование в ${c.name} — запись онлайн | BODYCOMP`,
+  description: `Анализ состава тела на DXA в ${c.city}: жир, мышцы, кость, висцеральный жир. ${c.address}. Запись: ${c.phone}.`,
+  url: `${BASE_URL}/clinics/${c.slug}`,
+}));
+
+const ALL_ROUTES = [...ROUTES, ...ARTICLE_ROUTES, ...CLINIC_ROUTES];
 
 const template = readFileSync(resolve(DIST, "index.html"), "utf-8");
 
