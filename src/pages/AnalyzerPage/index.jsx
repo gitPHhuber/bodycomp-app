@@ -12,6 +12,8 @@ import BodyRing from "./BodyRing";
 import StatCard from "./StatCard";
 import InputField from "./InputField";
 import ShareCard from "../../components/ShareCard";
+import ArchetypeCard from "./ArchetypeCard";
+import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 
 const BodyModel3D = lazy(() => import("../LandingPage/BodyModel3D"));
@@ -529,6 +531,9 @@ export default function AnalyzerPage() {
               {r.vr.level === "Низкий" ? Icons.check(24, r.vr.color) : r.vr.level === "Повышенный" ? Icons.alert(24, r.vr.color) : Icons.danger(24, r.vr.color)}
             </div>
           </div>
+
+          <ArchetypeCard archetype={null} visible={!!r} />
+          <OfferBanner archetype={null} visible={!!r} />
 
           {/* Quick mode DXA upsell banner */}
           {r.calcMode === "quick" && (
