@@ -16,6 +16,7 @@ import ExpertQAPage from "./pages/ExpertQAPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundary";
+import YandexMetrika from "./components/YandexMetrika";
 import "./styles/interactive.css";
 
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -118,6 +119,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         {/* Main site */}
         <Route path="*" element={
           <AuthProvider>
+            <YandexMetrika />
             <ScrollToTop />
             <TrackingProvider />
             <Header />
