@@ -5,9 +5,13 @@ import * as tracker from "../../lib/tracker";
 import { ARTICLES } from "../../content/articles";
 import { useJsonLd } from "../../utils/useJsonLd";
 import ArticleContent from "../../components/ArticleContent";
+
+import RelatedArticles from "../../components/RelatedArticles";
+
 import ArticleMeta from "../../components/ArticleMeta";
 import ReviewedBy from "../../components/ReviewedBy";
 import SourcesList from "../../components/SourcesList";
+
 
 /* ── Data (B2B article: stratos-vs-cheap) ────────────────── */
 
@@ -573,6 +577,10 @@ export default function ArticlePage() {
             <span style={{ color: "#94a3b8" }}>Статья</span>
           </div>
 
+          <ArticleContent article={articleMeta} />
+          <RelatedArticles currentSlug={slug} articles={ARTICLES} />
+
+
           {/* E-E-A-T: Author & date meta */}
           <ArticleMeta
             authorName={articleMeta.authorName}
@@ -606,6 +614,7 @@ export default function ArticlePage() {
               Имеются противопоказания. Необходима консультация специалиста.
             </p>
           </div>
+
         </div>
       </div>
     );

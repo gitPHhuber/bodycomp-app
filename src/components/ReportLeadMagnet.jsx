@@ -10,6 +10,17 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   const navigate = useNavigate();
 
 
+  const [step, setStep] = useState("form"); // 'form' | 'success'
+  const [email, setEmail] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const containerRef = useRef(null);
+  const trackedView = useRef(false);
+
+  // Track view: immediately for modal, IntersectionObserver for inline
+
+
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -34,6 +45,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   // Track view: immediately for modal, IntersectionObserver for inline
   
 
+
   useEffect(() => {
     if (trackedView.current) return;
 
@@ -49,6 +61,9 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
     if (!el) return;
 
 
+    const obs = new IntersectionObserver(
+
+
 
 
 
@@ -58,10 +73,14 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
       ([entry]) => {
         if (entry.isIntersecting && !trackedView.current) {
           tracker.trackEvent("report_teaser_view", { source });
           trackedView.current = true;
+
+          obs.disconnect();
+
 
 
 
@@ -72,14 +91,20 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
         }
       },
       { threshold: 0.3 }
     );
 
 
+    obs.observe(el);
+    return () => obs.disconnect();
+
+
     observer.observe(el);
     return () => observer.disconnect();
+
   }, [variant, source]);
 
   // Lock body scroll for modal
@@ -90,9 +115,9 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
     return () => { document.body.style.overflow = prev; };
   }, [variant]);
 
-  const handleSubmit = async () => {
-    setError(null);
-
+  const handleSubmit = async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    setError("");
 
 
 
@@ -149,6 +174,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
       if (supabase) {
         const { error: dbErr } = await supabase.from("bookings").insert(payload);
         if (dbErr) throw dbErr;
@@ -163,6 +189,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
           body: JSON.stringify(payload),
         });
 
+
         if (res.ok) submitted = true;
       }
 
@@ -173,14 +200,19 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
         if (!res.ok) throw new Error("Formspree error");
-      }
 
+      }
 
 
       tracker.trackEvent("report_email_submit", {
         source,
         email_domain: email.split("@")[1],
       });
+
+
+      setStep("success");
+    } catch {
+      setError("Не удалось отправить. Попробуйте ещё раз.");
 
       setStep(2);
     } catch {
@@ -219,6 +251,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
     } finally {
       setLoading(false);
     }
@@ -229,6 +262,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
     navigate("/clinics");
     if (onClose) onClose();
   };
+
 
 
   const card = (
@@ -448,6 +482,7 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
 
 
 
+
   // ── Styles ──
   const cardStyle = {
     borderRadius: 22,
@@ -605,8 +640,6 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
       )}
       {step === "form" ? formContent : successContent}
 
-
-
     </div>
   );
 
@@ -632,10 +665,14 @@ export default function ReportLeadMagnet({ variant = "inline", onClose, source =
   }
 
 
+  return <div ref={containerRef}>{card}</div>;
+
+
 
 
   return card;
 
   return <div ref={ref}>{card}</div>;
+
 
 }

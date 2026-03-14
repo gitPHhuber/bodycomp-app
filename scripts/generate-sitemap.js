@@ -29,28 +29,28 @@ function getLastMod(paths) {
 
 const staticUrls = [
   {
-    path: "/analyzer",
+    path: "/",
     changefreq: "weekly",
     priority: "1.0",
-    files: ["src/pages/AnalyzerPage/index.jsx", "src/main.jsx"],
+    files: ["src/pages/LandingPage/index.jsx", "src/main.jsx"],
   },
   {
-    path: "/",
-    changefreq: "monthly",
+    path: "/analyzer",
+    changefreq: "weekly",
     priority: "0.9",
-    files: ["src/pages/LandingPage/index.jsx", "src/main.jsx"],
+    files: ["src/pages/AnalyzerPage/index.jsx", "src/main.jsx"],
   },
   {
     path: "/clinics",
     changefreq: "weekly",
-    priority: "0.8",
+    priority: "0.9",
     files: ["src/pages/ClinicsPage/index.jsx", "src/main.jsx"],
   },
   {
-    path: "/xray",
+    path: "/repeat-dxa",
     changefreq: "monthly",
-    priority: "0.7",
-    files: ["src/pages/BodyComparePage/index.jsx", "src/main.jsx"],
+    priority: "0.8",
+    files: ["src/pages/RepeatDxaPage/index.jsx", "src/main.jsx"],
   },
   {
     path: "/news",
@@ -59,17 +59,29 @@ const staticUrls = [
     files: ["src/pages/NewsPage/index.jsx", "src/content/articles.js"],
   },
   {
-    path: "/repeat-dxa",
-    changefreq: "weekly",
-    priority: "0.8",
-    files: ["src/pages/RepeatDxaPage/index.jsx", "src/main.jsx"],
+    path: "/expert-qa",
+    changefreq: "monthly",
+    priority: "0.6",
+    files: ["src/pages/ExpertQAPage.jsx", "src/main.jsx"],
+  },
+  {
+    path: "/xray",
+    changefreq: "monthly",
+    priority: "0.5",
+    files: ["src/pages/BodyComparePage/index.jsx", "src/main.jsx"],
+  },
+  {
+    path: "/privacy",
+    changefreq: "yearly",
+    priority: "0.3",
+    files: ["src/main.jsx"],
   },
 ];
 
 const articleUrls = ARTICLES.filter((article) => !article.noindex).map((article) => ({
   path: `/news/${article.slug}`,
   changefreq: "monthly",
-  priority: "0.7",
+  priority: "0.8",
   files: ["src/content/articles.js"],
 }));
 
