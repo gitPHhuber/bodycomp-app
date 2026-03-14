@@ -293,9 +293,50 @@ function SourcesSection({ sources }) {
   );
 }
 
+/* ── Comparison table ───────────────────────────────────── */
+
+function ComparisonTableSection({ headers, rows }) {
+  return (
+    <div style={{ ...cardStyle, borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: `1.5fr ${"1fr ".repeat(headers.length - 1).trim()}`,
+        padding: "12px 16px",
+        background: "#020617",
+        borderBottom: "1px solid #1e293b",
+        fontSize: 11,
+        fontWeight: 700,
+        fontFamily: "'JetBrains Mono', monospace",
+      }}>
+        {headers.map((h, i) => (
+          <span key={i} style={{ color: i === 0 ? "#64748b" : "#94a3b8" }}>{h}</span>
+        ))}
+      </div>
+      {/* Rows */}
+      {rows.map((row, i) => (
+        <div key={i} style={{
+          display: "grid",
+          gridTemplateColumns: `1.5fr ${"1fr ".repeat(row.length - 1).trim()}`,
+          padding: "10px 16px",
+          borderBottom: i < rows.length - 1 ? "1px solid #1e293b20" : "none",
+          fontSize: 13,
+          lineHeight: 1.5,
+        }}>
+          {row.map((cell, j) => (
+            <span key={j} style={{ color: j === 0 ? "#94a3b8" : "#cbd5e1" }}>{cell}</span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── Main component ─────────────────────────────────────── */
 
-export default function ArticleContent({ sections, sources }) {
+export default function ArticleContent({ article }) {
+  const sections = article?.sections || [];
+
   return (
     <>
       {sections.map((section, i) => {
@@ -310,26 +351,19 @@ export default function ArticleContent({ sections, sources }) {
             return <ListSection key={i} items={section.items} />;
           case "cta":
             return <CtaSection key={i} variant={section.variant} text={section.text} link={section.link} />;
+
           case "fat_norms_table":
             return <FatNormsTableSection key={i} headers={section.headers} rows={section.rows} sex={section.sex} />;
+
+          case "comparison_table":
+            return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
+
           default:
             return null;
         }
       })}
 
       <InternalLinksSection />
-      <SourcesSection sources={sources} />
-
-      {/* Legal Disclaimer */}
-      <div style={{
-        textAlign: "center",
-        padding: "14px 0",
-        borderTop: "1px solid #1e293b",
-      }}>
-        <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6, margin: 0 }}>
-          Имеются противопоказания. Необходима консультация специалиста. Материал носит информационный характер.
-        </p>
-      </div>
     </>
   );
 }
