@@ -49,7 +49,7 @@ const staticUrls = [
     path: "/xray",
     changefreq: "monthly",
     priority: "0.7",
-    files: ["src/pages/XrayPage/index.jsx", "src/main.jsx"],
+    files: ["src/pages/BodyComparePage/index.jsx", "src/main.jsx"],
   },
   {
     path: "/news",

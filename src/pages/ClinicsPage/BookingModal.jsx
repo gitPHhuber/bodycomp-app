@@ -186,10 +186,8 @@ export default function BookingModal({ clinic, onClose, onConfirm }) {
 
             <button
 
-              onClick={() => { if (name && phone) { tracker.trackClick("booking_step_contact", { clinicId: clinic.id }); setStep(4); if (onConfirm) onConfirm({ clinic, date: selectedDate, time: selectedTime, name, phone }); } }}
-              disabled={!name || !phone}
-
               onClick={async () => {
+                tracker.trackClick("booking_step_contact", { clinicId: clinic.id });
                 if (!name || !phone || submitting) return;
                 setSubmitting(true);
                 setSubmitError(null);
