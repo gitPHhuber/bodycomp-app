@@ -2,7 +2,24 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import * as tracker from "../lib/tracker";
 
-export default function RetentionTeaser({ page = "unknown" }) {
+function mapToSvgPoints(data, key) {
+  const vals = data.map((d) => d[key]).filter((v) => v != null);
+  if (vals.length < 2) return null;
+
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const range = max - min || 1;
+
+  return vals
+    .map((v, i) => {
+      const x = 10 + (i / (vals.length - 1)) * 180;
+      const y = 70 - ((v - min) / range) * 50;
+      return `${x.toFixed(0)},${y.toFixed(0)}`;
+    })
+    .join(" ");
+}
+
+export default function RetentionTeaser({ page = "unknown", dxaResults }) {
   const ref = useRef(null);
   const firedRef = useRef(false);
 
@@ -58,60 +75,58 @@ export default function RetentionTeaser({ page = "unknown" }) {
         Отслеживайте динамику результатов
       </h3>
 
-      {/* Mini chart placeholder */}
-      <div
-        style={{
-          background: "#020617",
-          borderRadius: 12,
-          padding: "16px 12px 8px",
-          marginBottom: 14,
-        }}
-      >
-        <svg
-          viewBox="0 0 200 80"
-          width="100%"
-          height="80"
-          style={{ display: "block" }}
-        >
-          {/* Grid lines */}
-          {[20, 40, 60].map((y) => (
-            <line
-              key={y}
-              x1="0"
-              y1={y}
-              x2="200"
-              y2={y}
-              stroke="#1e293b"
-              strokeWidth="1"
-            />
-          ))}
-          {/* Fat line — going down */}
-          <polyline
-            points="10,25 50,30 90,38 130,48 170,58 190,62"
-            fill="none"
-            stroke="#22d3ee"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Muscle line — going up */}
-          <polyline
-            points="10,60 50,55 90,48 130,40 170,32 190,28"
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Labels */}
-          <text x="192" y="66" fill="#22d3ee" fontSize="8" fontFamily="'JetBrains Mono',monospace">
-            жир
-          </text>
-          <text x="192" y="25" fill="#10b981" fontSize="8" fontFamily="'JetBrains Mono',monospace">
-            мышцы
-          </text>
-        </svg>
-      </div>
+      {/* Mini chart */}
+      {(() => {
+        const last6 = dxaResults && dxaResults.length >= 2 ? dxaResults.slice(-6) : null;
+        const fatPts = last6 ? mapToSvgPoints(last6, "total_fat_pct") : null;
+        const musclePts = last6 ? mapToSvgPoints(last6, "lean_mass_kg") : null;
+        const realFat = fatPts || "10,25 50,30 90,38 130,48 170,58 190,62";
+        const realMuscle = musclePts || "10,60 50,55 90,48 130,40 170,32 190,28";
+
+        return (
+          <div
+            style={{
+              background: "#020617",
+              borderRadius: 12,
+              padding: "16px 12px 8px",
+              marginBottom: 14,
+            }}
+          >
+            <svg
+              viewBox="0 0 200 80"
+              width="100%"
+              height="80"
+              style={{ display: "block" }}
+            >
+              {[20, 40, 60].map((y) => (
+                <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="#1e293b" strokeWidth="1" />
+              ))}
+              <polyline
+                points={realFat}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <polyline
+                points={realMuscle}
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <text x="192" y="66" fill="#22d3ee" fontSize="8" fontFamily="'JetBrains Mono',monospace">
+                жир
+              </text>
+              <text x="192" y="25" fill="#10b981" fontSize="8" fontFamily="'JetBrains Mono',monospace">
+                мышцы
+              </text>
+            </svg>
+          </div>
+        );
+      })()}
 
       <p
         style={{
