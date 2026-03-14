@@ -16,7 +16,7 @@ export function getSessionId() {
 const UTM_KEY = "bc_utm";
 let utmParams = null;
 
-function getUtmParams() {
+export function getUtmParams() {
   if (utmParams) return utmParams;
 
   const stored = sessionStorage.getItem(UTM_KEY);
@@ -215,4 +215,48 @@ export function trackFormAbandon(page, filledFields) {
 
 export function trackCTAView(element) {
   debouncedEnqueue(`cta_view_${element}`, "cta_view", null, element);
+}
+
+// ── Generic event ───────────────────────────────────────────
+export function trackEvent(eventType, meta) {
+  enqueue(eventType, null, null, meta);
+}
+
+// ── Offer funnel ────────────────────────────────────────────
+export function trackOfferView(variant, page) {
+  enqueue("offer_view", page, null, { variant });
+}
+
+export function trackOfferClaim(variant, couponCode) {
+  enqueue("offer_claim", null, null, { variant, coupon_code: couponCode });
+}
+
+// ── Booking funnel ──────────────────────────────────────────
+export function trackBookingFormOpen(clinicId, sourcePage) {
+  enqueue("booking_form_open", sourcePage, null, { clinic_id: clinicId });
+}
+
+export function trackBookingStep(step, clinicId) {
+  enqueue("booking_step", null, null, { step, clinic_id: clinicId });
+}
+
+export function trackLeadCreated(meta) {
+  enqueue("lead_created", null, null, meta);
+}
+
+export function trackBookingConfirmed(bookingId) {
+  enqueue("booking_confirmed", null, null, { booking_id: bookingId });
+}
+
+export function trackScanCompleted(bookingId, scanType) {
+  enqueue("scan_completed", null, null, { booking_id: bookingId, scan_type: scanType });
+}
+
+// ── Repeat scan funnel ──────────────────────────────────────
+export function trackRepeatReminderShown(daysSinceLastScan) {
+  enqueue("repeat_reminder_shown", null, null, { days_since_last_scan: daysSinceLastScan });
+}
+
+export function trackRepeatBooked(bookingId, repeatOfBookingId) {
+  enqueue("repeat_booked", null, null, { booking_id: bookingId, repeat_of_booking_id: repeatOfBookingId });
 }
