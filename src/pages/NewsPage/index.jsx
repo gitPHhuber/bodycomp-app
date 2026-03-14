@@ -123,8 +123,8 @@ export default function NewsPage() {
 
             <div style={{ fontSize: 12, color: "#64748b", marginBottom: 14, lineHeight: 1.6 }}>
               <div><strong style={{ color: "#94a3b8" }}>Автор:</strong> {article.authorName}</div>
-              <div><strong style={{ color: "#94a3b8" }}>Дата:</strong> {article.date} · <strong style={{ color: "#94a3b8" }}>Обновлено:</strong> {article.updatedAt}</div>
-              <div><strong style={{ color: "#94a3b8" }}>Источники:</strong> {article.sourcesCount} внешних публикаций</div>
+              <div><strong style={{ color: "#94a3b8" }}>Дата:</strong> {article.date} · <strong style={{ color: "#94a3b8" }}>Обновлено:</strong> {article.updatedAt || article.date}</div>
+              <div><strong style={{ color: "#94a3b8" }}>Источники:</strong> {article.sourcesCount ?? "—"} внешних публикаций</div>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
