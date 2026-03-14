@@ -38,6 +38,7 @@ export function AuthProvider({ children }) {
 
           if (event === "SIGNED_IN") {
             await bindSession();
+            await applyPendingConsent(s.user.id);
             // Execute stored callback after auth
             if (authCallbackRef.current) {
               const cb = authCallbackRef.current;
@@ -68,6 +69,32 @@ export function AuthProvider({ children }) {
       setTrackerUserId(data.id);
     }
     return data;
+  }
+
+  async function applyPendingConsent(authUid) {
+    if (!supabase) return;
+    const raw = localStorage.getItem("pending_consent");
+    if (!raw) return;
+
+    try {
+      const consent = JSON.parse(raw);
+      const now = new Date().toISOString();
+      const updates = {};
+
+      if (consent.personal_data) {
+        updates.consent_personal_data = true;
+        updates.consent_personal_data_at = now;
+      }
+      updates.consent_marketing = !!consent.marketing;
+      if (consent.marketing) {
+        updates.consent_marketing_at = now;
+      }
+
+      await supabase.from("users").update(updates).eq("auth_id", authUid);
+      localStorage.removeItem("pending_consent");
+    } catch {
+      localStorage.removeItem("pending_consent");
+    }
   }
 
   async function bindSession() {

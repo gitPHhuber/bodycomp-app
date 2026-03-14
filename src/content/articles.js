@@ -17,6 +17,9 @@ export const ARTICLES = [
     updatedAt: "3 марта 2026",
     sourcesCount: 6,
     contentType: "custom",
+    reviewerName: null,
+    reviewerQualification: null,
+    reviewDate: null,
   },
   {
     slug: "skinny-fat",
@@ -31,6 +34,9 @@ export const ARTICLES = [
     readTime: "8 мин",
     authorName: "Редакция BODYCOMP",
     reviewerName: null,
+    reviewerQualification: null,
+    reviewDate: null,
+    updatedAt: null,
     image: "https://bodycomp.ru/og-image.png",
     tag: "РАЗБОР",
     tagColor: "#22d3ee",
@@ -167,6 +173,9 @@ export const ARTICLES = [
     publishedAt: "2026-03-15",
     readTime: "7 мин",
     authorName: "Редакция BODYCOMP",
+    reviewerName: null,
+    reviewerQualification: null,
+    reviewDate: null,
     tag: "СРАВНЕНИЕ",
     image: "https://bodycomp.ru/og-image.png",
     tagColor: "#3b82f6",
@@ -271,6 +280,10 @@ export const ARTICLES = [
     publishedAt: "2026-03-15",
     readTime: "6 мин",
     authorName: "Редакция BODYCOMP",
+    reviewerName: null,
+    reviewerQualification: null,
+    reviewDate: null,
+    updatedAt: null,
     tag: "РАЗБОР",
     tagColor: "#22d3ee",
     contentType: "article",
@@ -349,27 +362,43 @@ export const ARTICLES = [
   },
   {
     slug: "body-fat-norms",
+
     title: "Нормы процента жира в теле: таблица по возрасту и полу",
     subtitle: "Сколько жира — норма, когда пора действовать и как измерить точно",
     description: "Нормы процента жира для мужчин и женщин по возрасту. Таблица ACE/ACSM, чем опасен избыток и дефицит жира. Калькулятор + DXA.",
     metaTitle: "Нормы процента жира в теле — таблица по возрасту и полу | BODYCOMP",
+
+    title: "Норма процента жира у мужчин и женщин по возрасту",
+    subtitle: "Таблицы, категории и что значат ваши цифры",
+    description: "Норма процента жира в организме: таблицы по полу и возрасту, категории (атлет, норма, избыток). Калькулятор + DXA.",
+    metaTitle: "Норма процента жира — таблица по полу и возрасту | BODYCOMP",
+
     date: "15 марта 2026",
     publishedAt: "2026-03-15",
     readTime: "7 мин",
     authorName: "Редакция BODYCOMP",
     image: "https://bodycomp.ru/og-image.png",
     tag: "СПРАВОЧНИК",
+
     tagColor: "#f59e0b",
     contentType: "article",
     relatedSlugs: ["skinny-fat", "weight-plateau", "dxa-vs-bioimpedance"],
     sources: [
       { id: 1, text: "American Council on Exercise (ACE). Body Fat Percentage Norms." },
       { id: 2, text: "ACSM's Guidelines for Exercise Testing and Prescription, 11th ed. 2021." },
+
+    tagColor: "#10b981",
+    contentType: "article",
+    sources: [
+      { id: 1, text: "ACSM's Guidelines for Exercise Testing and Prescription, 11th ed. Wolters Kluwer, 2021." },
+      { id: 2, text: "ACE (American Council on Exercise). Body Fat Categorization." },
+
       { id: 3, text: "Gallagher D et al. Healthy percentage body fat ranges. Am J Clin Nutr (2000);72:694-701." },
     ],
     sections: [
       {
         type: "lead",
+
         text: "«У меня 25% жира — это нормально?» Зависит от пола, возраста и того, как измерять. Универсального числа не существует. Но есть научно обоснованные диапазоны, которые помогают понять, где вы находитесь — и нужно ли что-то менять.",
       },
       { type: "heading", level: 2, text: "Зачем знать свой процент жира" },
@@ -423,16 +452,77 @@ export const ARTICLES = [
           "Биоимпедансные весы — удобно, но погрешность ±5-15% в зависимости от условий",
           "DXA-денситометрия — золотой стандарт, погрешность ±1-2%, показывает жир по зонам тела",
         ],
+
+        text: "«У меня 24% жира — это нормально?» Ответ зависит от пола, возраста и целей. Не существует одного числа «идеального процента жира» — есть диапазоны. Ниже — таблицы из клинических гайдлайнов и объяснение, что ваши цифры означают на практике."
+      },
+      { type: "heading", level: 2, text: "Категории процента жира (мужчины)" },
+      {
+        type: "fat_norms_table",
+        sex: "male",
+        headers: ["Категория", "% жира", "Описание"],
+        rows: [
+          ["Незаменимый жир", "2–5%", "Минимум для выживания. Ниже — опасно для здоровья."],
+          ["Соревновательный атлет", "6–13%", "Рельефная мускулатура. Сложно поддерживать долго."],
+          ["Подтянутое тело", "14–17%", "Видимый пресс, здоровый уровень для активных людей."],
+          ["Среднее", "18–24%", "Норма для большинства мужчин. Здоровый диапазон."],
+          ["Избыточный жир", "25%+", "Повышенные метаболические риски. Стоит проверить состав тела."],
+        ]
+      },
+      { type: "heading", level: 2, text: "Категории процента жира (женщины)" },
+      {
+        type: "fat_norms_table",
+        sex: "female",
+        headers: ["Категория", "% жира", "Описание"],
+        rows: [
+          ["Незаменимый жир", "10–13%", "Минимум для гормонального здоровья. Ниже — нарушение цикла."],
+          ["Соревновательная атлетка", "14–20%", "Спортивное телосложение. Для большинства — не sustainable."],
+          ["Подтянутое тело", "21–24%", "Здоровый, активный уровень."],
+          ["Среднее", "25–31%", "Норма для большинства женщин."],
+          ["Избыточный жир", "32%+", "Повышенные риски. Рекомендуется проверка."],
+        ]
+      },
+      {
+        type: "paragraph",
+        text: "Источник категорий: ACSM Guidelines for Exercise Testing and Prescription [1], ACE Body Fat Categorization [2]. Пороги ориентировочные — точные нормы зависят от этнической принадлежности, генетики и индивидуальных особенностей."
+      },
+      { type: "heading", level: 2, text: "Как меняются нормы с возрастом" },
+      {
+        type: "paragraph",
+        text: "С возрастом доля жира естественно растёт, а мышечная масса снижается. По данным Gallagher et al. (2000), здоровый диапазон для мужчин 40–59 лет — примерно 11–22%, для женщин того же возраста — 23–34%. После 60 лет диапазон сдвигается ещё на 2–4 процентных пункта вверх. [3]"
+      },
+      {
+        type: "paragraph",
+        text: "Это не значит, что «после 40 можно не следить». Это значит, что оценивать свой результат нужно с поправкой на возраст, а не сравнивать себя с 25-летним атлетом."
+      },
+      { type: "heading", level: 2, text: "Почему «идеальный %» — не одно число" },
+      {
+        type: "paragraph",
+        text: "Два человека с одинаковым процентом жира могут иметь совершенно разное здоровье. Важно не только сколько жира, но и где он расположен (висцеральный vs подкожный), сколько мышечной массы, какая костная плотность. Именно поэтому DXA даёт более полную картину, чем один показатель %."
+      },
+      { type: "heading", level: 2, text: "Как узнать свой процент жира" },
+      {
+        type: "list",
+        items: [
+          "Калькулятор по обхватам — бесплатно, погрешность ±5–8% (наш калькулятор использует формулу Navy)",
+          "Биоимпедансные весы — дома, но погрешность ±8–15% в зависимости от гидратации",
+          "DXA-денситометрия — золотой стандарт, погрешность ±1–2%, + висцеральный жир, мышцы, кости"
+        ]
+
       },
       {
         type: "cta",
         variant: "calculator",
         text: "Рассчитать свой процент жира",
+
         link: "/analyzer",
+
+        link: "/analyzer"
+
       },
       {
         type: "cta",
         variant: "booking",
+
         text: "Записаться на точный DXA-анализ",
         link: "/clinics",
       },
@@ -445,6 +535,12 @@ export const ARTICLES = [
         ],
       },
     ],
+
+        text: "Узнать точные цифры на DXA",
+        link: "/clinics"
+      }
+    ]
+
   },
 ];
 

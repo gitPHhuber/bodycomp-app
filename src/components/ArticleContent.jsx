@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import * as tracker from "../lib/tracker";
 
@@ -121,6 +122,7 @@ function CtaSection({ variant, text, link }) {
   );
 }
 
+
 /* ── Comparison table ──────────────────────────────────── */
 
 function ComparisonTableSection({ headers, rows }) {
@@ -199,6 +201,122 @@ function RelatedLinksSection({ links }) {
           </Link>
         ))}
       </div>
+
+/* ── Fat norms table ───────────────────────────────────── */
+
+const ROW_COLORS = {
+  "Незаменимый жир": "#ef4444",
+  "Соревновательный атлет": "#3b82f6",
+  "Соревновательная атлетка": "#3b82f6",
+  "Подтянутое тело": "#10b981",
+  "Среднее": "#eab308",
+  "Избыточный жир": "#ef4444",
+};
+
+function FatNormsTableSection({ headers, rows }) {
+  const [isMobile, setIsMobile] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 640
+  );
+
+  React.useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+        {rows.map((row, i) => {
+          const color = ROW_COLORS[row[0]] || "#64748b";
+          return (
+            <div key={i} style={{
+              ...cardStyle,
+              padding: 16,
+              borderLeft: `4px solid ${color}`,
+            }}>
+              <div style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color,
+                marginBottom: 4,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
+                {row[0]}
+              </div>
+              <div style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#e2e8f0",
+                marginBottom: 6,
+              }}>
+                {row[1]}
+              </div>
+              <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.5 }}>
+                {row[2]}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ overflowX: "auto", marginBottom: 24 }}>
+      <table style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        fontSize: 14,
+      }}>
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th key={i} style={{
+                textAlign: "left",
+                padding: "10px 14px",
+                color: "#94a3b8",
+                fontWeight: 600,
+                fontSize: 12,
+                textTransform: "uppercase",
+                letterSpacing: 1,
+                borderBottom: "1px solid #334155",
+              }}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => {
+            const color = ROW_COLORS[row[0]] || "#64748b";
+            return (
+              <tr key={ri} style={{ borderBottom: "1px solid #1e293b" }}>
+                {row.map((cell, ci) => (
+                  <td key={ci} style={{
+                    padding: "12px 14px",
+                    color: ci === 0 ? "#e2e8f0" : "#cbd5e1",
+                    fontWeight: ci === 0 ? 600 : 400,
+                    borderLeft: ci === 0 ? `3px solid ${color}` : "none",
+                    lineHeight: 1.5,
+                  }}>
+                    {ci === 1 ? (
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 700,
+                        color,
+                      }}>
+                        {cell}
+                      </span>
+                    ) : cell}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
     </div>
   );
 }
@@ -209,7 +327,11 @@ const INTERNAL_LINKS = [
   { to: "/news/skinny-fat", label: "Скрытый жир: нормальный вес, но высокий процент жира" },
   { to: "/news/dxa-vs-bioimpedance", label: "DXA vs биоимпеданс: какой анализ состава тела точнее" },
   { to: "/news/weight-plateau", label: "Почему вес стоит: теряете жир или мышцы?" },
+
   { to: "/news/body-fat-norms", label: "Нормы процента жира по возрасту и полу" },
+
+  { to: "/news/body-fat-norms", label: "Норма процента жира у мужчин и женщин по возрасту" },
+
   { to: "/repeat-dxa", label: "Повторное DXA: когда и зачем" },
   { to: "/analyzer", label: "Калькулятор состава тела" },
 ];
@@ -256,10 +378,54 @@ function SourcesSection({ sources }) {
   );
 }
 
+/* ── Comparison table ───────────────────────────────────── */
+
+function ComparisonTableSection({ headers, rows }) {
+  return (
+    <div style={{ ...cardStyle, borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
+      {/* Header */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: `1.5fr ${"1fr ".repeat(headers.length - 1).trim()}`,
+        padding: "12px 16px",
+        background: "#020617",
+        borderBottom: "1px solid #1e293b",
+        fontSize: 11,
+        fontWeight: 700,
+        fontFamily: "'JetBrains Mono', monospace",
+      }}>
+        {headers.map((h, i) => (
+          <span key={i} style={{ color: i === 0 ? "#64748b" : "#94a3b8" }}>{h}</span>
+        ))}
+      </div>
+      {/* Rows */}
+      {rows.map((row, i) => (
+        <div key={i} style={{
+          display: "grid",
+          gridTemplateColumns: `1.5fr ${"1fr ".repeat(row.length - 1).trim()}`,
+          padding: "10px 16px",
+          borderBottom: i < rows.length - 1 ? "1px solid #1e293b20" : "none",
+          fontSize: 13,
+          lineHeight: 1.5,
+        }}>
+          {row.map((cell, j) => (
+            <span key={j} style={{ color: j === 0 ? "#94a3b8" : "#cbd5e1" }}>{cell}</span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── Main component ─────────────────────────────────────── */
 
 export default function ArticleContent({ article }) {
+
   const { sections, sources } = article;
+
+  const sections = article?.sections || [];
+
+
   return (
     <>
       {sections.map((section, i) => {
@@ -274,28 +440,25 @@ export default function ArticleContent({ article }) {
             return <ListSection key={i} items={section.items} />;
           case "cta":
             return <CtaSection key={i} variant={section.variant} text={section.text} link={section.link} />;
+
           case "comparison_table":
             return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
           case "related_links":
             return <RelatedLinksSection key={i} links={section.links} />;
+
+
+          case "fat_norms_table":
+            return <FatNormsTableSection key={i} headers={section.headers} rows={section.rows} sex={section.sex} />;
+
+          case "comparison_table":
+            return <ComparisonTableSection key={i} headers={section.headers} rows={section.rows} />;
+
           default:
             return null;
         }
       })}
 
       <InternalLinksSection />
-      <SourcesSection sources={sources} />
-
-      {/* Legal Disclaimer */}
-      <div style={{
-        textAlign: "center",
-        padding: "14px 0",
-        borderTop: "1px solid #1e293b",
-      }}>
-        <p style={{ fontSize: 10, color: "#1e293b", lineHeight: 1.6, margin: 0 }}>
-          Имеются противопоказания. Необходима консультация специалиста. Материал носит информационный характер.
-        </p>
-      </div>
     </>
   );
 }
