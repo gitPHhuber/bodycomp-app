@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as tracker from "../../lib/tracker";
 import { getSessionId } from "../../lib/tracker";
@@ -17,7 +17,6 @@ import OfferBanner from "./OfferBanner";
 import { useMeta } from "../../utils/useMeta";
 import { determineArchetype } from "./archetypes";
 
-const BodyModel3D = lazy(() => import("../LandingPage/BodyModel3D"));
 
 export default function AnalyzerPage() {
   useMeta(
@@ -505,16 +504,6 @@ export default function AnalyzerPage() {
                 <div style={{ fontSize: 11, color: "#64748b" }}>кг без жира</div>
               </div>
             </div>
-          </div>
-
-          {/* 3D Body Model */}
-          <div style={cardStyle}>
-            <div style={{ fontSize: 13, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontFamily: "'JetBrains Mono', monospace" }}>
-              3D-модель
-            </div>
-            <Suspense fallback={<div style={{ height: 280, display: "flex", alignItems: "center", justifyContent: "center", color: "#475569", fontSize: 13 }}>Загрузка модели...</div>}>
-              <BodyModel3D fatPct={r.bf} height={280} />
-            </Suspense>
           </div>
 
           {/* Stat Cards */}

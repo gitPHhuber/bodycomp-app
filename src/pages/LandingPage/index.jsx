@@ -4,13 +4,12 @@ import "./keyframes";
 import Reveal from "../../components/Reveal";
 import Typewriter from "./Typewriter";
 import CountingStat from "./CountingStat";
-import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
+import { PROFILES, MYTHS, THREATS, boneDesc } from "./data";
 import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
 const Particles = lazy(() => import("./Particles"));
 const ReportLeadMagnet = lazy(() => import("../../components/ReportLeadMagnet"));
-const BodyModel3D = lazy(() => import("./BodyModel3D"));
 const BoneCrossSection = lazy(() => import("./BoneCrossSection"));
 const BodyCompare = lazy(() => import("./BodyCompare"));
 
@@ -50,7 +49,6 @@ export default function LandingPage() {
   const [myth, setMyth] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const [quizDone, setQuizDone] = useState(false);
-  const [fat, setFat] = useState(25);
   const [bone, setBone] = useState(80);
   const [boneOpen, setBoneOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
@@ -86,7 +84,6 @@ export default function LandingPage() {
 
   const loader3d = <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", borderRadius: 20 }}><span style={{ color: "#334155", fontSize: 13, fontFamily: "'JetBrains Mono',monospace" }}>Загрузка 3D...</span></div>;
   const card = { background: "linear-gradient(135deg,#0f172a 0%,#1e293b 100%)", borderRadius: 20, padding: 24, border: "1px solid #334155" };
-  const fd = fatDesc(fat);
   const bd = boneDesc(bone);
 
   return (
@@ -208,39 +205,6 @@ export default function LandingPage() {
               return <button key={o.id} onClick={() => { if (!quizDone) { if (!quiz) tracker.trackQuizStart("visceral-fat"); setQuiz(o.id); setTimeout(() => { setQuizDone(true); tracker.trackQuizComplete("visceral-fat", o.ok ? 1 : 0, { selected: o.id, correct: o.ok }); }, 400); } }} style={{ display: "block", width: "100%", padding: "13px 16px", marginBottom: 8, borderRadius: 12, textAlign: "left", background: g ? "#10b98115" : b2 ? "#ef444415" : s ? "#7c3aed15" : "#0f172a", border: `1.5px solid ${g ? "#10b981" : b2 ? "#ef4444" : s ? "#7c3aed" : "#1e293b"}`, color: "#e2e8f0", fontSize: 14, cursor: quizDone ? "default" : "pointer", transition: "all 0.3s" }}>{g && "✓ "}{b2 && "✗ "}{o.t}</button>;
             })}
             {quizDone && <div style={{ padding: 14, borderRadius: 12, background: "#10b98110", border: "1px solid #10b98130", animation: "fadeSlide 0.6s ease", marginTop: 6, fontSize: 13, color: "#cbd5e1", lineHeight: 1.7 }}><b style={{ color: "#10b981" }}>Висцеральный жир</b> невидим снаружи, но является предиктором №1 болезней сердца и диабета. <b>Единственный способ измерить точно — DXA-сканирование.</b></div>}
-          </div>
-        </Reveal>
-
-        {/* ═══ Block 5: 3D Body Model ═══ */}
-        <Reveal from="right" delay={100}>
-          <div style={{ ...card, marginBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-              <div>
-                <div style={{ fontSize: 11, color: "#22d3ee", fontFamily: "'JetBrains Mono',monospace", letterSpacing: "0.1em", marginBottom: 4 }}>ИНТЕРАКТИВНАЯ 3D-МОДЕЛЬ</div>
-                <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Анатомия состава тела</h2>
-              </div>
-            </div>
-            <Suspense fallback={loader3d}><BodyModel3D fatPct={fat} height={340} /></Suspense>
-            <div style={{ padding: "12px 16px", borderRadius: 14, background: fd.color + "12", border: `1px solid ${fd.color}33`, marginBottom: 12, transition: "all 0.4s" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: fd.color }}>{fd.label}</span>
-                <span style={{ fontSize: 24, fontWeight: 900, color: fd.color, fontFamily: "'JetBrains Mono',monospace" }}>{fat}%</span>
-              </div>
-              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{fd.detail}</div>
-            </div>
-            <div style={{ padding: "0 4px" }}>
-              <input type="range" min={6} max={45} value={fat} onChange={e => { setFat(+e.target.value); tracker.track3DInteraction("body_model", "fat_slider"); }} style={{ width: "100%", accentColor: fd.color, height: 6, cursor: "pointer" }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#334155", fontFamily: "'JetBrains Mono',monospace", marginTop: 2 }}>
-                <span>6%</span><span>15%</span><span>25%</span><span>35%</span><span>45%</span>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
-              {[{ c: "#22d3ee", l: "Кожа" }, { c: "#ef4444", l: "Жир" }, { c: "#10b981", l: "Мышцы" }, { c: "#f1f5f9", l: "Кости" }, ...(fat > 22 ? [{ c: "#fbbf24", l: "Висцеральный жир" }] : [])].map((x, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#64748b" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: x.c, border: "1px solid #33415566" }} />{x.l}
-                </div>
-              ))}
-            </div>
           </div>
         </Reveal>
 
