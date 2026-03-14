@@ -6,7 +6,6 @@ import { useAdminStatus } from "../hooks/useAdminStatus";
 
 const NAV_LINKS = [
   { to: "/analyzer", label: "Анализ" },
-  { to: "/xray", label: "Сканер" },
   { to: "/clinics", label: "Клиники" },
   { to: "/news", label: "Новости" },
 ];
