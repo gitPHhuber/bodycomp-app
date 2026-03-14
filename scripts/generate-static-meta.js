@@ -52,6 +52,13 @@ const ROUTES = [
     description: NEWS_META.description,
     url: `${BASE_URL}/news`,
   },
+  {
+    path: "/repeat-dxa",
+    title: "Повторный DXA — зачем и когда делать | BODYCOMP",
+    description:
+      "Когда делать повторный DXA. Оптимальные интервалы, что покажет сравнение результатов: жир, мышцы, висцеральный жир, кости.",
+    url: `${BASE_URL}/repeat-dxa`,
+  },
 ];
 
 const ARTICLE_ROUTES = ARTICLES.map((article) => ({
