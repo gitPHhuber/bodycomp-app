@@ -20,11 +20,7 @@
   </url>
   <url>
     <loc>https://bodycomp.ru/xray</loc>
-
-    <lastmod>2026-02-27</lastmod>
-
     <lastmod>2026-03-03</lastmod>
-
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -38,6 +34,12 @@
     <loc>https://bodycomp.ru/news/stratos-vs-cheap</loc>
     <lastmod>2026-03-03</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bodycomp.ru/expert-qa</loc>
+    <lastmod>2026-03-03</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
