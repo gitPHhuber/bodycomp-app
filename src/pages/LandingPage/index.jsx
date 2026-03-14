@@ -8,6 +8,7 @@ import { PROFILES, MYTHS, THREATS, fatDesc, boneDesc } from "./data";
 import { Icons } from "../AnalyzerPage/Icons";
 import { useMeta } from "../../utils/useMeta";
 import * as tracker from "../../lib/tracker";
+import ReportLeadMagnet from "../../components/ReportLeadMagnet";
 
 const Particles = lazy(() => import("./Particles"));
 const BodyModel3D = lazy(() => import("./BodyModel3D"));
@@ -389,6 +390,11 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+        </Reveal>
+
+        {/* ═══ Block 10.5: Report Lead Magnet ═══ */}
+        <Reveal from="bottom">
+          <ReportLeadMagnet variant="inline" source="landing" />
         </Reveal>
 
         {/* ═══ Block 11: Final CTA ═══ */}
