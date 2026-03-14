@@ -217,6 +217,10 @@ export function trackCTAView(element) {
   debouncedEnqueue(`cta_view_${element}`, "cta_view", null, element);
 }
 
+
+export function trackGoal(goalName, meta) {
+  enqueue("goal", null, null, { goal: goalName, ...meta });
+
 // ── Generic event ───────────────────────────────────────────
 export function trackEvent(eventType, meta) {
   enqueue(eventType, null, null, meta);
@@ -259,4 +263,5 @@ export function trackRepeatReminderShown(daysSinceLastScan) {
 
 export function trackRepeatBooked(bookingId, repeatOfBookingId) {
   enqueue("repeat_booked", null, null, { booking_id: bookingId, repeat_of_booking_id: repeatOfBookingId });
+
 }

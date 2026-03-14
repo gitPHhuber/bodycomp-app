@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { trackGoal } from "../../utils/analytics";
 import * as tracker from "../../lib/tracker";
+const { trackGoal } = tracker;
 import Reveal from "../../components/Reveal";
 import { useMeta } from "../../utils/useMeta";
 import { CLINICS, CITIES } from "./data";
