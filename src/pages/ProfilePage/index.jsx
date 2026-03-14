@@ -6,7 +6,12 @@ import { supabase } from "../../lib/supabase";
 import { useMeta } from "../../utils/useMeta";
 
 const HistoryChart = lazy(() => import("./HistoryChart"));
+
+const DxaCharts = lazy(() => import("./DxaCharts"));
+const NextStepCard = lazy(() => import("./NextStepCard"));
+
 const DxaTimeline = lazy(() => import("./DxaTimeline"));
+
 
 const TABS = [
   { id: "data", label: "Профиль" },
@@ -41,6 +46,10 @@ export default function ProfilePage() {
   const [quizResults, setQuizResults] = useState(null);
   const [quizLoading, setQuizLoading] = useState(false);
 
+  // DXA state
+  const [dxaResults, setDxaResults] = useState(null);
+  const [dxaLoading, setDxaLoading] = useState(false);
+
   // Populate fields when profile loads
   useEffect(() => {
     if (profile) {
@@ -63,6 +72,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (tab === "quizzes" && quizResults === null && profile) {
       loadQuizResults();
+    }
+  }, [tab, profile]);
+
+  // Fetch DXA results
+  useEffect(() => {
+    if (tab === "dxa" && dxaResults === null && profile) {
+      loadDxaResults();
     }
   }, [tab, profile]);
 
@@ -98,6 +114,23 @@ export default function ProfilePage() {
       setQuizResults([]);
     } finally {
       setQuizLoading(false);
+    }
+  }
+
+  async function loadDxaResults() {
+    if (!supabase || !profile) return;
+    setDxaLoading(true);
+    try {
+      const { data } = await supabase
+        .from("dxa_results")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("scan_date", { ascending: true });
+      setDxaResults(data || []);
+    } catch {
+      setDxaResults([]);
+    } finally {
+      setDxaLoading(false);
     }
   }
 
@@ -511,9 +544,33 @@ export default function ProfilePage() {
 
         {/* Tab: DXA */}
         {tab === "dxa" && (
+
+          <div style={{ animation: "fadeSlide 0.4s ease" }}>
+            {dxaLoading ? (
+              <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>
+                Загрузка...
+              </div>
+            ) : (
+              <>
+                <Suspense fallback={<div style={{ height: 260 }} />}>
+                  <DxaCharts results={dxaResults || []} />
+                </Suspense>
+                {dxaResults && dxaResults.length > 0 && (
+                  <Suspense fallback={null}>
+                    <NextStepCard
+                      lastScanDate={dxaResults[dxaResults.length - 1].scan_date}
+                      scanType={dxaResults[dxaResults.length - 1].scan_type}
+                    />
+                  </Suspense>
+                )}
+              </>
+            )}
+          </div>
+
           <Suspense fallback={<div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>Загрузка...</div>}>
             <DxaTimeline />
           </Suspense>
+
         )}
 
         {/* Tab: Quizzes */}
